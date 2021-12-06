@@ -1,0 +1,5 @@
+{
+  "name": "hmd-cli-bartleby",
+  "description": "CLI for bartleby transform",
+  "build": {}
+}
