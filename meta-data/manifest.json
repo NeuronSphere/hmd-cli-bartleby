@@ -1,5 +1,16 @@
 {
+  "identifier": "some-project-repo-identifier",
   "name": "hmd-cli-bartleby",
   "description": "CLI for bartleby transform",
-  "build": {}
+  "project_type": {
+    "identifier": "some-project-type-identifier",
+    "name": "microservice"
+  },
+  "build": {
+    "commands": [
+      [
+        "python"
+      ]
+    ]
+  }
 }
