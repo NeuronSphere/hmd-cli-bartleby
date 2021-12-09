@@ -8,8 +8,6 @@ VERSION_BANNER = """
 hmd bartleby version: {}
 """
 
-run_arguments = []
-
 
 class LocalController(Controller):
     class Meta:
@@ -42,23 +40,16 @@ class LocalController(Controller):
 
     def _default(self):
         """Default action if no sub-command is passed."""
-        #     self.app.args.print_help()
-        #
-        # @ex(help="Run the bartleby transform.", arguments=run_arguments, aliases=["tf"])
-        # def transform(self):
+
         args = {}
         name = self.app.pargs.repo_name
         repo_version = self.app.pargs.repo_version
-
-        for _, arg_def in run_arguments:
-            set_pargs_value(self.app.pargs, arg_def["dest"], arg_def.get("default"))
-
         image_name = f"ghcr.io/hmdlabs/hmd-tf-bartleby"
         shell = self.app.pargs.shell
 
         if len(shell.split(",")) > 1:
             for cmd in shell.split(","):
-                transform_instance_context = json.dumps({"shell": f"{cmd}"})
+                transform_instance_context = json.dumps({"shell": f"{cmd.strip()}"})
                 args.update(
                     {
                         "name": name,

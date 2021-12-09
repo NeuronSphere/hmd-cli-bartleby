@@ -24,8 +24,11 @@ def transform(
     if not repo_path.exists():
         raise Exception("Repository root could not be located.")
 
-    with cd(repo_path):
-        bartleby_version = get_version()
+    if Path(repo_path.parent / "hmd-cli-bartleby").exists():
+        with cd(repo_path.parent / "hmd-cli-bartleby"):
+            bartleby_version = get_version()
+    else:
+        raise Exception("Bartleby transform repository could not be located.")
 
     input_path = repo_path / "docs"
     output_path = repo_path / "target" / "bartleby"

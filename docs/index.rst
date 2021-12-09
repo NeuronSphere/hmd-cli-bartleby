@@ -7,6 +7,7 @@ Welcome to HMD hmd-cli-bartleby's documentation!
    :maxdepth: 2
    :caption: Contents:
 
+   install_and_run.rst
 
 Indices and tables
 ==================
