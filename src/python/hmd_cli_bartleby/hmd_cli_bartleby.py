@@ -35,7 +35,8 @@ def transform(
 
     try:
         if Path(repo_path / "src" / "python").exists() and autodoc:
-            code_path = repo_path / "src" / "python"
+            pip_username = os.environ.get("PIP_USERNAME")
+            pip_password = os.environ.get("PIP_PASSWORD")
 
             command = [
                 "docker",
@@ -45,8 +46,6 @@ def transform(
                 f"{input_path}:/hmd_transform/input",
                 "-v",
                 f"{output_path}:/hmd_transform/output",
-                "-v",
-                f"{code_path}:/code/src/python",
                 "-e",
                 f"TRANSFORM_INSTANCE_CONTEXT={transform_instance_context}",
                 "-e",
@@ -54,7 +53,11 @@ def transform(
                 "-e",
                 f"HMD_DOC_REPO_VERSION={version}",
                 "-e",
-                f"AUTODOC=True",
+                "AUTODOC=True",
+                "-e",
+                f"PIP_USERNAME={pip_username}",
+                "-e",
+                f"PIP_PASSWORD={pip_password}",
                 f"{image_name}:{bartleby_version}",
             ]
 

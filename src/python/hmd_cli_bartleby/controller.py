@@ -28,6 +28,15 @@ class LocalController(Controller):
                 },
             ),
             (
+                ["-a", "--autodoc"],
+                {
+                    "action": "store_true",
+                    "dest": "autodoc",
+                    "help": "The flag to indicate if python modules exist and should be added to the autosummary",
+                    "default": False,
+                },
+            ),
+            (
                 [],
                 {
                     "action": "store",
@@ -44,7 +53,9 @@ class LocalController(Controller):
         args = {}
         name = self.app.pargs.repo_name
         repo_version = self.app.pargs.repo_version
+
         image_name = f"ghcr.io/hmdlabs/hmd-tf-bartleby"
+        autodoc = self.app.pargs.autodoc
         shell = self.app.pargs.shell
 
         if len(shell.split(",")) > 1:
@@ -56,6 +67,7 @@ class LocalController(Controller):
                         "version": repo_version,
                         "transform_instance_context": transform_instance_context,
                         "image_name": image_name,
+                        "autodoc": autodoc,
                     }
                 )
 
@@ -71,6 +83,7 @@ class LocalController(Controller):
                     "version": repo_version,
                     "transform_instance_context": transform_instance_context,
                     "image_name": image_name,
+                    "autodoc": autodoc,
                 }
             )
 
