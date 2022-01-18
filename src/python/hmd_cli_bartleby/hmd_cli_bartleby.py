@@ -5,8 +5,7 @@ from typing import List, Dict
 from hmd_cli_tools.hmd_cli_tools import get_version, cd
 
 
-hmd_repo_home = os.environ["HMD_REPO_HOME"]
-hmd_home = os.environ["HMD_HOME"]
+hmd_repo_home = os.environ.get("HMD_REPO_HOME")
 
 
 def transform(
@@ -19,13 +18,13 @@ def transform(
     if hmd_repo_home:
         repo_path = Path(hmd_repo_home) / name
     else:
-        repo_path = Path(os.getcwd()) / name
+        repo_path = Path(os.getcwd())
 
     if not repo_path.exists():
         raise Exception("Repository root could not be located.")
 
-    if Path(repo_path.parent / "hmd-cli-bartleby").exists():
-        with cd(repo_path.parent / "hmd-cli-bartleby"):
+    if Path(repo_path.parent / "hmd-tf-bartleby").exists():
+        with cd(repo_path.parent / "hmd-tf-bartleby"):
             bartleby_version = get_version()
     else:
         raise Exception("Bartleby transform repository could not be located.")
