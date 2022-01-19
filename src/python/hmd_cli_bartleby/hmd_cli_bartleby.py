@@ -15,22 +15,13 @@ def transform(
     image_name: str,
     autodoc: bool = False,
 ):
-    if hmd_repo_home:
-        repo_path = Path(hmd_repo_home) / name
-    else:
-        repo_path = Path(os.getcwd())
-
-    if not repo_path.exists():
-        raise Exception("Repository root could not be located.")
-
-    if Path(repo_path.parent / "hmd-tf-bartleby").exists():
-        with cd(repo_path.parent / "hmd-tf-bartleby"):
-            bartleby_version = get_version()
-    else:
-        raise Exception("Bartleby transform repository could not be located.")
+    repo_path = Path(os.getcwd())
 
     input_path = repo_path / "docs"
     output_path = repo_path / "target" / "bartleby"
+
+    if not input_path.exists():
+        raise Exception("No docs folder found in the current working directory.")
 
     try:
         if Path(repo_path / "src" / "python").exists() and autodoc:
@@ -57,7 +48,7 @@ def transform(
                 f"PIP_USERNAME={pip_username}",
                 "-e",
                 f"PIP_PASSWORD={pip_password}",
-                f"{image_name}:{bartleby_version}",
+                image_name,
             ]
 
             return_code = exec_cmd2(command)
@@ -76,7 +67,7 @@ def transform(
                 f"HMD_DOC_REPO_NAME={name}",
                 "-e",
                 f"HMD_DOC_REPO_VERSION={version}",
-                f"{image_name}:{bartleby_version}",
+                image_name,
             ]
 
             return_code = exec_cmd2(command)
@@ -85,4 +76,4 @@ def transform(
             raise Exception(f"Process completed with non-zero exit code: {return_code}")
 
     except Exception as e:
-        print(f"Exception occurred running {command}: {e}")
+        print(f"Exception occurred running: {e}")

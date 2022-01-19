@@ -1,4 +1,5 @@
 import json
+import os
 from importlib.metadata import version
 from cement import Controller, ex
 from hmd_cli_tools.hmd_cli_tools import set_pargs_value
@@ -54,7 +55,7 @@ class LocalController(Controller):
         name = self.app.pargs.repo_name
         repo_version = self.app.pargs.repo_version
 
-        image_name = f"ghcr.io/hmdlabs/hmd-tf-bartleby"
+        image_name = f"{os.environ.get('HMD_CONTAINER_REGISTRY', 'ghcr.io/hmdlabs')}/hmd-tf-bartleby:0.1"
         autodoc = self.app.pargs.autodoc
         shell = self.app.pargs.shell
 
