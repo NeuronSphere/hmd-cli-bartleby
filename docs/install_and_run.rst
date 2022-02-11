@@ -16,9 +16,9 @@ a pip config file).
 Running the Bartleby Transform
 +++++++++++++++++++++++++++++++
 
-The bartleby CLI uses the ``--repo-name`` and ``--repo-version`` arguments inherited from the base cli app to identify
-the repository that the rendered documents should be generated for. For example, if the command is being run from
-somewhere other than the repository root, the repository can be specified as follows:
+The bartleby CLI uses the ``--repo-name`` and ``--repo-version`` arguments inherited from the base cli app to help build
+the rendered documents. However, the CLI is also built with the assumption that the command is being run from the desired
+repository root in order to avoid dependencies upon the HMD_REPO_HOME environment variable:
 
 .. code-block:: bash
 
@@ -36,5 +36,6 @@ formats is desired, enter the options as a comma-separated list with *no spaces*
 Additional Setup
 +++++++++++++++++
 
-Ensure the ``hmd-tf-bartleby`` image is built locally using the hmd docker build tool prior to running the bartleby CLI.
-The bartleby CLI will look for a local image with the standard HMD naming convention to run the transform.
+Ensure the ``hmd-tf-bartleby`` image is built locally using the hmd docker build tool (``hmd docker build`` from the
+repository root) prior to running the bartleby CLI. The bartleby CLI will look for a local image under the registry name in
+the HMD_CONTAINER_REGISTRY environment variable (defaults to the HMD registry) in order to run the transform.
