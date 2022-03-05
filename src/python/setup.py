@@ -17,5 +17,5 @@ setup(
     license="unlicensed",
     packages=find_packages(),
     include_package_data=True,
-    install_requires=["hmd-cli-tools"],
+    install_requires=[],
 )
