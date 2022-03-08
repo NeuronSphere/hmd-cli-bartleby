@@ -107,6 +107,8 @@ def transform(
 
     input_path = repo_path / "docs"
     output_path = repo_path / "target" / "bartleby"
+    if not output_path.exists():
+        os.makedirs(output_path)
 
     if not input_path.exists():
         raise Exception("No docs folder found in the current working directory.")
