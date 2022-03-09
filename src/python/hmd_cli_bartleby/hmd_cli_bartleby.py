@@ -7,6 +7,7 @@ import json
 import yaml
 import urllib
 from tempfile import TemporaryDirectory
+import traceback
 
 hmd_home = os.environ.get("HMD_HOME")
 
@@ -221,5 +222,44 @@ extra-index-url = https://{pip_username}:{urllib.parse.quote(pip_password)}@hmdl
                     f"Process completed with non-zero exit code: {return_code}"
                 )
 
+        rm_command = ["docker-compose", "--file", inst_config, "rm", "-f"]
+        return_code = exec_cmd2(rm_command)
+
+        if return_code != 0:
+            raise Exception(
+                f"Docker compose remove finished with non-zero exit code: {return_code}."
+                f"Cleanup can be done manually with the following command: docker-compose --file {inst_config} rm -f"
+            )
+
     except Exception as e:
         print(f"Exception occurred running: {e}")
+
+
+def transform_puml(files: List, input_path: Path, output_path: Path, image_name: str):
+    command = [
+        "docker",
+        "run",
+        "--rm",
+        "-v",
+        f"{input_path}:/hmd_transform/input",
+        "-v",
+        f"{output_path}:/hmd_transform/output",
+        "-e",
+        f"PUML_FILES={','.join(files)}",
+        image_name,
+        "python",
+        "entry_puml.py",
+    ]
+    print(
+        f"input_path: {input_path}\n"
+        f"output_path: {output_path}\n"
+        f"files: {files}\n"
+        f"image_name: {image_name}\n"
+    )
+    try:
+        result = exec_cmd2(command)
+    except Exception as e:
+        print(f"Error executing command: {e}")
+
+    if result != 0:
+        raise Exception(f"Error generating images from puml: {traceback.format_exc()}")

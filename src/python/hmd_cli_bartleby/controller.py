@@ -4,6 +4,8 @@ import shutil
 from importlib.metadata import version
 from cement import Controller, ex
 from pathlib import Path
+from glob import glob
+from hmd_cli_tools.hmd_cli_tools import cd
 
 VERSION_BANNER = """
 hmd bartleby version: {}
@@ -27,6 +29,8 @@ repo_types = {
     "tf": {"name": "Transforms"},
     "ui": {"name": "UI_Components"},
 }
+
+image_name = f"{os.environ.get('HMD_CONTAINER_REGISTRY', 'ghcr.io/hmdlabs')}/hmd-tf-bartleby:{os.environ.get('HMD_TF_BARTLEBY_VERSION', '0.1.10')}"
 
 
 def update_index(index_path, repo):
@@ -112,7 +116,7 @@ class LocalController(Controller):
                 },
             ),
             (
-                [],
+                ["-s", "--shell"],
                 {
                     "action": "store",
                     "dest": "shell",
@@ -129,7 +133,6 @@ class LocalController(Controller):
         name = self.app.pargs.repo_name
         repo_version = self.app.pargs.repo_version
 
-        image_name = f"{os.environ.get('HMD_CONTAINER_REGISTRY', 'ghcr.io/hmdlabs')}/hmd-tf-bartleby:{os.environ.get('HMD_TF_BARTLEBY_VERSION', '0.1.8')}"
         autodoc = self.app.pargs.autodoc
         gather = self.app.pargs.gather
         shell = self.app.pargs.shell
@@ -170,3 +173,26 @@ class LocalController(Controller):
             from .hmd_cli_bartleby import transform
 
             transform(**args)
+
+    @ex(help="Render images from puml", arguments=[])
+    def puml(self):
+        def get_files():
+            files = glob("**", recursive=True)
+            files = list(map(lambda x: x.replace("\\", "/"), files))
+            return files
+
+        input_path = Path(os.getcwd()) / "docs"
+        output_path = Path(os.getcwd()) / "target" / "bartleby" / "puml_images"
+        if not output_path.exists():
+            os.makedirs(output_path)
+        if input_path.exists():
+            with cd(input_path):
+                puml_files = list(filter(lambda x: (x.endswith(".puml")), get_files()))
+                if len(puml_files) > 0:
+                    from .hmd_cli_bartleby import transform_puml
+
+                    transform_puml(puml_files, input_path, output_path, image_name)
+                else:
+                    print(
+                        "No puml files found in the docs folder of the current directory."
+                    )
