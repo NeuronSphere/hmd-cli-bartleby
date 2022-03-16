@@ -30,7 +30,7 @@ repo_types = {
     "ui": {"name": "UI_Components"},
 }
 
-image_name = f"{os.environ.get('HMD_CONTAINER_REGISTRY', 'ghcr.io/hmdlabs')}/hmd-tf-bartleby:{os.environ.get('HMD_TF_BARTLEBY_VERSION', '0.1.11')}"
+image_name = f"{os.environ.get('HMD_CONTAINER_REGISTRY', 'ghcr.io/hmdlabs')}/hmd-tf-bartleby:{os.environ.get('HMD_TF_BARTLEBY_VERSION', '0.1.12')}"
 
 
 def update_index(index_path, repo):

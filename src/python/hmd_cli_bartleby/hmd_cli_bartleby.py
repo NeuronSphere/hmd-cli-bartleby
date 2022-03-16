@@ -43,7 +43,7 @@ def get_compose(
                     "HMD_ACCOUNT": account,
                     "HMD_CUSTOMER_CODE": customer_code,
                     "HMD_DID": deployment_id,
-                    "AUTODOC": autodoc,
+                    "AUTODOC": f"{autodoc}",
                     "HMD_DOC_REPO_NAME": doc_repo,
                     "HMD_DOC_REPO_VERSION": doc_repo_version,
                 },
@@ -146,6 +146,7 @@ extra-index-url = https://{pip_username}:{urllib.parse.quote(pip_password)}@hmdl
                     else:
                         pip_config = Path.home() / ".pip" / "pip.conf"
 
+                print(pip_config)
                 compose = get_compose(
                     image_name=image_name,
                     instance_name=instance_name,
