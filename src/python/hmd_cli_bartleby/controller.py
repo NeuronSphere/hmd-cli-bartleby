@@ -30,13 +30,13 @@ repo_types = {
     "ui": {"name": "UI_Components"},
 }
 
-image_name = f"{os.environ.get('HMD_CONTAINER_REGISTRY', 'ghcr.io/hmdlabs')}/hmd-tf-bartleby:{os.environ.get('HMD_TF_BARTLEBY_VERSION', '0.1.13')}"
+image_name = f"{os.environ.get('HMD_CONTAINER_REGISTRY', 'ghcr.io/hmdlabs')}/hmd-tf-bartleby:{os.environ.get('HMD_TF_BARTLEBY_VERSION', '0.1.14')}"
 
 
 def update_index(index_path, repo):
     with open(index_path, "r") as index:
         text = index.readlines()
-        i = [text.index(x) for x in text if x == "Indices and tables\n"][0]
+        i = [text.index(x) for x in text if x == "Indexes and tables\n"][0]
         text.insert(i, f"   {repo}/index.rst\n")
     with open(index_path, "w") as index:
         index.writelines(text)
