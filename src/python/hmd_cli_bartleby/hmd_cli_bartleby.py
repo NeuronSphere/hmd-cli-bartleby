@@ -106,7 +106,7 @@ def transform(
     if Path(repo_path / "src" / "python").exists():
         py = True
 
-    input_path = repo_path / "docs"
+    input_path = repo_path
     output_path = repo_path / "target" / "bartleby"
     if not output_path.exists():
         os.makedirs(output_path)
