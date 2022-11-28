@@ -40,7 +40,7 @@ colorlog==6.6.0
     # via hmd-cli-app
 hmd-cli-app~=0.2.359
     # via -r C:\Users\KateWalls\programs\hmd-cli-bartleby\src\python\requirements.in
-hmd-cli-tools~=0.2.173
+hmd-cli-tools~=0.2.192
     # via hmd-cli-app
 idna==3.3
     # via
@@ -69,7 +69,9 @@ python-dotenv==0.19.2
     #   hmd-cli-app
     #   hmd-cli-tools
 pyyaml==6.0
-    # via hmd-cli-app
+    # via
+    #   hmd-cli-app
+    #   hmd-cli-tools
 requests==2.27.1
     # via
     #   hmd-cli-app
