@@ -30,6 +30,7 @@ repo_types = {
     "ui": {"name": "UI_Components"},
 }
 
+# TODO: move this into main module
 image_name = f"{os.environ.get('HMD_CONTAINER_REGISTRY', 'ghcr.io/hmdlabs')}/hmd-tf-bartleby:{os.environ.get('HMD_TF_BARTLEBY_VERSION', '0.1.19')}"
 
 
