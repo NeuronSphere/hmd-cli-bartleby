@@ -39,3 +39,11 @@ Additional Setup
 Ensure the ``hmd-tf-bartleby`` image is built locally using the hmd docker build tool (``hmd docker build`` from the
 repository root) prior to running the bartleby CLI. The bartleby CLI will look for a local image under the registry name in
 the HMD_CONTAINER_REGISTRY environment variable (defaults to the HMD registry) in order to run the transform.
+
+Development Setup
++++++++++++++++++
+
+After building a new ``hmd-tf-bartleby`` image locally, you need to set the environment variable ``HMD_TF_BARTLEBY_VERSION`` to the new tag created.
+By default, the tag will be the contents of ``./meta-data/VERSION`` and ``-linux-<amd64|arm64>`` based on the architecture you are running.
+For example on Intel machines with VERSION as 0.1, the tag will be ``0.1-linux-amd64``. 
+So, you can run and test your newly built local image by setting ``export HMD_TF_BARTLEBY_VERSION=0.1-linux-amd64``.
