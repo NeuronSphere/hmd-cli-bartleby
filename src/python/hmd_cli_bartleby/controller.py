@@ -30,9 +30,6 @@ repo_types = {
     "ui": {"name": "UI_Components"},
 }
 
-# TODO: move this into main module
-image_name = f"{os.environ.get('HMD_CONTAINER_REGISTRY', 'ghcr.io/hmdlabs')}/hmd-tf-bartleby:{os.environ.get('HMD_TF_BARTLEBY_VERSION', '0.1.19')}"
-
 
 def update_index(index_path, repo):
     with open(index_path, "r") as index:
@@ -141,6 +138,8 @@ class LocalController(Controller):
         if len(gather) > 0:
             gather_repos(gather)
             args.update({"gather": gather})
+
+        image_name = f"{os.environ.get('HMD_CONTAINER_REGISTRY', 'ghcr.io/neuronsphere')}/hmd-tf-bartleby:{os.environ.get('HMD_TF_BARTLEBY_VERSION', 'stable')}"
 
         if len(shell.split(",")) > 1:
             for cmd in shell.split(","):

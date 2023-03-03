@@ -28,25 +28,30 @@ def get_compose(
     output_path: str,
     pip_secret: str = None,
 ):
+    env_vars = {
+        "TRANSFORM_INSTANCE_CONTEXT": json.dumps(transform_instance_context),
+        "HMD_ENVIRONMENT": environment,
+        "HMD_REGION": region,
+        "HMD_ACCOUNT": account,
+        "HMD_CUSTOMER_CODE": customer_code,
+        "HMD_DID": deployment_id,
+        "AUTODOC": f"{autodoc}",
+        "HMD_DOC_REPO_NAME": doc_repo,
+        "HMD_DOC_REPO_VERSION": doc_repo_version,
+    }
+
+    if os.environ.get("HMD_BARTLEBY_CONFIDENTIALITY_STATEMENT", None):
+        env_vars["CONFIDENTIALITY_STATEMENT"] = os.environ.get(
+            "HMD_BARTLEBY_CONFIDENTIALITY_STATEMENT"
+        )
+
     compose = {
         "version": "3.2",
         "services": {
             "bartleby_transform": {
                 "image": image_name,
                 "container_name": f"bartleby-inst_{instance_name}",
-                "environment": {
-                    "TRANSFORM_INSTANCE_CONTEXT": json.dumps(
-                        transform_instance_context
-                    ),
-                    "HMD_ENVIRONMENT": environment,
-                    "HMD_REGION": region,
-                    "HMD_ACCOUNT": account,
-                    "HMD_CUSTOMER_CODE": customer_code,
-                    "HMD_DID": deployment_id,
-                    "AUTODOC": f"{autodoc}",
-                    "HMD_DOC_REPO_NAME": doc_repo,
-                    "HMD_DOC_REPO_VERSION": doc_repo_version,
-                },
+                "environment": env_vars,
                 "volumes": [
                     {
                         "type": "bind",
