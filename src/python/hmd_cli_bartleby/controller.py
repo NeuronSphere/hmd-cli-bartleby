@@ -1,11 +1,11 @@
-import json
 import os
 import shutil
 from importlib.metadata import version
 from cement import Controller, ex
 from pathlib import Path
 from glob import glob
-from hmd_cli_tools.hmd_cli_tools import cd
+from hmd_cli_tools.hmd_cli_tools import cd, load_hmd_env, set_hmd_env
+from hmd_cli_tools.prompt_tools import prompt_for_values
 
 VERSION_BANNER = """
 hmd bartleby version: {}
@@ -28,6 +28,13 @@ repo_types = {
     "orb": {"name": "CircleCI_Orbs"},
     "tf": {"name": "Transforms"},
     "ui": {"name": "UI_Components"},
+}
+
+DEFAULT_CONFIG = {
+    "HMD_BARTLEBY_DEFAULT_COVER_IMAGE_URL": {
+        "hidden": True,
+        "default": "https://www.neuronsphere.io/hubfs/Neuron%20Sphere%20Logo.svg",
+    }
 }
 
 
@@ -196,3 +203,13 @@ class LocalController(Controller):
                     print(
                         "No puml files found in the docs folder of the current directory."
                     )
+
+    @ex(help="Configure Bartleby environment variables", arguments=[])
+    def configure(self):
+        load_hmd_env()
+
+        results = prompt_for_values(DEFAULT_CONFIG)
+
+        if results:
+            for k, v in results.items():
+                set_hmd_env(k, str(v))
