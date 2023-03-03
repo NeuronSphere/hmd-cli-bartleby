@@ -190,6 +190,8 @@ class LocalController(Controller):
 
         input_path = Path(os.getcwd()) / "docs"
         output_path = Path(os.getcwd()) / "target" / "bartleby" / "puml_images"
+        image_name = f"{os.environ.get('HMD_CONTAINER_REGISTRY', 'ghcr.io/neuronsphere')}/hmd-tf-bartleby:{os.environ.get('HMD_TF_BARTLEBY_VERSION', 'stable')}"
+
         if not output_path.exists():
             os.makedirs(output_path)
         if input_path.exists():
