@@ -133,6 +133,7 @@ class LocalController(Controller):
 
     def _default(self):
         """Default action if no sub-command is passed."""
+        load_hmd_env()
 
         args = {}
         name = self.app.pargs.repo_name
@@ -147,7 +148,7 @@ class LocalController(Controller):
             args.update({"gather": gather})
 
         image_name = f"{os.environ.get('HMD_CONTAINER_REGISTRY', 'ghcr.io/neuronsphere')}/hmd-tf-bartleby:{os.environ.get('HMD_TF_BARTLEBY_VERSION', 'stable')}"
-
+        print(image_name)
         if len(shell.split(",")) > 1:
             for cmd in shell.split(","):
                 transform_instance_context = {"shell": f"{cmd.strip()}"}
@@ -183,6 +184,8 @@ class LocalController(Controller):
 
     @ex(help="Render images from puml", arguments=[])
     def puml(self):
+        load_hmd_env()
+
         def get_files():
             files = glob("**", recursive=True)
             files = list(map(lambda x: x.replace("\\", "/"), files))
