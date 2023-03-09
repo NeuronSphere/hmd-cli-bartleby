@@ -31,10 +31,18 @@ repo_types = {
 }
 
 DEFAULT_CONFIG = {
-    "HMD_BARTLEBY_DEFAULT_COVER_IMAGE_URL": {
+    "HMD_BARTLEBY_DEFAULT_LOGO": {
         "hidden": True,
-        "default": "https://www.neuronsphere.io/hubfs/Neuron%20Sphere%20Logo.svg",
-    }
+        "default": "https://neuronsphere.io/hubfs/bartleby_assets/NeuronSphereSwoosh.jpg",
+    },
+    "HMD_BARTLEBY_HTML_DEFAULT_LOGO": {
+        "hidden": True,
+        "default": "https://neuronsphere.io/hubfs/bartleby_assets/Neuron_Sphere_Logo_RGB_Color.png",
+    },
+    "HMD_BARTLEBY_PDF_DEFAULT_LOGO": {
+        "hidden": True,
+        "default": "https://neuronsphere.io/hubfs/bartleby_assets/NeuronSphereSwoosh.jpg",
+    },
 }
 
 
@@ -133,7 +141,7 @@ class LocalController(Controller):
 
     def _default(self):
         """Default action if no sub-command is passed."""
-        load_hmd_env()
+        load_hmd_env(override=False)
 
         args = {}
         name = self.app.pargs.repo_name
@@ -184,7 +192,7 @@ class LocalController(Controller):
 
     @ex(help="Render images from puml", arguments=[])
     def puml(self):
-        load_hmd_env()
+        load_hmd_env(override=False)
 
         def get_files():
             files = glob("**", recursive=True)
