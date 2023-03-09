@@ -1,10 +1,17 @@
 import os
 import shutil
 from importlib.metadata import version
+from typing import Any, Dict
 from cement import Controller, ex
 from pathlib import Path
 from glob import glob
-from hmd_cli_tools.hmd_cli_tools import cd, load_hmd_env, set_hmd_env
+from hmd_cli_tools.hmd_cli_tools import (
+    cd,
+    load_hmd_env,
+    set_hmd_env,
+    get_env_var,
+    read_manifest,
+)
 from hmd_cli_tools.prompt_tools import prompt_for_values
 
 VERSION_BANNER = """
@@ -34,16 +41,72 @@ DEFAULT_CONFIG = {
     "HMD_BARTLEBY_DEFAULT_LOGO": {
         "hidden": True,
         "default": "https://neuronsphere.io/hubfs/bartleby_assets/NeuronSphereSwoosh.jpg",
+    }
+}
+
+
+BARTLEBY_PARAMETERS = {
+    "confidential": {
+        "arg": (
+            ["--confidential"],
+            {
+                "action": "store_true",
+                "dest": "confidential",
+                "help": "The flag to indicate if documents should include HMD_BARTLEBY_CONFIDENTIALITY_STATEMENT",
+                "default": False,
+            },
+        ),
+        "key": "confidential",
+        "env_var": "HMD_BARTLEBY_CONFIDENTIAL",
     },
-    "HMD_BARTLEBY_HTML_DEFAULT_LOGO": {
-        "hidden": True,
-        "default": "https://neuronsphere.io/hubfs/bartleby_assets/Neuron_Sphere_Logo_RGB_Color.png",
+    "default_logo": {
+        "arg": (
+            ["--default-logo"],
+            {
+                "action": "store",
+                "dest": "default_logo",
+                "help": "URL to default HTML logo or PDF cover image to use",
+            },
+        ),
+        "key": "default_logo",
+        "env_var": "HMD_BARTLEBY_DEFAULT_LOGO",
     },
-    "HMD_BARTLEBY_PDF_DEFAULT_LOGO": {
-        "hidden": True,
-        "default": "https://neuronsphere.io/hubfs/bartleby_assets/NeuronSphereSwoosh.jpg",
+    "html_default_logo": {
+        "arg": (
+            ["--html-default-logo"],
+            {
+                "action": "store",
+                "dest": "html_default_logo",
+                "help": "URL to default HTML logo",
+            },
+        ),
+        "key": "default_logo",
+        "env_var": "HMD_BARTLEBY_HTML_DEFAULT_LOGO",
+    },
+    "pdf_default_logo": {
+        "arg": (
+            ["--pdf-default-logo"],
+            {
+                "action": "store",
+                "dest": "pdf_default_logo",
+                "help": "URL to default PDF cover image to use",
+            },
+        ),
+        "key": "default_logo",
+        "env_var": "HMD_BARTLEBY_PDF_DEFAULT_LOGO",
     },
 }
+
+
+def _get_parameter_default(param: str, manifest: Dict, default: Any = None):
+    value = manifest.get(BARTLEBY_PARAMETERS[param]["key"])
+
+    if value is None:
+        value = get_env_var(
+            BARTLEBY_PARAMETERS[param]["env_var"], throw=False, default=default
+        )
+
+    return value
 
 
 def update_index(index_path, repo):
@@ -134,14 +197,24 @@ class LocalController(Controller):
                     "action": "store",
                     "dest": "shell",
                     "help": "The command to pass to the bartleby transform instance.",
-                    "default": "default",
+                    "default": "html,pdf",
                 },
             ),
+            *[param["arg"] for _, param in BARTLEBY_PARAMETERS.items()],
         )
 
     def _default(self):
         """Default action if no sub-command is passed."""
         load_hmd_env(override=False)
+        shell = self.app.pargs.shell
+
+        if len(shell.split(",")) > 1:
+            for cmd in shell.split(","):
+                self._run_transform(f"{cmd.strip()}")
+        else:
+            self._run_transform(shell)
+
+    def _run_transform(self, shell: str):
 
         args = {}
         name = self.app.pargs.repo_name
@@ -149,46 +222,66 @@ class LocalController(Controller):
 
         autodoc = self.app.pargs.autodoc
         gather = self.app.pargs.gather
-        shell = self.app.pargs.shell
+
+        manifest = read_manifest()
+        confidential = _get_parameter_default(
+            "confidential", manifest, default=self.app.pargs.confidential
+        )
+
+        default_logo = self.app.pargs.default_logo
+
+        if self.app.pargs.default_logo is None:
+            default_logo = _get_parameter_default(
+                "default_logo", manifest, self.app.pargs.default_logo
+            )
+
+        html_default_logo = self.app.pargs.html_default_logo
+        if html_default_logo is None:
+            html_default_logo = _get_parameter_default(
+                "html_default_logo", manifest, default_logo
+            )
+
+        pdf_default_logo = self.app.pargs.pdf_default_logo
+        if pdf_default_logo is None:
+            pdf_default_logo = _get_parameter_default(
+                "pdf_default_logo", manifest, default_logo
+            )
 
         if len(gather) > 0:
             gather_repos(gather)
             args.update({"gather": gather})
 
         image_name = f"{os.environ.get('HMD_CONTAINER_REGISTRY', 'ghcr.io/neuronsphere')}/hmd-tf-bartleby:{os.environ.get('HMD_TF_BARTLEBY_VERSION', 'stable')}"
-        print(image_name)
-        if len(shell.split(",")) > 1:
-            for cmd in shell.split(","):
-                transform_instance_context = {"shell": f"{cmd.strip()}"}
-                args.update(
-                    {
-                        "name": name,
-                        "version": repo_version,
-                        "transform_instance_context": transform_instance_context,
-                        "image_name": image_name,
-                        "autodoc": autodoc,
-                    }
-                )
 
-                from .hmd_cli_bartleby import transform
+        transform_instance_context = {"shell": shell}
 
-                transform(**args)
-        else:
-            transform_instance_context = {"shell": shell}
+        args.update(
+            {
+                "name": name,
+                "version": repo_version,
+                "transform_instance_context": transform_instance_context,
+                "image_name": image_name,
+                "autodoc": autodoc,
+                "confidential": confidential,
+                "default_logo": default_logo,
+                "html_default_logo": html_default_logo,
+                "pdf_default_logo": pdf_default_logo,
+            }
+        )
 
-            args.update(
-                {
-                    "name": name,
-                    "version": repo_version,
-                    "transform_instance_context": transform_instance_context,
-                    "image_name": image_name,
-                    "autodoc": autodoc,
-                }
-            )
+        from .hmd_cli_bartleby import transform
 
-            from .hmd_cli_bartleby import transform
+        transform(**args)
 
-            transform(**args)
+    @ex(help="Render HTML documentation", arguments=[])
+    def html(self):
+        load_hmd_env(override=False)
+        self._run_transform("html")
+
+    @ex(help="Render PDF documentation", arguments=[])
+    def pdf(self):
+        load_hmd_env(override=False)
+        self._run_transform("pdf")
 
     @ex(help="Render images from puml", arguments=[])
     def puml(self):
@@ -220,7 +313,6 @@ class LocalController(Controller):
     @ex(help="Configure Bartleby environment variables", arguments=[])
     def configure(self):
         load_hmd_env()
-
         results = prompt_for_values(DEFAULT_CONFIG)
 
         if results:
