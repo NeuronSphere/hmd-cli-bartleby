@@ -321,6 +321,7 @@ class LocalController(Controller):
 
     @ex(help="Pull the latest Bartleby image", arguments=[])
     def update_image(self):
+        load_hmd_env()
         from .hmd_cli_bartleby import update_image as do_update_image
 
         image_name = f"{os.environ.get('HMD_CONTAINER_REGISTRY', 'ghcr.io/neuronsphere')}/hmd-tf-bartleby"
