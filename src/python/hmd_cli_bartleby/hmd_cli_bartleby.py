@@ -288,3 +288,23 @@ def transform_puml(files: List, input_path: Path, output_path: Path, image_name:
 
     if result != 0:
         raise Exception(f"Error generating images from puml: {traceback.format_exc()}")
+
+
+def update_image(image_name: str):
+    rmi_cmd = ["docker", "rmi", image_name]
+
+    return_code = exec_cmd2(rmi_cmd)
+
+    if return_code != 0:
+        raise Exception(
+            f"Removing old image completed with non-zero exit code: {return_code}"
+        )
+
+    pull_cmd = ["docker", "pull", image_name]
+
+    return_code = exec_cmd2(pull_cmd)
+
+    if return_code != 0:
+        raise Exception(
+            f"Pulling new image completed with non-zero exit code: {return_code}"
+        )

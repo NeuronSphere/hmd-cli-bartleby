@@ -318,3 +318,12 @@ class LocalController(Controller):
         if results:
             for k, v in results.items():
                 set_hmd_env(k, str(v))
+
+    @ex(help="Pull the latest Bartleby image", arguments=[])
+    def update_image(self):
+        from .hmd_cli_bartleby import update_image as do_update_image
+
+        image_name = f"{os.environ.get('HMD_CONTAINER_REGISTRY', 'ghcr.io/neuronsphere')}/hmd-tf-bartleby"
+        img_tag = os.environ.get("HMD_TF_BARTLEBY_VERSION", "stable")
+
+        do_update_image(image_name=f"{image_name}:{img_tag}")
