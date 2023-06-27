@@ -27,6 +27,10 @@ def get_compose(
     input_path: str,
     output_path: str,
     pip_secret: str = None,
+    confidential: bool = False,
+    default_logo: str = None,
+    html_default_logo: str = None,
+    pdf_default_logo: str = None,
 ):
     env_vars = {
         "TRANSFORM_INSTANCE_CONTEXT": json.dumps(transform_instance_context),
@@ -38,9 +42,12 @@ def get_compose(
         "AUTODOC": f"{autodoc}",
         "HMD_DOC_REPO_NAME": doc_repo,
         "HMD_DOC_REPO_VERSION": doc_repo_version,
+        "DEFAULT_LOGO": default_logo,
+        "HTML_DEFAULT_LOGO": html_default_logo,
+        "PDF_DEFAULT_LOGO": pdf_default_logo,
     }
 
-    if os.environ.get("HMD_BARTLEBY_CONFIDENTIALITY_STATEMENT", None):
+    if confidential and os.environ.get("HMD_BARTLEBY_CONFIDENTIALITY_STATEMENT", None):
         env_vars["CONFIDENTIALITY_STATEMENT"] = os.environ.get(
             "HMD_BARTLEBY_CONFIDENTIALITY_STATEMENT"
         )
@@ -89,6 +96,10 @@ def transform(
     image_name: str,
     gather: str = None,
     autodoc: bool = False,
+    confidential: bool = False,
+    default_logo: str = None,
+    html_default_logo: str = None,
+    pdf_default_logo: str = None,
 ):
     if hmd_home:
         instance_name = os.environ.get("HMD_INSTANCE_NAME", name)
@@ -167,6 +178,10 @@ extra-index-url = https://{pip_username}:{urllib.parse.quote(pip_password)}@hmdl
                     input_path=str(input_path),
                     output_path=str(output_path),
                     pip_secret=str(pip_config),
+                    confidential=confidential,
+                    default_logo=default_logo,
+                    html_default_logo=html_default_logo,
+                    pdf_default_logo=pdf_default_logo,
                 )
 
                 with open(inst_config, "w") as conf:
@@ -208,6 +223,10 @@ extra-index-url = https://{pip_username}:{urllib.parse.quote(pip_password)}@hmdl
                 doc_repo_version=version,
                 input_path=str(input_path),
                 output_path=str(output_path),
+                confidential=confidential,
+                default_logo=default_logo,
+                html_default_logo=html_default_logo,
+                pdf_default_logo=pdf_default_logo,
             )
 
             with open(inst_config, "w") as conf:
@@ -269,3 +288,23 @@ def transform_puml(files: List, input_path: Path, output_path: Path, image_name:
 
     if result != 0:
         raise Exception(f"Error generating images from puml: {traceback.format_exc()}")
+
+
+def update_image(image_name: str):
+    rmi_cmd = ["docker", "rmi", image_name]
+
+    return_code = exec_cmd2(rmi_cmd)
+
+    if return_code != 0:
+        raise Exception(
+            f"Removing old image completed with non-zero exit code: {return_code}"
+        )
+
+    pull_cmd = ["docker", "pull", image_name]
+
+    return_code = exec_cmd2(pull_cmd)
+
+    if return_code != 0:
+        raise Exception(
+            f"Pulling new image completed with non-zero exit code: {return_code}"
+        )
