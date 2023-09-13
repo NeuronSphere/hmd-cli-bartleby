@@ -46,6 +46,27 @@ DEFAULT_CONFIG = {
 
 
 BARTLEBY_PARAMETERS = {
+    "document_title": {
+        "arg": (
+            ["--title"],
+            {
+                "action": "store",
+                "dest": "document_title",
+                "help": "specify document title",
+            },
+        )
+    },
+    "timestamp_title": {
+        "arg": (
+            ["--no-timestamp-title"],
+            {
+                "action": "store_true",
+                "dest": "timestamp_title",
+                "help": "append timestamp to title",
+                "default": False,
+            },
+        )
+    },
     "confidential": {
         "arg": (
             ["--confidential"],
@@ -215,7 +236,6 @@ class LocalController(Controller):
             self._run_transform(shell)
 
     def _run_transform(self, shell: str):
-
         args = {}
         name = self.app.pargs.repo_name
         repo_version = self.app.pargs.repo_version
@@ -266,6 +286,8 @@ class LocalController(Controller):
                 "default_logo": default_logo,
                 "html_default_logo": html_default_logo,
                 "pdf_default_logo": pdf_default_logo,
+                "document_title": self.app.pargs.document_title,
+                "timestamp_title": self.app.pargs.timestamp_title,
             }
         )
 

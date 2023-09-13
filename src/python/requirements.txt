@@ -49,7 +49,7 @@ google-auth==2.9.1
     #   kubernetes
 hmd-cli-app~=1.1.595
     # via -r /tmp/hmd-cli-bartleby/src/python/requirements.in
-hmd-cli-tools~=1.1.227
+hmd-cli-tools~=1.1.228
     # via hmd-cli-app
 idna==3.3
     # via

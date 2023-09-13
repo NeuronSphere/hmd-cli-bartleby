@@ -27,6 +27,8 @@ def get_compose(
     input_path: str,
     output_path: str,
     pip_secret: str = None,
+    document_title: str = None,
+    timestamp_title: bool = False,
     confidential: bool = False,
     default_logo: str = None,
     html_default_logo: str = None,
@@ -45,7 +47,14 @@ def get_compose(
         "DEFAULT_LOGO": default_logo,
         "HTML_DEFAULT_LOGO": html_default_logo,
         "PDF_DEFAULT_LOGO": pdf_default_logo,
+        "HMD_DOC_COMPANY_NAME": os.environ.get("HMD_DOC_COMPANY_NAME"),
     }
+
+    if document_title:
+        env_vars["DOCUMENT_TITLE"] = document_title
+
+    if timestamp_title:
+        env_vars["NO_TIMESTAMP_TITLE"] = "true"
 
     if confidential and os.environ.get("HMD_BARTLEBY_CONFIDENTIALITY_STATEMENT", None):
         env_vars["CONFIDENTIALITY_STATEMENT"] = os.environ.get(
@@ -97,6 +106,8 @@ def transform(
     gather: str = None,
     autodoc: bool = False,
     confidential: bool = False,
+    document_title: str = None,
+    timestamp_title: bool = False,
     default_logo: str = None,
     html_default_logo: str = None,
     pdf_default_logo: str = None,
@@ -179,6 +190,8 @@ extra-index-url = https://{pip_username}:{urllib.parse.quote(pip_password)}@hmdl
                     output_path=str(output_path),
                     pip_secret=str(pip_config),
                     confidential=confidential,
+                    document_title=document_title,
+                    timestamp_title=timestamp_title,
                     default_logo=default_logo,
                     html_default_logo=html_default_logo,
                     pdf_default_logo=pdf_default_logo,
@@ -223,6 +236,8 @@ extra-index-url = https://{pip_username}:{urllib.parse.quote(pip_password)}@hmdl
                 doc_repo_version=version,
                 input_path=str(input_path),
                 output_path=str(output_path),
+                document_title=document_title,
+                timestamp_title=timestamp_title,
                 confidential=confidential,
                 default_logo=default_logo,
                 html_default_logo=html_default_logo,
