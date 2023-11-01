@@ -18,7 +18,14 @@ When some runs ``hmd bartleby``, it will run for each combination of root docume
 .. spec:: Allow rendering subset of roots
     :id: HMD_CLI_BARTLEBY_NERD001_SPEC001
     :links: HMD_CLI_BARTLEBY_NERD001
-    :status: proposed
+    :status: implemented
 
     An additional command line option will be added to allow only rendering a specific root document.
     Also if a shell builder is passed via command line, e.g. ``hmd bartelby pdf``, then only roots that specify ``pdf`` in the configuration will be rendered.
+
+.. spec:: Limit default 'index' root to certain builders
+    :id: HMD_CLI_BARTLEBY_NERD001_SPEC002
+    :links: HMD_CLI_BARTLEBY_NERD001
+    :status: implemented
+
+    A special root document shall be reserved for the default 'index'. Specifying this in the manifest is optional but will allow limiting which shell builders run for the default root.

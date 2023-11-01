@@ -1,3 +1,4 @@
+import json
 import os
 import shutil
 from importlib.metadata import version
@@ -120,12 +121,27 @@ BARTLEBY_PARAMETERS = {
 
 
 def _get_parameter_default(param: str, manifest: Dict, default: Any = None):
-    value = manifest.get(BARTLEBY_PARAMETERS[param]["key"])
+    bartleby_param = BARTLEBY_PARAMETERS.get(param)
+    bartleby_manifest = manifest.get("bartleby", {}).get("config", {})
+
+    if bartleby_param is None:
+        value = bartleby_manifest.get("builders", {}).get(param)
+
+        if value is None:
+            value = json.loads(
+                get_env_var(
+                    f"HMD_BARTLEBY_{param.upper()}_CONFIG",
+                    throw=False,
+                    default=str(default),
+                )
+            )
+
+        return value
+
+    value = bartleby_manifest.get(bartleby_param["key"])
 
     if value is None:
-        value = get_env_var(
-            BARTLEBY_PARAMETERS[param]["env_var"], throw=False, default=default
-        )
+        value = get_env_var(bartleby_param["env_var"], throw=False, default=default)
 
     return value
 
@@ -218,7 +234,16 @@ class LocalController(Controller):
                     "action": "store",
                     "dest": "shell",
                     "help": "The command to pass to the bartleby transform instance.",
-                    "default": "html,pdf",
+                    "default": "all",
+                },
+            ),
+            (
+                ["-rd", "--root-doc"],
+                {
+                    "action": "store",
+                    "dest": "root_doc",
+                    "help": "The root docuemnt to pass to the bartleby transform instance.",
+                    "default": "all",
                 },
             ),
             *[param["arg"] for _, param in BARTLEBY_PARAMETERS.items()],
@@ -228,14 +253,59 @@ class LocalController(Controller):
         """Default action if no sub-command is passed."""
         load_hmd_env(override=False)
         shell = self.app.pargs.shell
+        root_doc = self.app.pargs.root_doc
 
-        if len(shell.split(",")) > 1:
-            for cmd in shell.split(","):
-                self._run_transform(f"{cmd.strip()}")
+        docs = self._get_documents(root_doc=root_doc)
+        builds = self._get_shells(docs, shell=shell)
+
+        for build in builds:
+            self._run_transform(
+                build["name"], build["shell"], build["root_doc"], build["config"]
+            )
+
+    def _get_documents(self, root_doc: str = "all"):
+        manifest = read_manifest()
+        roots = manifest.get("bartleby", {}).get(
+            "roots", {"index": {"builders": ["html", "pdf"], "root_doc": "index"}}
+        )
+
+        docs = {}
+
+        if root_doc == "all":
+            return roots
         else:
-            self._run_transform(shell)
+            docs[root_doc] = roots.get(root_doc, {})
+            return docs
 
-    def _run_transform(self, shell: str):
+    def _get_shells(self, docs: dict, shell: str = "all"):
+        tf_ctxs = []
+        manifest = read_manifest()
+
+        for root, doc in docs.items():
+            shells = doc.get("builders", [])
+            doc_config = doc.get("config", {})
+            for s in shells:
+                if isinstance(s, dict):
+                    s = s.get("shell")
+                    config = s.get("config", _get_parameter_default(s, manifest, {}))
+                else:
+                    config = _get_parameter_default(s, manifest, {})
+
+                config = {**doc_config, **config}
+
+                if shell == "all" or s == shell:
+                    tf_ctxs.append(
+                        {
+                            "name": root,
+                            "shell": s,
+                            "root_doc": doc.get("root_doc", "index"),
+                            "config": config,
+                        }
+                    )
+
+        return tf_ctxs
+
+    def _run_transform(self, doc_name: str, shell: str, root_doc: str, config: dict):
         args = {}
         name = self.app.pargs.repo_name
         repo_version = self.app.pargs.repo_version
@@ -273,7 +343,12 @@ class LocalController(Controller):
 
         image_name = f"{os.environ.get('HMD_CONTAINER_REGISTRY', 'ghcr.io/neuronsphere')}/hmd-tf-bartleby:{os.environ.get('HMD_TF_BARTLEBY_VERSION', 'stable')}"
 
-        transform_instance_context = {"shell": shell}
+        transform_instance_context = {
+            "name": doc_name,
+            "shell": shell,
+            "root_doc": root_doc,
+            "config": config,
+        }
 
         args.update(
             {
@@ -298,12 +373,24 @@ class LocalController(Controller):
     @ex(help="Render HTML documentation", arguments=[])
     def html(self):
         load_hmd_env(override=False)
-        self._run_transform("html")
+        docs = self._get_documents()
+        builds = self._get_shells(docs, shell="html")
+
+        for build in builds:
+            self._run_transform(
+                build["name"], build["shell"], build["root_doc"], build["config"]
+            )
 
     @ex(help="Render PDF documentation", arguments=[])
     def pdf(self):
         load_hmd_env(override=False)
-        self._run_transform("pdf")
+        docs = self._get_documents()
+        builds = self._get_shells(docs, shell="pdf")
+
+        for build in builds:
+            self._run_transform(
+                build["name"], build["shell"], build["root_doc"], build["config"]
+            )
 
     @ex(help="Render images from puml", arguments=[])
     def puml(self):

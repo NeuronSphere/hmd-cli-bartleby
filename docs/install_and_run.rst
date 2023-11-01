@@ -23,7 +23,7 @@ repository root in order to avoid dependencies upon the HMD_REPO_HOME environmen
 
 .. code-block:: bash
 
-    hmd --repo-name <repo> bartleby <command>
+    hmd bartleby <command>
 
 For the ``<command>``, any combination of the configured options listed under the bartleby transform (see the
 "transforms" document under the ``hmd-tf-bartleby`` repo) can be entered as input. If rendered documents in multiple
@@ -31,7 +31,37 @@ formats is desired, enter the options as a comma-separated list with *no spaces*
 
 .. code-block:: bash
 
-    hmd --repo-name <repo> bartleby <option1>,<option2>
+    hmd bartleby --shell <option1>,<option2>
+
+Configuring Multiple Root Documents
+-----------------------------------
+
+Bartleby can render multiple different root documents with different builders available to each. For example, you might want to render one toctree 
+for PDF outputs and another for HTML. The below config enables that. It should be put in the ``meta-data/manifest.json`` file of the project.
+
+.. code-block:: json
+
+    {
+        ...
+        "bartleby": {
+            "roots": {
+                "html_doc": {
+                    "root_doc": "index",
+                    "builders": ["html"],
+                },
+                "pdf_doc": {
+                    "root_doc": "pdf_index",
+                    "builders": ["pdf"]
+                }
+            }
+        }
+    }
+
+Each entry should contain a ``root_doc`` property equal to the name of the root RST file to use, without the ``.rst`` extension.
+The paths are relative to the ``docs/`` directory.
+The entry should also have an array of ``builders`` that can render this document. The values in the array should be valid options sent to the ``--shell`` flag, i.e. html, pdf, revealjs, confluence.
+
+When a specific shell is specified on the command line, only documents with that value in their ``builders`` array will be rendered. For example, running ``hmd bartleby --shell html`` or the shortcut ``hmd bartleby html`` will only render the ``html_doc`` document.
 
 
 Additional Setup
