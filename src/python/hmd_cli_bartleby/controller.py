@@ -120,6 +120,17 @@ BARTLEBY_PARAMETERS = {
 }
 
 
+def _get_default_builder_config(shell: str):
+    prefix = f"HMD_BARTLEBY__{shell.upper()}__"
+    config = {}
+    for key, value in os.environ.items():
+        if key.startswith(prefix):
+            config_var = key.removeprefix(prefix).lower()
+            config[config_var] = value
+
+    return config
+
+
 def _get_parameter_default(param: str, manifest: Dict, default: Any = None):
     bartleby_param = BARTLEBY_PARAMETERS.get(param)
     bartleby_manifest = manifest.get("bartleby", {}).get("config", {})
@@ -255,7 +266,7 @@ class LocalController(Controller):
         shell = self.app.pargs.shell
         root_doc = self.app.pargs.root_doc
 
-        docs = self._get_documents(root_doc=root_doc)
+        docs = self._get_documents(root_doc=root_doc, shell=shell)
         builds = self._get_shells(docs, shell=shell)
 
         for build in builds:
@@ -263,12 +274,12 @@ class LocalController(Controller):
                 build["name"], build["shell"], build["root_doc"], build["config"]
             )
 
-    def _get_documents(self, root_doc: str = "all"):
+    def _get_documents(self, root_doc: str = "all", shell: str = "all"):
         manifest = read_manifest()
-        roots = manifest.get("bartleby", {}).get(
-            "roots", {"index": {"builders": ["html", "pdf"], "root_doc": "index"}}
-        )
+        roots = manifest.get("bartleby", {}).get("roots")
 
+        if roots is None:
+            return {"index": {"builders": [shell], "root_doc": "index"}}
         docs = {}
 
         if root_doc == "all":
@@ -291,7 +302,8 @@ class LocalController(Controller):
                 else:
                     config = _get_parameter_default(s, manifest, {})
 
-                config = {**doc_config, **config}
+                env_config = _get_default_builder_config(s)
+                config = {**doc_config, **config, **env_config}
 
                 if shell == "all" or s == shell:
                     tf_ctxs.append(
@@ -373,7 +385,7 @@ class LocalController(Controller):
     @ex(help="Render HTML documentation", arguments=[])
     def html(self):
         load_hmd_env(override=False)
-        docs = self._get_documents()
+        docs = self._get_documents(shell="html")
         builds = self._get_shells(docs, shell="html")
 
         for build in builds:
@@ -384,7 +396,7 @@ class LocalController(Controller):
     @ex(help="Render PDF documentation", arguments=[])
     def pdf(self):
         load_hmd_env(override=False)
-        docs = self._get_documents()
+        docs = self._get_documents(shell="pdf")
         builds = self._get_shells(docs, shell="pdf")
 
         for build in builds:
