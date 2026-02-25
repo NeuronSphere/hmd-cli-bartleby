@@ -64,6 +64,47 @@ The entry should also have an array of ``builders`` that can render this documen
 When a specific shell is specified on the command line, only documents with that value in their ``builders`` array will be rendered. For example, running ``hmd bartleby --shell html`` or the shortcut ``hmd bartleby html`` will only render the ``html_doc`` document.
 
 
+Rendering RevealJS Slideshows
+------------------------------
+
+Bartleby supports rendering RST documents as RevealJS slideshows via the ``slides`` subcommand.
+The ``hmd-tf-bartleby`` transform image includes the ``sphinx-revealjs`` extension, so no additional
+installation is needed.
+
+To use this feature, add ``"revealjs"`` to the ``builders`` array for the desired root document in
+``meta-data/manifest.json``:
+
+.. code-block:: json
+
+    {
+        "bartleby": {
+            "roots": {
+                "presentation": {
+                    "root_doc": "slides_index",
+                    "builders": ["revealjs"]
+                }
+            }
+        }
+    }
+
+Then render the slideshow with:
+
+.. code-block:: bash
+
+    hmd bartleby slides
+
+You can also target a specific root document:
+
+.. code-block:: bash
+
+    hmd bartleby slides -rd presentation
+
+Alternatively, the ``--shell`` flag still works:
+
+.. code-block:: bash
+
+    hmd bartleby --shell revealjs
+
 Additional Setup
 -----------------
 

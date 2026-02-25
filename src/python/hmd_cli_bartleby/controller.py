@@ -424,6 +424,18 @@ class LocalController(Controller):
                 build["name"], build["shell"], build["root_doc"], build["config"]
             )
 
+    @ex(help="Render RevealJS slideshow", arguments=[])
+    def slides(self):
+        load_hmd_env(override=False)
+        root_doc = self.app.pargs.root_doc
+        docs = self._get_documents(root_doc=root_doc, shell="revealjs")
+        builds = self._get_shells(docs, shell="revealjs")
+
+        for build in builds:
+            self._run_transform(
+                build["name"], build["shell"], build["root_doc"], build["config"]
+            )
+
     @ex(help="Render images from puml", arguments=[])
     def puml(self):
         load_hmd_env(override=False)

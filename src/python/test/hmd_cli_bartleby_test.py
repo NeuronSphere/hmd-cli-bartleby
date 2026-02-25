@@ -188,3 +188,30 @@ class TestGetShells:
         assert build["shell"] == "html"
         assert build["root_doc"] == "index"
         assert isinstance(build["config"], dict)
+
+    @patch("hmd_cli_bartleby.controller.read_manifest", return_value={})
+    def test_revealjs_shell_filters_builds(self, mock_manifest):
+        ctrl = self._make_controller()
+        docs = {"index": {"builders": ["html", "pdf", "revealjs"], "root_doc": "index"}}
+        builds = ctrl._get_shells(docs, shell="revealjs")
+        assert len(builds) == 1
+        assert builds[0]["shell"] == "revealjs"
+
+    @patch("hmd_cli_bartleby.controller.read_manifest", return_value={})
+    def test_revealjs_in_multi_builder_doc(self, mock_manifest):
+        ctrl = self._make_controller()
+        docs = {
+            "slides": {
+                "builders": ["html", "revealjs"],
+                "root_doc": "slides_index",
+            },
+            "guide": {
+                "builders": ["html", "pdf"],
+                "root_doc": "guide_index",
+            },
+        }
+        builds = ctrl._get_shells(docs, shell="revealjs")
+        assert len(builds) == 1
+        assert builds[0]["name"] == "slides"
+        assert builds[0]["shell"] == "revealjs"
+        assert builds[0]["root_doc"] == "slides_index"

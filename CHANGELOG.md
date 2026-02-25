@@ -2,6 +2,7 @@
 
 ## 2026-02-25
 
+- feat: add slides subcommand for RevealJS slideshow rendering
 - feat: support selecting multiple root documents via comma-separated -rd argument
 - fix: html and pdf subcommands now respect the -rd flag
 - fix: use default builders (html, pdf) when no bartleby manifest config present
