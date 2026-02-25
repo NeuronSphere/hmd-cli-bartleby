@@ -45,6 +45,8 @@ DEFAULT_CONFIG = {
     }
 }
 
+DEFAULT_BUILDERS = ["html", "pdf"]
+
 
 BARTLEBY_PARAMETERS = {
     "document_title": {
@@ -279,7 +281,7 @@ class LocalController(Controller):
         roots = manifest.get("bartleby", {}).get("roots")
 
         if roots is None:
-            return {"index": {"builders": [shell], "root_doc": "index"}}
+            return {"index": {"builders": DEFAULT_BUILDERS, "root_doc": "index"}}
         docs = {}
 
         if root_doc == "all":
