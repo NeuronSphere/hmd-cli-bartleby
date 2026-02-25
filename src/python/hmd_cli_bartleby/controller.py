@@ -255,7 +255,8 @@ class LocalController(Controller):
                 {
                     "action": "store",
                     "dest": "root_doc",
-                    "help": "The root docuemnt to pass to the bartleby transform instance.",
+                    "help": "Root document(s) to build. Use 'all' for all roots, or specify "
+                    "comma-separated root names (e.g., 'guide,api').",
                     "default": "all",
                 },
             ),
@@ -282,13 +283,28 @@ class LocalController(Controller):
 
         if roots is None:
             return {"index": {"builders": DEFAULT_BUILDERS, "root_doc": "index"}}
-        docs = {}
 
         if root_doc == "all":
             return roots
-        else:
-            docs[root_doc] = roots.get(root_doc, {})
-            return docs
+
+        requested = [name.strip() for name in root_doc.split(",") if name.strip()]
+        docs = {}
+        for name in requested:
+            if name in roots:
+                docs[name] = roots[name]
+            else:
+                print(
+                    f"Warning: root document '{name}' not found in manifest. "
+                    f"Available roots: {', '.join(roots.keys())}"
+                )
+
+        if not docs:
+            raise SystemExit(
+                f"Error: none of the requested root documents ({root_doc}) "
+                f"were found in manifest. Available roots: {', '.join(roots.keys())}"
+            )
+
+        return docs
 
     def _get_shells(self, docs: dict, shell: str = "all"):
         tf_ctxs = []
@@ -387,7 +403,8 @@ class LocalController(Controller):
     @ex(help="Render HTML documentation", arguments=[])
     def html(self):
         load_hmd_env(override=False)
-        docs = self._get_documents(shell="html")
+        root_doc = self.app.pargs.root_doc
+        docs = self._get_documents(root_doc=root_doc, shell="html")
         builds = self._get_shells(docs, shell="html")
 
         for build in builds:
@@ -398,7 +415,8 @@ class LocalController(Controller):
     @ex(help="Render PDF documentation", arguments=[])
     def pdf(self):
         load_hmd_env(override=False)
-        docs = self._get_documents(shell="pdf")
+        root_doc = self.app.pargs.root_doc
+        docs = self._get_documents(root_doc=root_doc, shell="pdf")
         builds = self._get_shells(docs, shell="pdf")
 
         for build in builds:
