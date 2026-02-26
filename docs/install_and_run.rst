@@ -105,6 +105,108 @@ Alternatively, the ``--shell`` flag still works:
 
     hmd bartleby --shell revealjs
 
+Combining External Documentation Sources
+-----------------------------------------
+
+Bartleby can pull documentation from multiple external repositories into a single combined site. This uses
+``pre_build_artifacts`` to download build artifacts from other repos and ``bartleby.sources`` to configure
+how docs are staged and injected into the toctree.
+
+**Step 1: Configure pre_build_artifacts**
+
+In ``meta-data/manifest.json``, declare the build artifacts to download:
+
+.. code-block:: json
+
+    {
+        "build": {
+            "pre_build_artifacts": [
+                ["hmd-ms-transform@1.0:build", "target/artifacts/transform"],
+                ["hmd-ms-deployment@0.1:build", "target/artifacts/deployment"]
+            ]
+        }
+    }
+
+**Step 2: Configure bartleby.sources**
+
+Add a ``bartleby.sources`` section to the manifest. Each key becomes a staging directory under ``docs/_sources/``:
+
+.. code-block:: json
+
+    {
+        "bartleby": {
+            "sources": {
+                "transform": {
+                    "artifact_path": "target/artifacts/transform",
+                    "docs_root": "docs",
+                    "title": "Transform Service API"
+                },
+                "deployment": {
+                    "artifact_path": "target/artifacts/deployment",
+                    "docs_root": "docs",
+                    "title": "Deployment Service API"
+                }
+            },
+            "roots": {
+                "index": {
+                    "root_doc": "index",
+                    "builders": ["html", "pdf"]
+                }
+            }
+        }
+    }
+
+Source configuration fields:
+
+- **key** (e.g., ``"transform"``): Name used as the staging directory under ``docs/_sources/``
+- **artifact_path** (optional): Where ``pre_build_artifacts`` downloaded the build artifact, relative to the repo root
+- **docs_root** (optional, default ``"docs"``): Subdirectory within the artifact containing RST files
+- **title**: Display name used as the toctree caption
+
+If ``artifact_path`` is omitted, the key is treated as a path relative to ``docs/`` and docs must already be in place.
+
+**Step 3: Control toctree placement (optional)**
+
+Add the ``.. bartleby-sources::`` marker directive in your ``index.rst`` to control where the external
+toctree entries are inserted:
+
+.. code-block:: rst
+
+    Welcome
+    =======
+
+    .. toctree::
+       :maxdepth: 2
+       :caption: Local Docs
+
+       local/overview
+
+    .. bartleby-sources::
+
+    Indices and tables
+    ==================
+
+If no marker is present, Bartleby inserts entries before the "Indexes and tables" or "Indices and tables"
+heading. If neither is found, entries are appended to the end of the file.
+
+**Step 4: Build**
+
+Run a full build (downloads artifacts then runs Bartleby):
+
+.. code-block:: bash
+
+    hmd build
+
+Or run pre-build artifacts separately, then Bartleby:
+
+.. code-block:: bash
+
+    hmd build -pdo
+    hmd bartleby
+
+Bartleby will automatically stage the external docs, inject toctree entries, run the Sphinx transform,
+and clean up staging files and restore ``index.rst`` afterwards (even if the build fails).
+
 Additional Setup
 -----------------
 

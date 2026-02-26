@@ -47,6 +47,10 @@ DEFAULT_CONFIG = {
 
 DEFAULT_BUILDERS = ["html", "pdf"]
 
+SOURCES_MARKER = ".. bartleby-sources::"
+INDEXES_MARKERS = ["Indexes and tables\n", "Indices and tables\n"]
+SOURCES_STAGING_DIR = "_sources"
+
 
 BARTLEBY_PARAMETERS = {
     "document_title": {
@@ -159,6 +163,124 @@ def _get_parameter_default(param: str, manifest: Dict, default: Any = None):
     return value
 
 
+def _get_sources(manifest: Dict) -> Dict:
+    return manifest.get("bartleby", {}).get("sources", {})
+
+
+def _stage_sources(repo_path: Path, docs_path: Path, sources: Dict) -> "list[Path]":
+    staged = []
+    for key, source in sources.items():
+        artifact_path = source.get("artifact_path")
+        if artifact_path is None:
+            continue
+        docs_root = source.get("docs_root", "docs")
+        src_dir = repo_path / artifact_path / docs_root
+        if not src_dir.exists():
+            print(
+                f"Warning: artifact docs path '{src_dir}' does not exist for "
+                f"source '{key}'. Skipping."
+            )
+            continue
+        dest_dir = docs_path / SOURCES_STAGING_DIR / key
+        if dest_dir.exists():
+            shutil.rmtree(dest_dir)
+        shutil.copytree(src_dir, dest_dir)
+        staged.append(dest_dir)
+    return staged
+
+
+def _cleanup_staged_sources(docs_path: Path):
+    staging = docs_path / SOURCES_STAGING_DIR
+    if staging.exists():
+        shutil.rmtree(staging)
+
+
+def _generate_toctree_entries(sources: Dict) -> str:
+    if not sources:
+        return ""
+    blocks = []
+    for key, source in sources.items():
+        title = source.get("title", key)
+        if source.get("artifact_path"):
+            path = f"{SOURCES_STAGING_DIR}/{key}/index"
+        else:
+            path = f"{key}/index"
+        block = (
+            f".. toctree::\n"
+            f"   :maxdepth: 2\n"
+            f"   :caption: {title}\n"
+            f"\n"
+            f"   {path}\n"
+        )
+        blocks.append(block)
+    return "\n".join(blocks) + "\n"
+
+
+def _inject_sources(index_path: Path, sources: Dict) -> "str | None":
+    if not sources:
+        return None
+    original = index_path.read_text()
+    toctree = _generate_toctree_entries(sources)
+    lines = original.splitlines(keepends=True)
+
+    # Strategy 1: marker replacement
+    marker_idx = None
+    for i, line in enumerate(lines):
+        if SOURCES_MARKER in line:
+            marker_idx = i
+            break
+
+    if marker_idx is not None:
+        lines[marker_idx] = toctree
+        index_path.write_text("".join(lines))
+        return original
+
+    # Strategy 2: insert before "Indexes and tables" or "Indices and tables"
+    for i, line in enumerate(lines):
+        if line in INDEXES_MARKERS:
+            lines.insert(i, toctree + "\n")
+            index_path.write_text("".join(lines))
+            return original
+
+    # Strategy 3: append
+    text = original
+    if not text.endswith("\n"):
+        text += "\n"
+    text += "\n" + toctree
+    index_path.write_text(text)
+    return original
+
+
+def _restore_index(index_path: Path, original_content: str):
+    index_path.write_text(original_content)
+
+
+def _validate_source_paths(repo_path: Path, docs_path: Path, sources: Dict) -> Dict:
+    valid = {}
+    for key, source in sources.items():
+        artifact_path = source.get("artifact_path")
+        if artifact_path:
+            docs_root = source.get("docs_root", "docs")
+            check_path = repo_path / artifact_path / docs_root
+            if check_path.exists():
+                valid[key] = source
+            else:
+                print(
+                    f"Warning: source '{key}' artifact docs path "
+                    f"'{check_path}' not found. Skipping."
+                )
+        else:
+            check_path = docs_path / key
+            if check_path.exists():
+                valid[key] = source
+            else:
+                print(
+                    f"Warning: source '{key}' docs path "
+                    f"'{check_path}' not found. Skipping."
+                )
+    return valid
+
+
 def update_index(index_path, repo):
     with open(index_path, "r") as index:
         text = index.readlines()
@@ -263,6 +385,48 @@ class LocalController(Controller):
             *[param["arg"] for _, param in BARTLEBY_PARAMETERS.items()],
         )
 
+    def _run_builds(self, builds):
+        repo_path = Path(os.getcwd())
+        docs_path = repo_path / "docs"
+        manifest = read_manifest()
+        sources = _get_sources(manifest)
+
+        if not sources:
+            for build in builds:
+                self._run_transform(
+                    build["name"], build["shell"], build["root_doc"], build["config"]
+                )
+            return
+
+        valid_sources = _validate_source_paths(repo_path, docs_path, sources)
+        if not valid_sources:
+            for build in builds:
+                self._run_transform(
+                    build["name"], build["shell"], build["root_doc"], build["config"]
+                )
+            return
+
+        _stage_sources(repo_path, docs_path, valid_sources)
+
+        root_docs = {b["root_doc"] for b in builds}
+        originals = {}
+        for root_doc in root_docs:
+            index_path = docs_path / f"{root_doc}.rst"
+            if index_path.exists():
+                original = _inject_sources(index_path, valid_sources)
+                if original is not None:
+                    originals[index_path] = original
+
+        try:
+            for build in builds:
+                self._run_transform(
+                    build["name"], build["shell"], build["root_doc"], build["config"]
+                )
+        finally:
+            for index_path, original in originals.items():
+                _restore_index(index_path, original)
+            _cleanup_staged_sources(docs_path)
+
     def _default(self):
         """Default action if no sub-command is passed."""
         load_hmd_env(override=False)
@@ -272,10 +436,7 @@ class LocalController(Controller):
         docs = self._get_documents(root_doc=root_doc, shell=shell)
         builds = self._get_shells(docs, shell=shell)
 
-        for build in builds:
-            self._run_transform(
-                build["name"], build["shell"], build["root_doc"], build["config"]
-            )
+        self._run_builds(builds)
 
     def _get_documents(self, root_doc: str = "all", shell: str = "all"):
         manifest = read_manifest()
@@ -406,11 +567,7 @@ class LocalController(Controller):
         root_doc = self.app.pargs.root_doc
         docs = self._get_documents(root_doc=root_doc, shell="html")
         builds = self._get_shells(docs, shell="html")
-
-        for build in builds:
-            self._run_transform(
-                build["name"], build["shell"], build["root_doc"], build["config"]
-            )
+        self._run_builds(builds)
 
     @ex(help="Render PDF documentation", arguments=[])
     def pdf(self):
@@ -418,11 +575,7 @@ class LocalController(Controller):
         root_doc = self.app.pargs.root_doc
         docs = self._get_documents(root_doc=root_doc, shell="pdf")
         builds = self._get_shells(docs, shell="pdf")
-
-        for build in builds:
-            self._run_transform(
-                build["name"], build["shell"], build["root_doc"], build["config"]
-            )
+        self._run_builds(builds)
 
     @ex(help="Render RevealJS slideshow", arguments=[])
     def slides(self):
@@ -430,11 +583,7 @@ class LocalController(Controller):
         root_doc = self.app.pargs.root_doc
         docs = self._get_documents(root_doc=root_doc, shell="revealjs")
         builds = self._get_shells(docs, shell="revealjs")
-
-        for build in builds:
-            self._run_transform(
-                build["name"], build["shell"], build["root_doc"], build["config"]
-            )
+        self._run_builds(builds)
 
     @ex(help="Render images from puml", arguments=[])
     def puml(self):
