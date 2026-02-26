@@ -2,7 +2,6 @@
 
 ## 2026-02-26
 
-- fix: pin requests>=2.32.4 to resolve Dependabot security alerts
 - feat: add external documentation sources support via bartleby.sources manifest config
 
 ## 2026-02-25
