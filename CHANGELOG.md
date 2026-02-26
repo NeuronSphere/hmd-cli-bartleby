@@ -2,6 +2,7 @@
 
 ## 2026-02-26
 
+- feat: add AI agent and skills for RST documentation, API docs, NERDs, and doc combining
 - feat: add external documentation sources support via bartleby.sources manifest config
 
 ## 2026-02-25
