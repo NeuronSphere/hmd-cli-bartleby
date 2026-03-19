@@ -207,6 +207,109 @@ Or run pre-build artifacts separately, then Bartleby:
 Bartleby will automatically stage the external docs, inject toctree entries, run the Sphinx transform,
 and clean up staging files and restore ``index.rst`` afterwards (even if the build fails).
 
+Custom Style Overrides
+-----------------------
+
+Bartleby supports custom style overrides at two levels:
+
+1. **Global** — organisation-wide defaults stored at ``$HMD_HOME/bartleby/styles/``
+2. **Per-repo** — project-specific overrides in the repo's ``docs/`` directory
+
+**Precedence:** Built-in defaults < global (``$HMD_HOME``) < per-repo (``docs/``). The repo always wins.
+
+Global Style Directory
+~~~~~~~~~~~~~~~~~~~~~~
+
+Create subdirectories under ``$HMD_HOME/bartleby/styles/`` for each output format:
+
+.. code-block:: text
+
+    $HMD_HOME/bartleby/styles/
+      revealjs/
+        _static/
+          corporate-theme.css
+          logo.png
+        _templates/
+          revealjs/section.html
+        conf_overrides.json
+      html/
+        _static/
+          custom.css
+        _templates/
+          layout.html
+        conf_overrides.json
+      pdf/
+        _static/
+          cover-logo.png
+        conf_overrides.json
+
+Each format subdirectory can contain:
+
+- ``_static/`` — Static assets (CSS, images, JS) copied into the Sphinx ``_static`` directory
+- ``_templates/`` — Jinja2 templates that override Sphinx defaults
+- ``conf_overrides.json`` — Sphinx configuration values applied at build time
+
+Per-Repo Style Overrides
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Place overrides directly in the repo's ``docs/`` directory:
+
+- ``docs/_static/`` — Static assets (these already work with Bartleby)
+- ``docs/_templates/`` — Jinja2 template overrides
+- Sphinx config overrides via the ``config`` key in ``meta-data/manifest.json``
+
+Because per-repo files are copied after global files, they take precedence. Any file with the
+same name in both global and per-repo will use the per-repo version.
+
+conf_overrides.json
+~~~~~~~~~~~~~~~~~~~~
+
+The ``conf_overrides.json`` file sets Sphinx configuration variables. Each key-value pair is
+injected into ``conf.py`` at build time using ``globals()[key] = value``.
+
+**RevealJS example:**
+
+.. code-block:: json
+
+    {
+        "revealjs_theme": "night",
+        "revealjs_css_files": ["_static/corporate-theme.css"]
+    }
+
+**HTML example:**
+
+.. code-block:: json
+
+    {
+        "html_theme": "furo",
+        "html_theme_options": {
+            "sidebar_hide_name": true
+        }
+    }
+
+**PDF example:**
+
+.. code-block:: json
+
+    {
+        "latex_theme": "manual",
+        "latex_elements": {
+            "preamble": "\\usepackage{charter}"
+        }
+    }
+
+Disabling Default Styles
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To completely replace the built-in ``styles.css``, set ``disable_default_styles`` to ``true``
+in either ``conf_overrides.json`` or the manifest ``config``:
+
+.. code-block:: json
+
+    {
+        "disable_default_styles": true
+    }
+
 Additional Setup
 -----------------
 

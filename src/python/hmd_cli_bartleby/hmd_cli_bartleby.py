@@ -61,6 +61,33 @@ def get_compose(
             "HMD_BARTLEBY_CONFIDENTIALITY_STATEMENT"
         )
 
+    env_vars["BARTLEBY_SHELL"] = transform_instance_context.get("shell", "")
+
+    volumes = [
+        {
+            "type": "bind",
+            "source": input_path,
+            "target": "/hmd_transform/input",
+        },
+        {
+            "type": "bind",
+            "source": output_path,
+            "target": "/hmd_transform/output",
+        },
+    ]
+
+    if hmd_home:
+        global_styles_path = os.path.join(hmd_home, "bartleby", "styles")
+        if os.path.isdir(global_styles_path):
+            volumes.append(
+                {
+                    "type": "bind",
+                    "source": global_styles_path,
+                    "target": "/hmd_transform/global_styles",
+                    "read_only": True,
+                }
+            )
+
     compose = {
         "version": "3.2",
         "services": {
@@ -68,18 +95,7 @@ def get_compose(
                 "image": image_name,
                 "container_name": f"bartleby-inst_{instance_name}",
                 "environment": env_vars,
-                "volumes": [
-                    {
-                        "type": "bind",
-                        "source": input_path,
-                        "target": "/hmd_transform/input",
-                    },
-                    {
-                        "type": "bind",
-                        "source": output_path,
-                        "target": "/hmd_transform/output",
-                    },
-                ],
+                "volumes": volumes,
                 "secrets": [],
             }
         },
