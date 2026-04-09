@@ -137,3 +137,5 @@ yarn-error.log*
 
 src/python/build
 target/bartleby/
+src/go/bartleby/build/
+test/results/

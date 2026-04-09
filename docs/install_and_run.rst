@@ -6,6 +6,45 @@ Bartleby Install and Run
 Installation
 -------------
 
+Install via Homebrew (recommended)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: bash
+
+    brew tap neuronsphere/tap
+    brew install bartleby
+
+This installs a self-contained Go binary with no Python runtime required.
+Docker (or Colima) must be running when you execute builds.
+
+To upgrade to the latest release:
+
+.. code-block:: bash
+
+    brew update
+    brew upgrade bartleby
+
+Build from Source
+~~~~~~~~~~~~~~~~~~
+
+Clone the repository and build with Make:
+
+.. code-block:: bash
+
+    git clone https://github.com/neuronsphere/hmd-cli-bartleby.git
+    cd hmd-cli-bartleby
+    make build
+
+The binary is written to ``src/go/bartleby/build/bartleby``.
+
+Legacy Installation (Python CLI)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. note::
+
+   The Python-based CLI has been replaced by the Go binary above.
+   These instructions are retained for reference only.
+
 The HMD CLI Bartleby tool can be installed using ``pip`` and specifying the HMD pypi server (via command line or using
 a pip config file).
 

@@ -1,0 +1,50 @@
+project_name: bartleby
+
+before:
+  hooks:
+    - go mod tidy -C src/go/bartleby
+
+builds:
+  - main: .
+    dir: src/go/bartleby
+    binary: bartleby
+    ldflags:
+      - -X main.version={{ .Version }}
+    goos:
+      - darwin
+      - linux
+    goarch:
+      - amd64
+      - arm64
+
+archives:
+  - format: tar.gz
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+
+brews:
+  - repository:
+      owner: neuronsphere
+      name: homebrew-tap
+    directory: Formula
+    homepage: https://github.com/neuronsphere/hmd-cli-bartleby
+    description: "Render reStructuredText documentation using Sphinx inside Docker"
+    caveats: |
+      bartleby requires Docker to run documentation builds.
+      If you use Colima, make sure it is running:
+        colima start
+    install: |
+      bin.install "bartleby"
+    test: |
+      assert_match "bartleby", shell_output("#{bin}/bartleby --help")
+
+release:
+  github:
+    owner: neuronsphere
+    name: hmd-cli-bartleby
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"

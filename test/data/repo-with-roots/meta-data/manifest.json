@@ -1,0 +1,11 @@
+{
+  "name": "test-with-roots",
+  "bartleby": {
+    "roots": {
+      "main": {
+        "root_doc": "index",
+        "builders": ["html"]
+      }
+    }
+  }
+}
