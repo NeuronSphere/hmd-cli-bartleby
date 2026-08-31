@@ -1,0 +1,4 @@
+@startuml
+Alice -> Bob: build docs
+Bob --> Alice: html
+@enduml

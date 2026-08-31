@@ -1,0 +1,14 @@
+{
+  "name": "test-with-sources",
+  "bartleby": {
+    "roots": {
+      "main": {"root_doc": "index", "builders": ["html"]}
+    },
+    "sources": {
+      "widget": {
+        "artifact_path": "artifacts/widget",
+        "title": "Widget Guide"
+      }
+    }
+  }
+}

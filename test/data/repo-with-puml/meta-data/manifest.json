@@ -1,0 +1,4 @@
+{
+  "name": "test-with-puml",
+  "bartleby": {"roots": {"main": {"root_doc": "index", "builders": ["html"]}}}
+}

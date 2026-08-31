@@ -15,7 +15,7 @@ Prerequisites
 - A GitHub Personal Access Token (PAT) with ``repo`` scope on
   ``neuronsphere/homebrew-tap``, stored as the repository secret
   ``HOMEBREW_TAP_TOKEN`` in ``hmd-cli-bartleby``
-- `GoReleaser <https://goreleaser.com/install/>`_ installed locally (only
+- `GoReleaser <https://goreleaser.com/install/>`__ installed locally (only
   needed for local releases — CI handles this automatically)
 
 How a Release Works
@@ -123,5 +123,10 @@ The binary's version is set at build time through Go linker flags::
    -ldflags "-X main.version=1.2.0"
 
 Both the project ``Makefile`` (reading ``meta-data/VERSION``) and GoReleaser
-(using the Git tag) inject this value. The ``bartleby --help`` output and
-any future ``bartleby version`` subcommand will reflect it.
+(using the Git tag) inject this value. ``bartleby --version`` and
+``bartleby version`` both report it.
+
+A binary built without the flag — a plain ``go build`` — reports ``dev``. That
+makes it easy to tell a development build from a released one, and the CLI
+contract test in ``test/cli.robot`` asserts that a ``make build`` binary does
+*not* report ``dev``, which catches the ldflag silently ceasing to apply.

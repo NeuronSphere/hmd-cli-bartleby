@@ -17,6 +17,25 @@ tags:
 
 Create a new NERD (NeuronSphere Engineering Requirements Document) using sphinx-needs directives.
 
+## Relationship to the requirements baseline
+
+A NERD is a **proposal for a change**. The standing description of what the CLI
+must do lives in `docs/requirements/` as area-coded requirements
+(`HMD_CLI_BARTLEBY_REQ_<AREA>_<NNN>`), each linked to the tests that verify it.
+
+So when a NERD is accepted and implemented:
+
+1. Add or amend the requirement in the matching `docs/requirements/<area>.rst`.
+2. Link the NERD's spec to it with `:links:`, so the proposal and the standing
+   requirement are connected.
+3. Annotate the tests that cover it — `// Requirements: REQ_<AREA>_<NNN>` on a Go
+   test, `[Tags]    REQ_<AREA>_<NNN>` on a Robot test.
+4. Run `make reqs` to regenerate the traceability page, and `make check` to
+   confirm nothing is uncovered.
+
+Do not use a NERD as the permanent home of a requirement: `make check` verifies
+coverage of the requirements baseline, not of proposals.
+
 ## Instructions
 
 When the user invokes this skill, follow these steps:
