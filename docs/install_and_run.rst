@@ -562,6 +562,68 @@ images logged the Sphinx exit code and exited 0, so a broken document looked lik
 a clean build; if you see that behaviour, the image predates the fix — run
 ``bartleby update-image``.
 
+Asking Claude What Went Wrong
+------------------------------
+
+A Sphinx or LaTeX failure is usually explained somewhere in the log, in terms that
+assume you know Sphinx internals. ``bartleby explain`` makes one request to Claude
+with the evidence that matters and asks for the answer:
+
+.. code-block:: bash
+
+    bartleby explain                    # explains the most recent build
+    bartleby explain --builder pdf      # a particular builder's log
+    bartleby explain --log path/to.log  # a specific file
+    bartleby explain --dry-run          # print what would be sent, send nothing
+
+Or have a failed build explain itself:
+
+.. code-block:: bash
+
+    bartleby html --explain
+    export BARTLEBY_EXPLAIN=1           # for a whole session
+
+The explanation is **advisory and never changes the outcome**: the build's own
+error and exit code are what you get back, whether the explanation succeeds, fails,
+or cannot run for want of credentials. The answer is also written to
+``target/bartleby/logs/<builder>-explain.md``.
+
+What gets sent
+~~~~~~~~~~~~~~
+
+One request, carrying: the Sphinx warnings in full, the tail of the build log, the
+LaTeX error slice for a PDF build, the repository name, version and manifest, and
+**the source lines every warning refers to**. That last part is what makes the
+answers useful — a citation of ``index.rst:8`` means little without the lines
+around it. Sphinx cites paths inside the container's temporary directory, so those
+are mapped back to the repository's own files.
+
+The payload is capped, and anything dropped to fit is listed inside the request so
+the model knows the evidence is partial. **This sends excerpts of your
+documentation to the Anthropic API.** Nothing is sent unless you ask; ``--dry-run``
+prints the exact payload.
+
+Credentials and cost
+~~~~~~~~~~~~~~~~~~~~
+
+Credentials come from the Anthropic SDK's usual sources — ``ANTHROPIC_API_KEY``,
+``ANTHROPIC_AUTH_TOKEN``, a profile from ``ant auth login``, or workload identity
+federation. With none of those, the command says so and sends nothing.
+
+The default model is ``claude-opus-5``, which is roughly five cents for a typical
+build log. ``--model`` or ``BARTLEBY_EXPLAIN_MODEL`` overrides it —
+``claude-haiku-4-5`` costs about a cent and handles the common cases.
+
+Replacing the prompt
+~~~~~~~~~~~~~~~~~~~~
+
+The built-in prompt asks for the cause, the file and line, and a concrete fix. To
+use your own, in precedence order: ``--prompt-file``,
+``BARTLEBY_EXPLAIN_PROMPT_FILE``, ``BARTLEBY_EXPLAIN_PROMPT`` for a short inline
+instruction, or a ``.bartleby/explain-prompt.md`` committed in the documentation
+repository — useful when a project has house conventions worth telling the model
+about. The CLI reports which prompt it used.
+
 Requirements and Traceability
 ------------------------------
 

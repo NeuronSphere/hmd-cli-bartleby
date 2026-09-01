@@ -152,6 +152,48 @@ Interrupting A Build Removes The Container
     ...    Container Should Not Exist    bartleby-inst_test-no-roots_html
     [Teardown]    Remove Container If Present    bartleby-inst_test-no-roots_html
 
+Explain Dry Run Shows Exactly What Would Be Sent
+    [Documentation]    The evidence includes excerpts of the user's documentation,
+    ...               so there is a way to see it without sending it. Needs no API
+    ...               credentials.
+    [Tags]    REQ_EXPL_001    REQ_EXPL_003    REQ_EXPL_006
+    [Setup]    Clean Output    ${DATA_DIR}/repo-with-warnings
+    Run Bartleby In    ${DATA_DIR}/repo-with-warnings    html
+    ${result}=    Run Process    ${BINARY} explain --dry-run
+    ...    shell=True    cwd=${DATA_DIR}/repo-with-warnings
+    Log    ${result.stdout}
+    Should Be Equal As Integers    ${result.rc}    0
+    Should Contain    ${result.stderr}    Would send
+    # The warnings, and the source they point at, resolved back to a host file.
+    Should Contain    ${result.stdout}    undefined label
+    Should Contain    ${result.stdout}    docs/index.rst
+    Should Contain    ${result.stdout}    a-label-that-does-not-exist
+    File Should Not Exist    ${DATA_DIR}/repo-with-warnings/target/bartleby/logs/html-explain.md
+
+A Failed Build With --explain Still Fails
+    [Documentation]    The explanation is advisory. With no credentials available
+    ...               it cannot run, and the build's own failure must still be
+    ...               what the caller gets — same error, same exit code.
+    [Tags]    REQ_EXPL_002    REQ_EXPL_002_SPEC001
+    [Setup]    Create Failing Image
+    ${result}=    Run Process    ${BINARY} html --explain
+    ...    shell=True
+    ...    cwd=${DATA_DIR}/repo-with-roots
+    ...    env:HMD_TF_BARTLEBY_VERSION=${FAIL_TAG}
+    ...    env:ANTHROPIC_API_KEY=
+    ...    env:ANTHROPIC_AUTH_TOKEN=
+    Log    ${result.stdout}
+    Log    ${result.stderr}
+    Should Not Be Equal As Integers    ${result.rc}    0
+    ...    msg=The build failure must survive the explanation attempt
+    Should Contain    ${result.stderr}    exited with code
+    Should Contain    ${result.stderr}    Asking Claude
+    # Whether the attempt fails for want of credentials or is made and fails, the
+    # build error is what survives. HOME is deliberately left alone: the Docker
+    # endpoint lookup reads it, and overriding it breaks the build for the wrong
+    # reason.
+    [Teardown]    Remove Failing Image
+
 *** Keywords ***
 Run Bartleby In
     [Arguments]    ${repo}    ${args}

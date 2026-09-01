@@ -1,5 +1,38 @@
 # Changelog
 
+## 2026-09-01
+
+### Added
+
+- `bartleby explain` asks Claude what went wrong in the last build, in one
+  request. It sends the Sphinx warnings in full, the tail of the build log, the
+  LaTeX error slice for a PDF build, the repository name, version and manifest,
+  and the source lines every warning refers to — mapping the container's
+  temporary paths (`/tmp/tmpXXXX/source/index.rst`) back to the repository's own
+  files. Overlapping excerpts are merged; the payload is capped and says what was
+  dropped.
+- `--explain`, or `BARTLEBY_EXPLAIN`, has a failed build explain itself. The
+  explanation is advisory: the build's own error and exit code survive whatever
+  happens, including having no credentials at all.
+- `--dry-run` prints the exact payload and sends nothing, because the evidence
+  includes excerpts of the user's documentation.
+- Credentials come from the Anthropic SDK's own resolution — `ANTHROPIC_API_KEY`,
+  `ANTHROPIC_AUTH_TOKEN`, an `ant auth login` profile, or workload identity —
+  rather than one variable. Default model `claude-opus-5`, overridable with
+  `--model` / `BARTLEBY_EXPLAIN_MODEL`. The answer is written to
+  `target/bartleby/logs/<builder>-explain.md`.
+- The prompt is replaceable: `--prompt-file`, `BARTLEBY_EXPLAIN_PROMPT_FILE`,
+  `BARTLEBY_EXPLAIN_PROMPT`, or a repository's `.bartleby/explain-prompt.md`.
+- `--image` / `BARTLEBY_IMAGE` runs an explicitly named transform image, which is
+  what makes a locally built one usable: `bartleby --image hmd-tf-bartleby:local`.
+- 16 requirements for the two features (areas `EXPL` and `EXEC`), with tests. The
+  request path is covered through a stub requester, so the suite needs no API key.
+
+### Changed
+
+- Depends on `github.com/anthropics/anthropic-sdk-go`.
+
+
 ## 2026-08-31
 
 Requirements-driven documentation. What the CLI must do is now written down as

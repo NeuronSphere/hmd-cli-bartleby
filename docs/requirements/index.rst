@@ -52,6 +52,8 @@ area segment keeps the ID readable where it matters most — on a test:
      - ``$HMD_HOME`` configuration and ``bartleby configure``.
    * - ``AUTO``
      - Autodoc builds and the pip credentials they need.
+   * - ``EXPL``
+     - Explaining a failed build with Claude.
    * - ``TRACE``
      - This traceability process itself.
 
@@ -101,5 +103,6 @@ it *is* verified. There are two, both about pulling a multi-gigabyte image.
    gather
    environment
    autodoc
+   explain
    process
    traceability

@@ -34,6 +34,7 @@ const (
 // than reading globals so they can be tested.
 type options struct {
 	autodoc          bool
+	explain          bool
 	image            string
 	shell            string
 	rootDoc          string
@@ -94,6 +95,8 @@ func init() {
 
 	flags.BoolVarP(&opts.autodoc, "autodoc", "a", false,
 		"Generate Python API docs with autosummary (requires src/python/)")
+	flags.BoolVar(&opts.explain, "explain", false,
+		"On failure, ask Claude to explain the build log (sends documentation excerpts to the Anthropic API)")
 	flags.StringVar(&opts.image, "image", "",
 		"Transform image to run, e.g. hmd-tf-bartleby:local — overrides the registry and version variables")
 	flags.StringVarP(&opts.shell, "shell", "s", buildplan.AllShells,
@@ -122,6 +125,7 @@ func init() {
 		pumlCmd,
 		updateImageCmd,
 		configureCmd,
+		explainCmd,
 		versionCmd,
 	)
 }
@@ -369,7 +373,14 @@ func runBuilds(cmd *cobra.Command, shellFilter string) error {
 		}
 
 		if err := runner.RunTransform(ctx, cfg); err != nil {
-			return fmt.Errorf("building %s with the %s builder: %w", b.Name, b.Shell, err)
+			buildErr := fmt.Errorf("building %s with the %s builder: %w", b.Name, b.Shell, err)
+
+			// Advisory only: whatever the explanation attempt does, the build
+			// failure is what the caller gets back and what sets the exit code.
+			if explainEnabled(opts, env) {
+				explainFailure(cmd, rp, b.Shell)
+			}
+			return buildErr
 		}
 	}
 

@@ -363,3 +363,37 @@ func TestFindPumlFilesEmptyTree(t *testing.T) {
 		t.Errorf("want no files, got %v", files)
 	}
 }
+
+// The failure hook is opt-in: nothing is sent to an API unless the flag or the
+// environment variable says so.
+//
+// Requirements: REQ_EXPL_003
+func TestExplainEnabled(t *testing.T) {
+	if explainEnabled(options{}, fakeEnv(nil)) {
+		t.Error("explanation should be off by default")
+	}
+	if !explainEnabled(options{explain: true}, fakeEnv(nil)) {
+		t.Error("--explain should enable it")
+	}
+	for _, value := range []string{"1", "true", "TRUE", "yes", "on"} {
+		if !explainEnabled(options{}, fakeEnv(map[string]string{"BARTLEBY_EXPLAIN": value})) {
+			t.Errorf("BARTLEBY_EXPLAIN=%q should enable it", value)
+		}
+	}
+	for _, value := range []string{"", "0", "false", "no"} {
+		if explainEnabled(options{}, fakeEnv(map[string]string{"BARTLEBY_EXPLAIN": value})) {
+			t.Errorf("BARTLEBY_EXPLAIN=%q should not enable it", value)
+		}
+	}
+}
+
+// Requirements: REQ_EXPL_007
+func TestCredentialsHelpNamesTheOptions(t *testing.T) {
+	help := credentialsHelp()
+
+	for _, want := range []string{"ANTHROPIC_API_KEY", "ant auth login", "--dry-run"} {
+		if !strings.Contains(help, want) {
+			t.Errorf("the message should mention %q:\n%s", want, help)
+		}
+	}
+}

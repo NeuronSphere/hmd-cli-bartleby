@@ -106,6 +106,15 @@ A Runtime Error Does Not Print Usage
     Should Not Contain    ${result.stderr}    Usage:
     Should Be Empty    ${result.stdout}
 
+Explain Without A Build Says To Build First
+    [Tags]    REQ_EXPL_001
+    ${repo}=    Set Variable    ${TEMPDIR}/bartleby-no-logs
+    Create Directory    ${repo}/meta-data
+    Create File    ${repo}/meta-data/manifest.json    {"name": "no-logs"}
+    ${result}=    Run Bartleby    explain --dry-run    ${repo}    expect_rc=1
+    Should Contain    ${result.stderr}    run a build first
+    [Teardown]    Remove Directory    ${repo}    recursive=True
+
 *** Keywords ***
 Run Bartleby
     [Documentation]    Run the binary in a directory and assert its exit code.

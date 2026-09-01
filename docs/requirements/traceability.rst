@@ -16,7 +16,7 @@ generated from those declarations.
 Summary
 -------
 
-87 requirement items, verified by 127 Go tests and 32 Robot tests.
+102 requirement items, verified by 146 Go tests and 35 Robot tests.
 
 .. list-table::
    :header-rows: 1
@@ -78,6 +78,22 @@ Summary
      - 1
      - 1
      - 0
+   * - EXPL
+     - 11
+     - 24
+     - 0
+   * - EXPL_002
+     - 1
+     - 1
+     - 0
+   * - EXPL_004
+     - 2
+     - 2
+     - 0
+   * - EXPL_009
+     - 1
+     - 0
+     - 1
    * - GATH
      - 4
      - 8
@@ -288,6 +304,51 @@ Coverage by requirement
      - implemented
    * - :need:`HMD_CLI_BARTLEBY_REQ_EXEC_016_SPEC001`
      - cmd.TestImageNameExplicitOverride
+     - implemented
+   * - :need:`HMD_CLI_BARTLEBY_REQ_EXPL_001`
+     - explain.TestCollectHonoursBuilderAndLogPath, explain.TestCollectPicksTheMostRecentLog, explain.TestCollectWithoutLogs, explain.TestRunAsksOnceAndSavesTheAnswer, bartleby_cli: Explain Dry Run Shows Exactly What Would Be Sent, cli: Explain Without A Build Says To Build First
+     - implemented
+   * - :need:`HMD_CLI_BARTLEBY_REQ_EXPL_002`
+     - explain.TestRunSurfacesRequestFailures, bartleby_cli: A Failed Build With --explain Still Fails
+     - implemented
+   * - :need:`HMD_CLI_BARTLEBY_REQ_EXPL_002_SPEC001`
+     - bartleby_cli: A Failed Build With --explain Still Fails
+     - implemented
+   * - :need:`HMD_CLI_BARTLEBY_REQ_EXPL_003`
+     - cmd.TestExplainEnabled, explain.TestRunDryRunSendsNothing, bartleby_cli: Explain Dry Run Shows Exactly What Would Be Sent
+     - implemented
+   * - :need:`HMD_CLI_BARTLEBY_REQ_EXPL_004`
+     - explain.TestCitations, explain.TestCollectGathersTheEvidence
+     - implemented
+   * - :need:`HMD_CLI_BARTLEBY_REQ_EXPL_004_SPEC001`
+     - explain.TestMergeWindows
+     - implemented
+   * - :need:`HMD_CLI_BARTLEBY_REQ_EXPL_004_SPEC002`
+     - explain.TestCollectFallsBackToTheRootDocument
+     - implemented
+   * - :need:`HMD_CLI_BARTLEBY_REQ_EXPL_005`
+     - explain.TestCollectCapsThePayloadAndSaysSo
+     - implemented
+   * - :need:`HMD_CLI_BARTLEBY_REQ_EXPL_006`
+     - explain.TestCollectResolvesContainerPaths, explain.TestResolveCitationPaths, bartleby_cli: Explain Dry Run Shows Exactly What Would Be Sent
+     - implemented
+   * - :need:`HMD_CLI_BARTLEBY_REQ_EXPL_007`
+     - cmd.TestCredentialsHelpNamesTheOptions, explain.TestHasCredentials
+     - implemented
+   * - :need:`HMD_CLI_BARTLEBY_REQ_EXPL_008`
+     - explain.TestResolvePromptPrecedence, explain.TestResolvePromptRejectsUnusableFiles
+     - implemented
+   * - :need:`HMD_CLI_BARTLEBY_REQ_EXPL_009`
+     - explain.TestClaudeDefaults
+     - implemented
+   * - :need:`HMD_CLI_BARTLEBY_REQ_EXPL_009_SPEC001`
+     - *exempt: see the requirement text*
+     - implemented
+   * - :need:`HMD_CLI_BARTLEBY_REQ_EXPL_010`
+     - explain.TestRunAsksOnceAndSavesTheAnswer
+     - implemented
+   * - :need:`HMD_CLI_BARTLEBY_REQ_EXPL_011`
+     - explain.TestRunAsksOnceAndSavesTheAnswer
      - implemented
    * - :need:`HMD_CLI_BARTLEBY_REQ_GATH_001`
      - gather.TestReposRejectsWrongDirectory, gather.TestReposRequiresDemosLibrary, cli: Gather Outside The Docs Repo Is Rejected
@@ -597,6 +658,20 @@ Run with ``make test``. No Docker required.
 
     ``src/go/bartleby/cmd/configure_test.go:65``
 
+.. test:: cmd.TestCredentialsHelpNamesTheOptions
+    :id: HMD_CLI_BARTLEBY_TEST_GO_60E98B31
+    :links: HMD_CLI_BARTLEBY_REQ_EXPL_007
+    :tags: go
+
+    ``src/go/bartleby/cmd/root_test.go:391``
+
+.. test:: cmd.TestExplainEnabled
+    :id: HMD_CLI_BARTLEBY_TEST_GO_94843B55
+    :links: HMD_CLI_BARTLEBY_REQ_EXPL_003
+    :tags: go
+
+    ``src/go/bartleby/cmd/root_test.go:371``
+
 .. test:: cmd.TestFindPumlFiles
     :id: HMD_CLI_BARTLEBY_TEST_GO_30C3BE0F
     :links: HMD_CLI_BARTLEBY_REQ_PUML_001_SPEC001
@@ -680,6 +755,125 @@ Run with ``make test``. No Docker required.
     :tags: go
 
     ``src/go/bartleby/cmd/root_test.go:271``
+
+.. test:: explain.TestCitations
+    :id: HMD_CLI_BARTLEBY_TEST_GO_F49FA6C2
+    :links: HMD_CLI_BARTLEBY_REQ_EXPL_004
+    :tags: go
+
+    ``src/go/bartleby/internal/explain/explain_test.go:168``
+
+.. test:: explain.TestClaudeDefaults
+    :id: HMD_CLI_BARTLEBY_TEST_GO_39B47F18
+    :links: HMD_CLI_BARTLEBY_REQ_EXPL_009
+    :tags: go
+
+    ``src/go/bartleby/internal/explain/explain_test.go:542``
+
+.. test:: explain.TestCollectCapsThePayloadAndSaysSo
+    :id: HMD_CLI_BARTLEBY_TEST_GO_DCF80A3F
+    :links: HMD_CLI_BARTLEBY_REQ_EXPL_005
+    :tags: go
+
+    ``src/go/bartleby/internal/explain/explain_test.go:323``
+
+.. test:: explain.TestCollectFallsBackToTheRootDocument
+    :id: HMD_CLI_BARTLEBY_TEST_GO_3B850D04
+    :links: HMD_CLI_BARTLEBY_REQ_EXPL_004_SPEC002
+    :tags: go
+
+    ``src/go/bartleby/internal/explain/explain_test.go:231``
+
+.. test:: explain.TestCollectGathersTheEvidence
+    :id: HMD_CLI_BARTLEBY_TEST_GO_B94B3B90
+    :links: HMD_CLI_BARTLEBY_REQ_EXPL_004
+    :tags: go
+
+    ``src/go/bartleby/internal/explain/explain_test.go:70``
+
+.. test:: explain.TestCollectHonoursBuilderAndLogPath
+    :id: HMD_CLI_BARTLEBY_TEST_GO_0136D539
+    :links: HMD_CLI_BARTLEBY_REQ_EXPL_001
+    :tags: go
+
+    ``src/go/bartleby/internal/explain/explain_test.go:289``
+
+.. test:: explain.TestCollectPicksTheMostRecentLog
+    :id: HMD_CLI_BARTLEBY_TEST_GO_7F0D6CC7
+    :links: HMD_CLI_BARTLEBY_REQ_EXPL_001
+    :tags: go
+
+    ``src/go/bartleby/internal/explain/explain_test.go:263``
+
+.. test:: explain.TestCollectResolvesContainerPaths
+    :id: HMD_CLI_BARTLEBY_TEST_GO_A69D6B26
+    :links: HMD_CLI_BARTLEBY_REQ_EXPL_006
+    :tags: go
+
+    ``src/go/bartleby/internal/explain/explain_test.go:114``
+
+.. test:: explain.TestCollectWithoutLogs
+    :id: HMD_CLI_BARTLEBY_TEST_GO_D36DDDA5
+    :links: HMD_CLI_BARTLEBY_REQ_EXPL_001
+    :tags: go
+
+    ``src/go/bartleby/internal/explain/explain_test.go:312``
+
+.. test:: explain.TestHasCredentials
+    :id: HMD_CLI_BARTLEBY_TEST_GO_651453BA
+    :links: HMD_CLI_BARTLEBY_REQ_EXPL_007
+    :tags: go
+
+    ``src/go/bartleby/internal/explain/explain_test.go:515``
+
+.. test:: explain.TestMergeWindows
+    :id: HMD_CLI_BARTLEBY_TEST_GO_3A40FAAD
+    :links: HMD_CLI_BARTLEBY_REQ_EXPL_004_SPEC001
+    :tags: go
+
+    ``src/go/bartleby/internal/explain/explain_test.go:195``
+
+.. test:: explain.TestResolveCitationPaths
+    :id: HMD_CLI_BARTLEBY_TEST_GO_0FF461CB
+    :links: HMD_CLI_BARTLEBY_REQ_EXPL_006
+    :tags: go
+
+    ``src/go/bartleby/internal/explain/explain_test.go:135``
+
+.. test:: explain.TestResolvePromptPrecedence
+    :id: HMD_CLI_BARTLEBY_TEST_GO_4064DB22
+    :links: HMD_CLI_BARTLEBY_REQ_EXPL_008
+    :tags: go
+
+    ``src/go/bartleby/internal/explain/explain_test.go:359``
+
+.. test:: explain.TestResolvePromptRejectsUnusableFiles
+    :id: HMD_CLI_BARTLEBY_TEST_GO_447DD5D0
+    :links: HMD_CLI_BARTLEBY_REQ_EXPL_008
+    :tags: go
+
+    ``src/go/bartleby/internal/explain/explain_test.go:405``
+
+.. test:: explain.TestRunAsksOnceAndSavesTheAnswer
+    :id: HMD_CLI_BARTLEBY_TEST_GO_4DCD3A44
+    :links: HMD_CLI_BARTLEBY_REQ_EXPL_001, HMD_CLI_BARTLEBY_REQ_EXPL_010, HMD_CLI_BARTLEBY_REQ_EXPL_011
+    :tags: go
+
+    ``src/go/bartleby/internal/explain/explain_test.go:419``
+
+.. test:: explain.TestRunDryRunSendsNothing
+    :id: HMD_CLI_BARTLEBY_TEST_GO_910CEEAB
+    :links: HMD_CLI_BARTLEBY_REQ_EXPL_003
+    :tags: go
+
+    ``src/go/bartleby/internal/explain/explain_test.go:465``
+
+.. test:: explain.TestRunSurfacesRequestFailures
+    :id: HMD_CLI_BARTLEBY_TEST_GO_507353E5
+    :links: HMD_CLI_BARTLEBY_REQ_EXPL_002
+    :tags: go
+
+    ``src/go/bartleby/internal/explain/explain_test.go:498``
 
 .. test:: gather.TestAddToIndexIndicesSpelling
     :id: HMD_CLI_BARTLEBY_TEST_GO_85540123
@@ -1344,6 +1538,13 @@ Robot Framework tests
 
     ``test/bartleby_cli.robot:103``
 
+.. test:: bartleby_cli: A Failed Build With --explain Still Fails
+    :id: HMD_CLI_BARTLEBY_TEST_ROBOT_4DA73F37
+    :links: HMD_CLI_BARTLEBY_REQ_EXPL_002, HMD_CLI_BARTLEBY_REQ_EXPL_002_SPEC001
+    :tags: robot
+
+    ``test/bartleby_cli.robot:173``
+
 .. test:: bartleby_cli: A Leftover Container Is Removed And The Build Retried
     :id: HMD_CLI_BARTLEBY_TEST_ROBOT_08DF96C3
     :links: HMD_CLI_BARTLEBY_REQ_EXEC_007
@@ -1371,6 +1572,13 @@ Robot Framework tests
     :tags: robot
 
     ``test/bartleby_cli.robot:44``
+
+.. test:: bartleby_cli: Explain Dry Run Shows Exactly What Would Be Sent
+    :id: HMD_CLI_BARTLEBY_TEST_ROBOT_343BFA8A
+    :links: HMD_CLI_BARTLEBY_REQ_EXPL_001, HMD_CLI_BARTLEBY_REQ_EXPL_003, HMD_CLI_BARTLEBY_REQ_EXPL_006
+    :tags: robot
+
+    ``test/bartleby_cli.robot:155``
 
 .. test:: bartleby_cli: HTML Build Produces An Index File
     :id: HMD_CLI_BARTLEBY_TEST_ROBOT_73015634
@@ -1420,6 +1628,13 @@ Robot Framework tests
     :tags: robot
 
     ``test/cli.robot:100``
+
+.. test:: cli: Explain Without A Build Says To Build First
+    :id: HMD_CLI_BARTLEBY_TEST_ROBOT_C069BA12
+    :links: HMD_CLI_BARTLEBY_REQ_EXPL_001
+    :tags: robot
+
+    ``test/cli.robot:109``
 
 .. test:: cli: Gather Outside The Docs Repo Is Rejected
     :id: HMD_CLI_BARTLEBY_TEST_ROBOT_A2C81817
