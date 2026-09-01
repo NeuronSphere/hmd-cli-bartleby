@@ -47,7 +47,7 @@ var pumlCmd = &cobra.Command{
 		fmt.Fprintf(cmd.OutOrStdout(), "Rendering %d PlantUML file(s) to %s...\n", len(pumlFiles), outputPath)
 
 		return runner.RunPuml(cmd.Context(), runner.PumlConfig{
-			ImageName:  imageName(os.Getenv),
+			ImageName:  imageName(opts, os.Getenv),
 			InputPath:  inputPath,
 			OutputPath: outputPath,
 			Files:      pumlFiles,

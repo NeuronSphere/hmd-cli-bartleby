@@ -37,11 +37,65 @@ func TestImageName(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := imageName(fakeEnv(tt.env)); got != tt.want {
+			if got := imageName(options{}, fakeEnv(tt.env)); got != tt.want {
 				t.Errorf("imageName = %q, want %q", got, tt.want)
 			}
 		})
 	}
+}
+
+// A locally built image has no registry prefix and no release-shaped version, so
+// it can only be named explicitly.
+//
+// Requirements: REQ_EXEC_016, REQ_EXEC_016_SPEC001
+func TestImageNameExplicitOverride(t *testing.T) {
+	registryEnv := map[string]string{
+		"HMD_CONTAINER_REGISTRY":  "registry.internal.test/ns",
+		"HMD_TF_BARTLEBY_VERSION": "1.2.3",
+	}
+
+	t.Run("flag wins over everything", func(t *testing.T) {
+		env := map[string]string{"BARTLEBY_IMAGE": "from-env:tag"}
+		for k, v := range registryEnv {
+			env[k] = v
+		}
+
+		got := imageName(options{image: "hmd-tf-bartleby:local"}, fakeEnv(env))
+		if got != "hmd-tf-bartleby:local" {
+			t.Errorf("image = %q, want the flag value", got)
+		}
+	})
+
+	t.Run("environment wins over the registry variables", func(t *testing.T) {
+		env := map[string]string{"BARTLEBY_IMAGE": "hmd-tf-bartleby:local"}
+		for k, v := range registryEnv {
+			env[k] = v
+		}
+
+		got := imageName(options{}, fakeEnv(env))
+		if got != "hmd-tf-bartleby:local" {
+			t.Errorf("image = %q, want the BARTLEBY_IMAGE value", got)
+		}
+	})
+
+	t.Run("an explicit reference is not rewritten", func(t *testing.T) {
+		for _, ref := range []string{
+			"hmd-tf-bartleby:local",
+			"localhost:5000/hmd-tf-bartleby:dev",
+			"hmd-tf-bartleby@sha256:0000000000000000000000000000000000000000000000000000000000000000",
+		} {
+			if got := imageName(options{image: ref}, fakeEnv(nil)); got != ref {
+				t.Errorf("image = %q, want %q unchanged", got, ref)
+			}
+		}
+	})
+
+	t.Run("no override falls back to composition", func(t *testing.T) {
+		got := imageName(options{}, fakeEnv(registryEnv))
+		if got != "registry.internal.test/ns/hmd-tf-bartleby:1.2.3" {
+			t.Errorf("image = %q, want the composed reference", got)
+		}
+	})
 }
 
 // Requirements: REQ_CFG_004

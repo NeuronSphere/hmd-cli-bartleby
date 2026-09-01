@@ -34,6 +34,7 @@ const (
 // than reading globals so they can be tested.
 type options struct {
 	autodoc          bool
+	image            string
 	shell            string
 	rootDoc          string
 	gather           string
@@ -93,6 +94,8 @@ func init() {
 
 	flags.BoolVarP(&opts.autodoc, "autodoc", "a", false,
 		"Generate Python API docs with autosummary (requires src/python/)")
+	flags.StringVar(&opts.image, "image", "",
+		"Transform image to run, e.g. hmd-tf-bartleby:local — overrides the registry and version variables")
 	flags.StringVarP(&opts.shell, "shell", "s", buildplan.AllShells,
 		"Builder(s) to run: comma-separated names from the manifest (html, pdf, revealjs, ...), or 'all'")
 	flags.StringVarP(&opts.rootDoc, "root-doc", "r", buildplan.AllShells,
@@ -143,9 +146,20 @@ func newShellCmd(use, short, shell string) *cobra.Command {
 	}
 }
 
-// imageName returns the transform image reference, honouring the registry and
-// version overrides from the environment.
-func imageName(env envFunc) string {
+// imageName returns the transform image to run.
+//
+// An explicit reference — --image, or BARTLEBY_IMAGE — is used as given, which is
+// what makes a locally built image usable: it needs no registry prefix and no
+// version that looks like a release. Otherwise the reference is composed from the
+// registry and version variables.
+func imageName(o options, env envFunc) string {
+	if o.image != "" {
+		return o.image
+	}
+	if explicit := env("BARTLEBY_IMAGE"); explicit != "" {
+		return explicit
+	}
+
 	registry := env("HMD_CONTAINER_REGISTRY")
 	if registry == "" {
 		registry = defaultRegistry
@@ -319,7 +333,7 @@ func runBuilds(cmd *cobra.Command, shellFilter string) error {
 	}
 	defer restore()
 
-	img := imageName(env)
+	img := imageName(opts, env)
 
 	for _, b := range builds {
 		fmt.Fprintf(stdout, "Building %s with the %s builder (root document: %s)...\n", b.Name, b.Shell, b.RootDoc)

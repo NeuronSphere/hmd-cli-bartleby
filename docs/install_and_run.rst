@@ -128,6 +128,9 @@ Options
      - HTML logo URL.
    * - ``--pdf-default-logo``
      - PDF cover image URL.
+   * - ``--image``
+     - Transform image to run, e.g. ``hmd-tf-bartleby:local``. Used as given, in
+       preference to the registry and version variables.
    * - ``--version``
      - Print the version and exit.
 
@@ -152,6 +155,9 @@ produces a warning and the build continues.
 
    * - Variable
      - Effect
+   * - ``BARTLEBY_IMAGE``
+     - Transform image to run, used exactly as given. Overrides the two variables
+       below; the ``--image`` flag overrides it in turn.
    * - ``HMD_CONTAINER_REGISTRY``
      - Registry holding the transform image. Defaults to ``ghcr.io/neuronsphere``.
    * - ``HMD_TF_BARTLEBY_VERSION``
@@ -497,6 +503,64 @@ Additional Setup
 Ensure the ``hmd-tf-bartleby`` image is built locally using the hmd docker build tool (``hmd docker build`` from the
 repository root) prior to running the bartleby CLI. The bartleby CLI will look for a local image under the registry name in
 the HMD_CONTAINER_REGISTRY environment variable (defaults to the HMD registry) in order to run the transform.
+
+Developing Against a Local Transform Image
+-------------------------------------------
+
+The rendering itself happens inside ``hmd-tf-bartleby``, so changing Sphinx
+configuration, the doctools, or the container entrypoint means building that image
+and pointing this CLI at the result. From a checkout of that repository:
+
+.. code-block:: bash
+
+    cd hmd-tf-bartleby
+    make image-local          # builds hmd-tf-bartleby:local from the working tree
+
+Then run any build against it:
+
+.. code-block:: bash
+
+    cd ../some-docs-repo
+    bartleby --image hmd-tf-bartleby:local html
+
+    # or, for a whole shell session
+    export BARTLEBY_IMAGE=hmd-tf-bartleby:local
+    bartleby html
+
+``--image`` is used exactly as given, which is the point: a locally built image has
+no registry prefix and no release version, so ``HMD_CONTAINER_REGISTRY`` and
+``HMD_TF_BARTLEBY_VERSION`` cannot name it. Those two variables remain the way to
+select a *published* image — a specific released tag, or a different registry.
+
+The local build needs no network and no private index credentials: it takes
+``plantuml.jar`` from an image already on the machine and installs the transform's
+Python package from source. A code-only change rebuilds in seconds because the pip
+layer is cached.
+
+Reading the logs of a failed build
+-----------------------------------
+
+Everything the container produces lands under ``target/bartleby/logs/``:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 40 60
+
+   * - File
+     - Contents
+   * - ``<builder>.log``
+     - Everything Sphinx and, for PDF, ``latexmk`` printed. Complete, and long.
+   * - ``<builder>-warnings.log``
+     - Only the warnings and errors Sphinx reported. Start here: a document that
+       does not build usually explains itself in a line or two of this file.
+   * - ``<builder>-latex-*.log``
+     - LaTeX's own log for a PDF build — undefined control sequences, missing
+       fonts, overfull boxes. Copied out of the ``latex/`` build tree.
+
+A build that fails now exits non-zero and names those files. Older transform
+images logged the Sphinx exit code and exited 0, so a broken document looked like
+a clean build; if you see that behaviour, the image predates the fix — run
+``bartleby update-image``.
 
 Requirements and Traceability
 ------------------------------

@@ -16,7 +16,7 @@ generated from those declarations.
 Summary
 -------
 
-85 requirement items, verified by 126 Go tests and 32 Robot tests.
+87 requirement items, verified by 127 Go tests and 32 Robot tests.
 
 .. list-table::
    :header-rows: 1
@@ -71,9 +71,13 @@ Summary
      - 1
      - 0
    * - EXEC
-     - 15
-     - 32
+     - 16
+     - 33
      - 1
+   * - EXEC_016
+     - 1
+     - 1
+     - 0
    * - GATH
      - 4
      - 8
@@ -278,6 +282,12 @@ Coverage by requirement
      - implemented
    * - :need:`HMD_CLI_BARTLEBY_REQ_EXEC_015`
      - *exempt: see the requirement text*
+     - implemented
+   * - :need:`HMD_CLI_BARTLEBY_REQ_EXEC_016`
+     - cmd.TestImageNameExplicitOverride
+     - implemented
+   * - :need:`HMD_CLI_BARTLEBY_REQ_EXEC_016_SPEC001`
+     - cmd.TestImageNameExplicitOverride
      - implemented
    * - :need:`HMD_CLI_BARTLEBY_REQ_GATH_001`
      - gather.TestReposRejectsWrongDirectory, gather.TestReposRequiresDemosLibrary, cli: Gather Outside The Docs Repo Is Rejected
@@ -592,28 +602,28 @@ Run with ``make test``. No Docker required.
     :links: HMD_CLI_BARTLEBY_REQ_PUML_001_SPEC001
     :tags: go
 
-    ``src/go/bartleby/cmd/root_test.go:268``
+    ``src/go/bartleby/cmd/root_test.go:322``
 
 .. test:: cmd.TestFindPumlFilesEmptyTree
     :id: HMD_CLI_BARTLEBY_TEST_GO_382CA23C
     :links: HMD_CLI_BARTLEBY_REQ_PUML_002
     :tags: go
 
-    ``src/go/bartleby/cmd/root_test.go:303``
+    ``src/go/bartleby/cmd/root_test.go:357``
 
 .. test:: cmd.TestFirstNonEmpty
     :id: HMD_CLI_BARTLEBY_TEST_GO_A8296381
     :links: HMD_CLI_BARTLEBY_REQ_CFG_004
     :tags: go
 
-    ``src/go/bartleby/cmd/root_test.go:231``
+    ``src/go/bartleby/cmd/root_test.go:285``
 
 .. test:: cmd.TestGlobalStylesPath
     :id: HMD_CLI_BARTLEBY_TEST_GO_3ABF671F
     :links: HMD_CLI_BARTLEBY_REQ_ENV_005
     :tags: go
 
-    ``src/go/bartleby/cmd/root_test.go:204``
+    ``src/go/bartleby/cmd/root_test.go:258``
 
 .. test:: cmd.TestImageName
     :id: HMD_CLI_BARTLEBY_TEST_GO_7E0F7E19
@@ -622,47 +632,54 @@ Run with ``make test``. No Docker required.
 
     ``src/go/bartleby/cmd/root_test.go:19``
 
+.. test:: cmd.TestImageNameExplicitOverride
+    :id: HMD_CLI_BARTLEBY_TEST_GO_000D911D
+    :links: HMD_CLI_BARTLEBY_REQ_EXEC_016, HMD_CLI_BARTLEBY_REQ_EXEC_016_SPEC001
+    :tags: go
+
+    ``src/go/bartleby/cmd/root_test.go:51``
+
 .. test:: cmd.TestRepoName
     :id: HMD_CLI_BARTLEBY_TEST_GO_CB8661D6
     :links: HMD_CLI_BARTLEBY_REQ_MAN_004
     :tags: go
 
-    ``src/go/bartleby/cmd/root_test.go:193``
+    ``src/go/bartleby/cmd/root_test.go:247``
 
 .. test:: cmd.TestResolveConfidential
     :id: HMD_CLI_BARTLEBY_TEST_GO_D13A9289
     :links: HMD_CLI_BARTLEBY_REQ_CFG_005, HMD_CLI_BARTLEBY_REQ_CFG_005_SPEC001
     :tags: go
 
-    ``src/go/bartleby/cmd/root_test.go:98``
+    ``src/go/bartleby/cmd/root_test.go:152``
 
 .. test:: cmd.TestResolveLogosPrecedence
     :id: HMD_CLI_BARTLEBY_TEST_GO_354203E5
     :links: HMD_CLI_BARTLEBY_REQ_CFG_004
     :tags: go
 
-    ``src/go/bartleby/cmd/root_test.go:48``
+    ``src/go/bartleby/cmd/root_test.go:102``
 
 .. test:: cmd.TestResolveTitle
     :id: HMD_CLI_BARTLEBY_TEST_GO_2E135D7B
     :links: HMD_CLI_BARTLEBY_REQ_CFG_006, HMD_CLI_BARTLEBY_REQ_CFG_007, HMD_CLI_BARTLEBY_REQ_CFG_007_SPEC001
     :tags: go
 
-    ``src/go/bartleby/cmd/root_test.go:160``
+    ``src/go/bartleby/cmd/root_test.go:214``
 
 .. test:: cmd.TestShellSubcommandRejectsConflictingFlag
     :id: HMD_CLI_BARTLEBY_TEST_GO_EC00F99A
     :links: HMD_CLI_BARTLEBY_REQ_CLI_002_SPEC001
     :tags: go
 
-    ``src/go/bartleby/cmd/root_test.go:246``
+    ``src/go/bartleby/cmd/root_test.go:300``
 
 .. test:: cmd.TestTruthy
     :id: HMD_CLI_BARTLEBY_TEST_GO_E4106ACD
     :links: HMD_CLI_BARTLEBY_REQ_CFG_005_SPEC001
     :tags: go
 
-    ``src/go/bartleby/cmd/root_test.go:217``
+    ``src/go/bartleby/cmd/root_test.go:271``
 
 .. test:: gather.TestAddToIndexIndicesSpelling
     :id: HMD_CLI_BARTLEBY_TEST_GO_85540123

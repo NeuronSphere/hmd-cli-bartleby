@@ -117,6 +117,26 @@ Running the Transform Container
     ``ghcr.io/neuronsphere`` and the tag from ``HMD_TF_BARTLEBY_VERSION``
     defaulting to ``stable``.
 
+.. req:: Run an explicitly named image
+    :id: HMD_CLI_BARTLEBY_REQ_EXEC_016
+    :status: implemented
+
+    ``--image``, or ``BARTLEBY_IMAGE``, shall be used as the image reference
+    exactly as given, in preference to the registry and version variables. A
+    locally built image has neither a registry prefix nor a version that looks
+    like a release, so composing a reference from those variables cannot name it.
+
+    This is what makes the development loop work: build the transform image from
+    a working tree and run this CLI against it without publishing anything.
+
+.. spec:: Image reference precedence
+    :id: HMD_CLI_BARTLEBY_REQ_EXEC_016_SPEC001
+    :links: HMD_CLI_BARTLEBY_REQ_EXEC_016, HMD_CLI_BARTLEBY_REQ_EXEC_013
+    :status: implemented
+
+    The flag shall win over the environment variable, and either shall win over
+    ``HMD_CONTAINER_REGISTRY`` and ``HMD_TF_BARTLEBY_VERSION``.
+
 .. req:: Report pull progress readably
     :id: HMD_CLI_BARTLEBY_REQ_EXEC_014
     :status: implemented

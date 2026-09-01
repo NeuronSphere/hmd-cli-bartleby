@@ -18,7 +18,7 @@ var updateImageCmd = &cobra.Command{
 	SilenceErrors: true,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := cmd.Context()
-		img := imageName(os.Getenv)
+		img := imageName(opts, os.Getenv)
 		out := cmd.OutOrStdout()
 
 		// The local image is removed first so that a moving tag such as :stable
