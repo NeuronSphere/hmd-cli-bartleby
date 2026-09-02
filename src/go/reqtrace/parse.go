@@ -31,7 +31,7 @@ var robotRequirementTag = regexp.MustCompile(`^(?:HMD_[A-Z0-9_]*_)?(?:REQ|NERD)_
 // The parse is line-oriented rather than a full RST parse: a needs directive is
 // a directive line followed by indented option lines, which is unambiguous
 // enough, and it keeps this tool free of a docutils dependency.
-func ParseRequirements(root, repoRoot string) ([]Requirement, error) {
+func ParseRequirements(root, repoRoot string, scheme Scheme) ([]Requirement, error) {
 	var requirements []Requirement
 
 	err := filepath.WalkDir(root, func(path string, d fs.DirEntry, err error) error {
@@ -45,7 +45,7 @@ func ParseRequirements(root, repoRoot string) ([]Requirement, error) {
 			return nil
 		}
 
-		found, err := parseRequirementFile(path, repoRoot)
+		found, err := parseRequirementFile(path, repoRoot, scheme)
 		if err != nil {
 			return err
 		}
@@ -59,7 +59,7 @@ func ParseRequirements(root, repoRoot string) ([]Requirement, error) {
 	return requirements, nil
 }
 
-func parseRequirementFile(path, repoRoot string) ([]Requirement, error) {
+func parseRequirementFile(path, repoRoot string, scheme Scheme) ([]Requirement, error) {
 	file, err := os.Open(path)
 	if err != nil {
 		return nil, err
@@ -87,10 +87,11 @@ func parseRequirementFile(path, repoRoot string) ([]Requirement, error) {
 		if match := needDirective.FindStringSubmatch(line); match != nil {
 			flush()
 			current = &Requirement{
-				Type:  match[1],
-				Title: strings.TrimSpace(match[2]),
-				File:  relativeTo(repoRoot, path),
-				Line:  lineNo,
+				Type:   match[1],
+				Title:  strings.TrimSpace(match[2]),
+				File:   relativeTo(repoRoot, path),
+				Line:   lineNo,
+				Prefix: scheme.Prefix,
 			}
 			continue
 		}
@@ -122,7 +123,7 @@ func parseRequirementFile(path, repoRoot string) ([]Requirement, error) {
 		case "tags":
 			current.Tags = splitCommaList(value)
 		case "links":
-			current.Links = normalizeIDs(splitCommaList(value))
+			current.Links = scheme.normalizeIDs(splitCommaList(value))
 		}
 	}
 	if err := scanner.Err(); err != nil {
@@ -139,7 +140,7 @@ func parseRequirementFile(path, repoRoot string) ([]Requirement, error) {
 // Test functions are found through go/ast rather than a regex so that a comment
 // which merely mentions a requirement in passing, somewhere in a function body,
 // is not mistaken for a coverage claim.
-func ParseGoTests(root, repoRoot string, skipDirs []string) ([]TestCase, error) {
+func ParseGoTests(root, repoRoot string, skipDirs []string, scheme Scheme) ([]TestCase, error) {
 	var tests []TestCase
 	fileSet := token.NewFileSet()
 
@@ -174,7 +175,8 @@ func ParseGoTests(root, repoRoot string, skipDirs []string) ([]TestCase, error) 
 				Suite:        parsed.Name.Name,
 				File:         relativeTo(repoRoot, path),
 				Line:         fileSet.Position(fn.Pos()).Line,
-				Requirements: requirementsFromDoc(fn.Doc),
+				Requirements: requirementsFromDoc(fn.Doc, scheme),
+				Prefix:       scheme.Prefix,
 			})
 		}
 		return nil
@@ -211,7 +213,7 @@ func isTestFunc(fn *ast.FuncDecl) bool {
 // requirementsFromDoc pulls the IDs out of a "Requirements:" line in a doc
 // comment. The line may wrap onto following comment lines that are indented or
 // begin with a comma.
-func requirementsFromDoc(doc *ast.CommentGroup) []string {
+func requirementsFromDoc(doc *ast.CommentGroup, scheme Scheme) []string {
 	if doc == nil {
 		return nil
 	}
@@ -241,16 +243,16 @@ func requirementsFromDoc(doc *ast.CommentGroup) []string {
 		collecting = strings.HasSuffix(trimmed, ",")
 	}
 
-	return normalizeIDs(raw)
+	return scheme.normalizeIDs(raw)
 }
 
 // ParseRobotTests reads Robot suites and returns every test case with the
 // requirement IDs from its [Tags] setting.
-func ParseRobotTests(paths []string, repoRoot string) ([]TestCase, error) {
+func ParseRobotTests(paths []string, repoRoot string, scheme Scheme) ([]TestCase, error) {
 	var tests []TestCase
 
 	for _, path := range paths {
-		found, err := parseRobotFile(path, repoRoot)
+		found, err := parseRobotFile(path, repoRoot, scheme)
 		if err != nil {
 			return nil, err
 		}
@@ -260,7 +262,7 @@ func ParseRobotTests(paths []string, repoRoot string) ([]TestCase, error) {
 	return tests, nil
 }
 
-func parseRobotFile(path, repoRoot string) ([]TestCase, error) {
+func parseRobotFile(path, repoRoot string, scheme Scheme) ([]TestCase, error) {
 	file, err := os.Open(path)
 	if err != nil {
 		return nil, err
@@ -301,11 +303,12 @@ func parseRobotFile(path, repoRoot string) ([]TestCase, error) {
 		if !strings.HasPrefix(line, " ") && !strings.HasPrefix(line, "\t") {
 			flushOne(current)
 			current = &TestCase{
-				Kind:  KindRobot,
-				Name:  trimmed,
-				Suite: suite,
-				File:  relativeTo(repoRoot, path),
-				Line:  lineNo,
+				Kind:   KindRobot,
+				Name:   trimmed,
+				Suite:  suite,
+				File:   relativeTo(repoRoot, path),
+				Line:   lineNo,
+				Prefix: scheme.Prefix,
 			}
 			continue
 		}
@@ -320,7 +323,7 @@ func parseRobotFile(path, repoRoot string) ([]TestCase, error) {
 		}
 		for _, tag := range fields[1:] {
 			if robotRequirementTag.MatchString(strings.ToUpper(tag)) {
-				current.Requirements = normalizeIDs(append(current.Requirements, tag))
+				current.Requirements = scheme.normalizeIDs(append(current.Requirements, tag))
 			}
 		}
 	}
