@@ -1,5 +1,6 @@
 BINARY    := bartleby
 GO_DIR    := src/go/bartleby
+REQTRACE_DIR := src/go/reqtrace
 BUILD_DIR := $(GO_DIR)/build
 
 GO        := go
@@ -62,11 +63,11 @@ fmt-check:
 
 ## reqs: regenerate docs/requirements/traceability.rst from the requirements and test annotations
 reqs:
-	cd $(GO_DIR) && $(GO) run ./tools/reqtrace
+	cd $(REQTRACE_DIR) && $(GO) run ./cmd/reqtrace -repo $(CURDIR)
 
 ## reqs-check: fail if traceability has a gap or the generated matrix is stale
 reqs-check:
-	cd $(GO_DIR) && $(GO) run ./tools/reqtrace -check
+	cd $(REQTRACE_DIR) && $(GO) run ./cmd/reqtrace -repo $(CURDIR) -check
 
 ## check: fmt-check + vet + unit tests + traceability — what CI should run
 check: fmt-check vet test reqs-check

@@ -33,6 +33,10 @@ const sampleRequirements = `Sample
 
 // writeRepo lays out a miniature repository with requirements, a Go test file,
 // and a Robot suite.
+// testScheme matches the repository name writeRepo puts in meta-data/manifest.json,
+// so direct parser calls expand IDs the same way Load would.
+var testScheme = SchemeFromName("hmd-cli-bartleby")
+
 func writeRepo(t *testing.T, requirements, goTest, robot string) string {
 	t.Helper()
 	root := t.TempDir()
@@ -62,7 +66,7 @@ func write(t *testing.T, path, content string) {
 func TestParseRequirements(t *testing.T) {
 	root := writeRepo(t, sampleRequirements, "", "")
 
-	requirements, err := ParseRequirements(filepath.Join(root, "docs", "requirements"), root)
+	requirements, err := ParseRequirements(filepath.Join(root, "docs", "requirements"), root, testScheme)
 	if err != nil {
 		t.Fatalf("ParseRequirements: %v", err)
 	}
@@ -111,7 +115,7 @@ func TestParseRequirementsSkipsTheGeneratedPage(t *testing.T) {
 	write(t, filepath.Join(root, "docs", "requirements", GeneratedFile),
 		".. test:: x\n    :id: HMD_CLI_BARTLEBY_TEST_GO_00000000\n\n"+sampleRequirements)
 
-	requirements, err := ParseRequirements(filepath.Join(root, "docs", "requirements"), root)
+	requirements, err := ParseRequirements(filepath.Join(root, "docs", "requirements"), root, testScheme)
 	if err != nil {
 		t.Fatalf("ParseRequirements: %v", err)
 	}
@@ -149,7 +153,7 @@ func TestWithBodyComment(t *testing.T) {
 func TestParseGoTests(t *testing.T) {
 	root := writeRepo(t, sampleRequirements, sampleGoTest, "")
 
-	tests, err := ParseGoTests(filepath.Join(root, "src", "go", "bartleby"), root, nil)
+	tests, err := ParseGoTests(filepath.Join(root, "src", "go", "bartleby"), root, nil, testScheme)
 	if err != nil {
 		t.Fatalf("ParseGoTests: %v", err)
 	}
@@ -188,7 +192,7 @@ func TestParseGoTests(t *testing.T) {
 func TestParseGoTestsIgnoresNonTests(t *testing.T) {
 	root := writeRepo(t, sampleRequirements, sampleGoTest, "")
 
-	tests, err := ParseGoTests(filepath.Join(root, "src", "go", "bartleby"), root, nil)
+	tests, err := ParseGoTests(filepath.Join(root, "src", "go", "bartleby"), root, nil, testScheme)
 	if err != nil {
 		t.Fatalf("ParseGoTests: %v", err)
 	}
@@ -212,7 +216,7 @@ func TestParseGoTestsSkipsRequestedDirectories(t *testing.T) {
 	write(t, filepath.Join(root, "src", "go", "bartleby", "build", "gen_test.go"),
 		"package build\n\nimport \"testing\"\n\nfunc TestGenerated(t *testing.T) {}\n")
 
-	tests, err := ParseGoTests(filepath.Join(root, "src", "go", "bartleby"), root, []string{"build"})
+	tests, err := ParseGoTests(filepath.Join(root, "src", "go", "bartleby"), root, []string{"build"}, testScheme)
 	if err != nil {
 		t.Fatalf("ParseGoTests: %v", err)
 	}
@@ -248,7 +252,7 @@ Not A Test
 func TestParseRobotTests(t *testing.T) {
 	root := writeRepo(t, sampleRequirements, "", sampleRobot)
 
-	tests, err := ParseRobotTests([]string{filepath.Join(root, "test", "sample.robot")}, root)
+	tests, err := ParseRobotTests([]string{filepath.Join(root, "test", "sample.robot")}, root, testScheme)
 	if err != nil {
 		t.Fatalf("ParseRobotTests: %v", err)
 	}
@@ -281,9 +285,29 @@ func TestExpandID(t *testing.T) {
 		"":                             "",
 	}
 	for in, want := range cases {
-		if got := ExpandID(in); got != want {
+		if got := testScheme.ExpandID(in); got != want {
 			t.Errorf("ExpandID(%q) = %q, want %q", in, got, want)
 		}
+	}
+
+	// The prefix is derived from the repository name, not compiled in.
+	schemes := map[string]Scheme{
+		"hmd-cli-bartleby": {Prefix: "HMD_CLI_BARTLEBY_", Org: "HMD_"},
+		"glint-jira":       {Prefix: "GLINT_JIRA_", Org: "GLINT_"},
+		"bartleby":         {Prefix: "BARTLEBY_", Org: "BARTLEBY_"},
+		"hmd_ms_gozer":     {Prefix: "HMD_MS_GOZER_", Org: "HMD_"},
+		"weird..name--x":   {Prefix: "WEIRD_NAME_X_", Org: "WEIRD_"},
+		"":                 {},
+	}
+	for name, want := range schemes {
+		if got := SchemeFromName(name); got != want {
+			t.Errorf("SchemeFromName(%q) = %+v, want %+v", name, got, want)
+		}
+	}
+
+	// An unset scheme leaves IDs alone rather than corrupting them.
+	if got := (Scheme{}).ExpandID("REQ_SEL_001"); got != "REQ_SEL_001" {
+		t.Errorf("zero scheme ExpandID = %q, want the input unchanged", got)
 	}
 }
 
@@ -471,10 +495,11 @@ func TestRenderIsDeterministic(t *testing.T) {
 //
 // Requirements: REQ_TRACE_006_SPEC001
 func TestNeedIDIsStable(t *testing.T) {
-	one := TestCase{Kind: KindGo, Name: "TestOne", Suite: "thing"}
-	same := TestCase{Kind: KindGo, Name: "TestOne", Suite: "thing", File: "moved_test.go", Line: 99}
-	other := TestCase{Kind: KindGo, Name: "TestTwo", Suite: "thing"}
-	otherKind := TestCase{Kind: KindRobot, Name: "TestOne", Suite: "thing"}
+	prefix := testScheme.Prefix
+	one := TestCase{Kind: KindGo, Name: "TestOne", Suite: "thing", Prefix: prefix}
+	same := TestCase{Kind: KindGo, Name: "TestOne", Suite: "thing", File: "moved_test.go", Line: 99, Prefix: prefix}
+	other := TestCase{Kind: KindGo, Name: "TestTwo", Suite: "thing", Prefix: prefix}
+	otherKind := TestCase{Kind: KindRobot, Name: "TestOne", Suite: "thing", Prefix: prefix}
 
 	if one.NeedID() != same.NeedID() {
 		t.Error("moving a test within its file should not change its ID")
@@ -485,7 +510,7 @@ func TestNeedIDIsStable(t *testing.T) {
 	if one.NeedID() == otherKind.NeedID() {
 		t.Error("a Go test and a Robot test with the same name must not share an ID")
 	}
-	if !strings.HasPrefix(one.NeedID(), IDPrefix+"TEST_GO_") {
+	if !strings.HasPrefix(one.NeedID(), prefix+"TEST_GO_") {
 		t.Errorf("ID = %q, want the repo prefix and kind", one.NeedID())
 	}
 }

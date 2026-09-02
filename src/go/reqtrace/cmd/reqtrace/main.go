@@ -13,7 +13,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/neuronsphere/hmd-cli-bartleby/internal/reqtrace"
+	"github.com/neuronsphere/hmd-cli-bartleby/src/go/reqtrace"
 )
 
 func main() {
