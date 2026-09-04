@@ -5,6 +5,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -13,35 +14,40 @@ import (
 )
 
 var pumlCmd = &cobra.Command{
-	Use:   "puml",
-	Short: "Generate images from PlantUML (.puml) files",
+	Use:           "puml",
+	Short:         "Render PlantUML (.puml) files in docs/ to images",
+	Args:          cobra.NoArgs,
+	SilenceUsage:  true,
+	SilenceErrors: true,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		rp := repoPath()
-		inputPath := filepath.Join(rp, "docs")
-		outputPath := filepath.Join(rp, "target", "bartleby", "puml_images")
+		rp, err := repoPath()
+		if err != nil {
+			return err
+		}
 
-		if _, err := os.Stat(inputPath); os.IsNotExist(err) {
-			return fmt.Errorf("docs/ directory not found in %s", rp)
+		inputPath := filepath.Join(rp, "docs")
+		if !isDir(inputPath) {
+			return fmt.Errorf("no docs directory at %s", inputPath)
 		}
 
 		pumlFiles, err := findPumlFiles(inputPath)
 		if err != nil {
-			return fmt.Errorf("failed to scan for puml files: %w", err)
+			return err
 		}
-
 		if len(pumlFiles) == 0 {
-			fmt.Println("No .puml files found in docs/")
+			fmt.Fprintf(cmd.OutOrStdout(), "No .puml files under %s\n", inputPath)
 			return nil
 		}
 
+		outputPath := filepath.Join(rp, "target", "bartleby", "puml_images")
 		if err := os.MkdirAll(outputPath, 0o755); err != nil {
-			return fmt.Errorf("failed to create output directory: %w", err)
+			return fmt.Errorf("creating output directory %s: %w", outputPath, err)
 		}
 
-		fmt.Printf("Found %d .puml file(s)\n", len(pumlFiles))
+		fmt.Fprintf(cmd.OutOrStdout(), "Rendering %d PlantUML file(s) to %s...\n", len(pumlFiles), outputPath)
 
-		return runner.RunPuml(runner.PumlConfig{
-			ImageName:  imageName(),
+		return runner.RunPuml(cmd.Context(), runner.PumlConfig{
+			ImageName:  imageName(opts, os.Getenv),
 			InputPath:  inputPath,
 			OutputPath: outputPath,
 			Files:      pumlFiles,
@@ -49,22 +55,31 @@ var pumlCmd = &cobra.Command{
 	},
 }
 
-// findPumlFiles returns all .puml files under root as paths relative to root,
-// using forward slashes (as the container expects a Linux path).
+// findPumlFiles returns every .puml file under root, as forward-slash paths
+// relative to root, because the container resolves them inside a Linux mount.
+// Results are sorted so runs are reproducible.
 func findPumlFiles(root string) ([]string, error) {
 	var files []string
+
 	err := filepath.WalkDir(root, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
-		if !d.IsDir() && strings.HasSuffix(d.Name(), ".puml") {
-			rel, err := filepath.Rel(root, path)
-			if err != nil {
-				return err
-			}
-			files = append(files, filepath.ToSlash(rel))
+		if d.IsDir() || !strings.EqualFold(filepath.Ext(d.Name()), ".puml") {
+			return nil
 		}
+
+		rel, err := filepath.Rel(root, path)
+		if err != nil {
+			return err
+		}
+		files = append(files, filepath.ToSlash(rel))
 		return nil
 	})
-	return files, err
+	if err != nil {
+		return nil, fmt.Errorf("scanning %s for .puml files: %w", root, err)
+	}
+
+	sort.Strings(files)
+	return files, nil
 }

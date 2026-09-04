@@ -1,7 +1,9 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
+	"os"
 
 	"github.com/spf13/cobra"
 
@@ -9,17 +11,27 @@ import (
 )
 
 var updateImageCmd = &cobra.Command{
-	Use:   "update-image",
-	Short: "Pull the latest Bartleby Docker image",
+	Use:           "update-image",
+	Short:         "Pull the latest Bartleby transform image",
+	Args:          cobra.NoArgs,
+	SilenceUsage:  true,
+	SilenceErrors: true,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		img := imageName()
+		ctx := cmd.Context()
+		img := imageName(opts, os.Getenv)
+		out := cmd.OutOrStdout()
 
-		fmt.Printf("Removing old image %s...\n", img)
-		if err := runner.RemoveImage(img); err != nil {
-			// Non-fatal: image may not exist locally yet.
-			fmt.Printf("warning: could not remove image: %v\n", err)
+		// The local image is removed first so that a moving tag such as :stable
+		// is genuinely re-fetched rather than reported as up to date.
+		fmt.Fprintf(out, "Removing local %s...\n", img)
+		switch err := runner.RemoveImage(ctx, img); {
+		case err == nil:
+		case errors.Is(err, runner.ErrImageNotFound):
+			fmt.Fprintln(out, "  not present locally — nothing to remove")
+		default:
+			return err
 		}
 
-		return runner.PullImage(img)
+		return runner.PullImage(ctx, img)
 	},
 }

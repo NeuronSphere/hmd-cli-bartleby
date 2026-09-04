@@ -6,5 +6,6 @@ hmd-cli-bartleby
 .. toctree::
 
    install_and_run
+   requirements/index
    releasing
    proposals/index

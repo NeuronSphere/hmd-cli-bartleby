@@ -17,7 +17,7 @@ When some runs ``hmd bartleby``, it will run for each combination of root docume
 
 .. spec:: Allow rendering subset of roots
     :id: HMD_CLI_BARTLEBY_NERD001_SPEC001
-    :links: HMD_CLI_BARTLEBY_NERD001
+    :links: HMD_CLI_BARTLEBY_NERD001, HMD_CLI_BARTLEBY_REQ_SEL_001, HMD_CLI_BARTLEBY_REQ_SEL_002, HMD_CLI_BARTLEBY_REQ_SEL_003
     :status: implemented
 
     An additional command line option will be added to allow only rendering a specific root document.
@@ -25,7 +25,16 @@ When some runs ``hmd bartleby``, it will run for each combination of root docume
 
 .. spec:: Limit default 'index' root to certain builders
     :id: HMD_CLI_BARTLEBY_NERD001_SPEC002
-    :links: HMD_CLI_BARTLEBY_NERD001
+    :links: HMD_CLI_BARTLEBY_NERD001, HMD_CLI_BARTLEBY_REQ_SEL_005, HMD_CLI_BARTLEBY_REQ_SEL_006
     :status: implemented
 
     A special root document shall be reserved for the default 'index'. Specifying this in the manifest is optional but will allow limiting which shell builders run for the default root.
+
+.. note::
+
+   This proposal's specifications were marked ``implemented`` while the behaviour
+   they describe was not: the ``--shell`` flag was parsed and never read, so
+   passing a builder did not restrict anything. That is what the standing
+   requirements under :doc:`../requirements/index` and their traceability matrix
+   exist to prevent — the specifications above now link to the requirements that
+   replaced them, and each of those is verified by a test.

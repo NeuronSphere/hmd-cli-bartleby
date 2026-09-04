@@ -1,0 +1,4 @@
+{
+  "name": "test-with-warnings",
+  "bartleby": {"roots": {"main": {"root_doc": "index", "builders": ["html"]}}}
+}

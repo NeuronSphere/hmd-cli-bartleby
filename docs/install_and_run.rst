@@ -42,8 +42,16 @@ Legacy Installation (Python CLI)
 
 .. note::
 
-   The Python-based CLI has been replaced by the Go binary above.
-   These instructions are retained for reference only.
+   The Python CLI has been superseded by the Go binary above, which now covers
+   everything it did — including ``bartleby.sources``, ``--gather``,
+   ``configure``, ``$HMD_HOME`` environment loading, and per-builder config.
+   Unlike the Python version it talks to the Docker API directly: no
+   ``docker-compose`` binary, and no ``docker-compose-<shell>.yaml`` written into
+   ``target/``. Compose was only ever needed to pass pip credentials as a secret,
+   and a bind-mounted file does that job.
+
+   These instructions are retained for anyone still on the ``hmd bartleby``
+   plugin.
 
 The HMD CLI Bartleby tool can be installed using ``pip`` and specifying the HMD pypi server (via command line or using
 a pip config file).
@@ -56,21 +64,135 @@ a pip config file).
 Running the Bartleby Transform
 --------------------------------
 
-The bartleby CLI uses the ``--repo-name`` and ``--repo-version`` arguments inherited from the base cli app to help build
-the rendered documents. However, the CLI is also built with the assumption that the command is being run from the desired
-repository root in order to avoid dependencies upon the HMD_REPO_HOME environment variable:
+``bartleby`` builds the repository it is run from, so run it from the repository
+root. It reads ``meta-data/manifest.json`` and ``meta-data/VERSION`` there, mounts
+the repository into the transform container, and writes output to
+``target/bartleby/``.
 
 .. code-block:: bash
 
-    hmd bartleby <command>
+    bartleby                  # every builder configured for every root document
+    bartleby html             # HTML only
+    bartleby pdf              # PDF only
+    bartleby slides           # RevealJS slideshow
+    bartleby puml             # render docs/**/*.puml to images
+    bartleby update-image     # re-pull the transform image
+    bartleby configure        # write defaults to $HMD_HOME/.config/hmd.env
+    bartleby version          # print the version
 
-For the ``<command>``, any combination of the configured options listed under the bartleby transform (see the
-"transforms" document under the ``hmd-tf-bartleby`` repo) can be entered as input. If rendered documents in multiple
-formats is desired, enter the options as a comma-separated list with *no spaces*:
+Selecting builders and root documents
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+``--shell`` selects builders and ``--root-doc`` selects root documents. Both take
+a comma-separated list, or ``all``:
 
 .. code-block:: bash
 
-    hmd bartleby --shell <option1>,<option2>
+    bartleby --shell html,pdf
+    bartleby --root-doc guide,api
+    bartleby html --root-doc guide
+
+Anything named in a root's ``builders`` array is a valid ``--shell`` value. A
+builder no root declares is an error that lists what is available, rather than a
+silent success. The subcommands are shorthand for a single builder, so combining
+one with a contradictory ``--shell`` is also an error.
+
+Options
+~~~~~~~
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 70
+
+   * - Flag
+     - Effect
+   * - ``-s, --shell``
+     - Builder(s) to run. Comma-separated, or ``all`` (default).
+   * - ``-r, --root-doc``
+     - Root document(s) to build, by manifest key. Comma-separated, or ``all``.
+   * - ``-a, --autodoc``
+     - Generate Python API docs with autosummary. Requires ``src/python/``; the
+       CLI warns and continues without it when there is no Python package.
+   * - ``-g, --gather``
+     - Gather sibling repositories' docs before building. Only valid from an
+       ``hmd-docs-bartleby`` checkout that sits next to ``hmd-lib-bartleby-demos``.
+   * - ``--title``
+     - Document title. Defaults to ``<repo>-<version>``. Sanitized for LaTeX.
+   * - ``--no-timestamp-title``
+     - Omit the timestamp the container appends to output document names.
+   * - ``--confidential``
+     - Stamp documents with ``HMD_BARTLEBY_CONFIDENTIALITY_STATEMENT``.
+   * - ``--default-logo``
+     - Logo URL for HTML and PDF unless one of the two below overrides it.
+   * - ``--html-default-logo``
+     - HTML logo URL.
+   * - ``--pdf-default-logo``
+     - PDF cover image URL.
+   * - ``--image``
+     - Transform image to run, e.g. ``hmd-tf-bartleby:local``. Used as given, in
+       preference to the registry and version variables.
+   * - ``--version``
+     - Print the version and exit.
+
+Titles are sanitized automatically: spaces, underscores, and the other characters
+that break LaTeX text mode or a Makefile target are replaced with hyphens, and the
+CLI prints a note when it changes what you passed.
+
+Environment
+~~~~~~~~~~~
+
+If ``HMD_HOME`` is set, ``bartleby`` loads ``$HMD_HOME/.config/hmd.env`` before it
+does anything else, so shared defaults do not have to be exported by hand. Values
+already present in the environment win over the file. A missing ``HMD_HOME`` or a
+missing file is not an error; a file that exists but cannot be read or parsed
+produces a warning and the build continues.
+
+``bartleby configure`` writes to that same file.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 40 60
+
+   * - Variable
+     - Effect
+   * - ``BARTLEBY_IMAGE``
+     - Transform image to run, used exactly as given. Overrides the two variables
+       below; the ``--image`` flag overrides it in turn.
+   * - ``HMD_CONTAINER_REGISTRY``
+     - Registry holding the transform image. Defaults to ``ghcr.io/neuronsphere``.
+   * - ``HMD_TF_BARTLEBY_VERSION``
+     - Transform image tag. Defaults to ``stable``.
+   * - ``HMD_BARTLEBY_DEFAULT_LOGO``
+     - Default logo URL. Also ``_HTML_`` and ``_PDF_`` variants.
+   * - ``HMD_BARTLEBY_CONFIDENTIAL``
+     - Turn on the confidentiality stamp without the flag. Accepts ``true``,
+       ``1``, ``yes``, ``on``, in any case.
+   * - ``HMD_BARTLEBY_CONFIDENTIALITY_STATEMENT``
+     - The text that stamp uses.
+   * - ``HMD_BARTLEBY_<SHELL>_CONFIG``
+     - Per-builder Sphinx config as a JSON object, e.g.
+       ``HMD_BARTLEBY_PDF_CONFIG='{"papersize": "a4paper"}'``. The manifest's
+       ``bartleby.config.builders.<shell>`` takes precedence over it.
+   * - ``HMD_BARTLEBY__<SHELL>__<KEY>``
+     - A single per-builder config value. Highest precedence of the config layers.
+   * - ``HMD_HOME``
+     - Root of the NeuronSphere config directory: supplies ``.config/hmd.env``
+       and ``bartleby/styles/`` (see *Custom Style Overrides*).
+   * - ``PIP_USERNAME`` / ``PIP_PASSWORD``
+     - Credentials for autodoc installs from a private index. When both are set
+       the CLI writes a temporary ``pip.conf`` (mode 600), mounts it as the
+       container's pip secret, and deletes it afterwards. Otherwise ``~/.pip/pip.conf``
+       is used if present.
+   * - ``DOCKER_HOST`` and the other ``DOCKER_*`` variables
+     - Honoured as usual. With no ``DOCKER_HOST`` the CLI asks the active docker
+       context, then falls back to the Colima, Docker Desktop, and Rancher socket
+       locations — so Colima works without exporting anything.
+
+Interrupting a build
+~~~~~~~~~~~~~~~~~~~~
+
+Ctrl-C cancels the build and removes the container it started, so the next run
+does not trip over a leftover container with the same name.
 
 Configuring Multiple Root Documents
 -----------------------------------
@@ -78,15 +200,16 @@ Configuring Multiple Root Documents
 Bartleby can render multiple different root documents with different builders available to each. For example, you might want to render one toctree 
 for PDF outputs and another for HTML. The below config enables that. It should be put in the ``meta-data/manifest.json`` file of the project.
 
+Alongside the manifest's other top-level keys:
+
 .. code-block:: json
 
     {
-        ...
         "bartleby": {
             "roots": {
                 "html_doc": {
                     "root_doc": "index",
-                    "builders": ["html"],
+                    "builders": ["html"]
                 },
                 "pdf_doc": {
                     "root_doc": "pdf_index",
@@ -100,7 +223,32 @@ Each entry should contain a ``root_doc`` property equal to the name of the root 
 The paths are relative to the ``docs/`` directory.
 The entry should also have an array of ``builders`` that can render this document. The values in the array should be valid options sent to the ``--shell`` flag, i.e. html, pdf, revealjs, confluence.
 
-When a specific shell is specified on the command line, only documents with that value in their ``builders`` array will be rendered. For example, running ``hmd bartleby --shell html`` or the shortcut ``hmd bartleby html`` will only render the ``html_doc`` document.
+A builder may instead be given as an object, which lets it carry its own Sphinx
+config:
+
+.. code-block:: json
+
+    {
+        "bartleby": {
+            "roots": {
+                "html_doc": {
+                    "root_doc": "index",
+                    "builders": [
+                        "html",
+                        {"shell": "pdf", "config": {"papersize": "a4paper"}}
+                    ]
+                }
+            }
+        }
+    }
+
+Builder config is merged from four layers, lowest priority first: the root's own
+``config``, then ``bartleby.config.builders.<shell>`` (or the
+``HMD_BARTLEBY_<SHELL>_CONFIG`` JSON environment variable when the manifest has
+none), then a builder object's inline ``config``, then any
+``HMD_BARTLEBY__<SHELL>__<KEY>`` environment variables.
+
+When a specific shell is specified on the command line, only documents with that value in their ``builders`` array will be rendered. For example, running ``bartleby --shell html`` or the shortcut ``bartleby html`` will only render the ``html_doc`` document.
 
 
 Rendering RevealJS Slideshows
@@ -130,19 +278,19 @@ Then render the slideshow with:
 
 .. code-block:: bash
 
-    hmd bartleby slides
+    bartleby slides
 
 You can also target a specific root document:
 
 .. code-block:: bash
 
-    hmd bartleby slides -rd presentation
+    bartleby slides --root-doc presentation
 
 Alternatively, the ``--shell`` flag still works:
 
 .. code-block:: bash
 
-    hmd bartleby --shell revealjs
+    bartleby --shell revealjs
 
 Combining External Documentation Sources
 -----------------------------------------
@@ -241,7 +389,7 @@ Or run pre-build artifacts separately, then Bartleby:
 .. code-block:: bash
 
     hmd build -pdo
-    hmd bartleby
+    bartleby
 
 Bartleby will automatically stage the external docs, inject toctree entries, run the Sphinx transform,
 and clean up staging files and restore ``index.rst`` afterwards (even if the build fails).
@@ -355,6 +503,145 @@ Additional Setup
 Ensure the ``hmd-tf-bartleby`` image is built locally using the hmd docker build tool (``hmd docker build`` from the
 repository root) prior to running the bartleby CLI. The bartleby CLI will look for a local image under the registry name in
 the HMD_CONTAINER_REGISTRY environment variable (defaults to the HMD registry) in order to run the transform.
+
+Developing Against a Local Transform Image
+-------------------------------------------
+
+The rendering itself happens inside ``hmd-tf-bartleby``, so changing Sphinx
+configuration, the doctools, or the container entrypoint means building that image
+and pointing this CLI at the result. From a checkout of that repository:
+
+.. code-block:: bash
+
+    cd hmd-tf-bartleby
+    make image-local          # builds hmd-tf-bartleby:local from the working tree
+
+Then run any build against it:
+
+.. code-block:: bash
+
+    cd ../some-docs-repo
+    bartleby --image hmd-tf-bartleby:local html
+
+    # or, for a whole shell session
+    export BARTLEBY_IMAGE=hmd-tf-bartleby:local
+    bartleby html
+
+``--image`` is used exactly as given, which is the point: a locally built image has
+no registry prefix and no release version, so ``HMD_CONTAINER_REGISTRY`` and
+``HMD_TF_BARTLEBY_VERSION`` cannot name it. Those two variables remain the way to
+select a *published* image — a specific released tag, or a different registry.
+
+The local build needs no network and no private index credentials: it takes
+``plantuml.jar`` from an image already on the machine and installs the transform's
+Python package from source. A code-only change rebuilds in seconds because the pip
+layer is cached.
+
+Reading the logs of a failed build
+-----------------------------------
+
+Everything the container produces lands under ``target/bartleby/logs/``:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 40 60
+
+   * - File
+     - Contents
+   * - ``<builder>.log``
+     - Everything Sphinx and, for PDF, ``latexmk`` printed. Complete, and long.
+   * - ``<builder>-warnings.log``
+     - Only the warnings and errors Sphinx reported. Start here: a document that
+       does not build usually explains itself in a line or two of this file.
+   * - ``<builder>-latex-*.log``
+     - LaTeX's own log for a PDF build — undefined control sequences, missing
+       fonts, overfull boxes. Copied out of the ``latex/`` build tree.
+
+A build that fails now exits non-zero and names those files. Older transform
+images logged the Sphinx exit code and exited 0, so a broken document looked like
+a clean build; if you see that behaviour, the image predates the fix — run
+``bartleby update-image``.
+
+Asking Claude What Went Wrong
+------------------------------
+
+A Sphinx or LaTeX failure is usually explained somewhere in the log, in terms that
+assume you know Sphinx internals. ``bartleby explain`` makes one request to Claude
+with the evidence that matters and asks for the answer:
+
+.. code-block:: bash
+
+    bartleby explain                    # explains the most recent build
+    bartleby explain --builder pdf      # a particular builder's log
+    bartleby explain --log path/to.log  # a specific file
+    bartleby explain --dry-run          # print what would be sent, send nothing
+
+Or have a failed build explain itself:
+
+.. code-block:: bash
+
+    bartleby html --explain
+    export BARTLEBY_EXPLAIN=1           # for a whole session
+
+The explanation is **advisory and never changes the outcome**: the build's own
+error and exit code are what you get back, whether the explanation succeeds, fails,
+or cannot run for want of credentials. The answer is also written to
+``target/bartleby/logs/<builder>-explain.md``.
+
+What gets sent
+~~~~~~~~~~~~~~
+
+One request, carrying: the Sphinx warnings in full, the tail of the build log, the
+LaTeX error slice for a PDF build, the repository name, version and manifest, and
+**the source lines every warning refers to**. That last part is what makes the
+answers useful — a citation of ``index.rst:8`` means little without the lines
+around it. Sphinx cites paths inside the container's temporary directory, so those
+are mapped back to the repository's own files.
+
+The payload is capped, and anything dropped to fit is listed inside the request so
+the model knows the evidence is partial. **This sends excerpts of your
+documentation to the Anthropic API.** Nothing is sent unless you ask; ``--dry-run``
+prints the exact payload.
+
+Credentials and cost
+~~~~~~~~~~~~~~~~~~~~
+
+Credentials come from the Anthropic SDK's usual sources — ``ANTHROPIC_API_KEY``,
+``ANTHROPIC_AUTH_TOKEN``, a profile from ``ant auth login``, or workload identity
+federation. With none of those, the command says so and sends nothing.
+
+The default model is ``claude-opus-5``, which is roughly five cents for a typical
+build log. ``--model`` or ``BARTLEBY_EXPLAIN_MODEL`` overrides it —
+``claude-haiku-4-5`` costs about a cent and handles the common cases.
+
+Replacing the prompt
+~~~~~~~~~~~~~~~~~~~~
+
+The built-in prompt asks for the cause, the file and line, and a concrete fix. To
+use your own, in precedence order: ``--prompt-file``,
+``BARTLEBY_EXPLAIN_PROMPT_FILE``, ``BARTLEBY_EXPLAIN_PROMPT`` for a short inline
+instruction, or a ``.bartleby/explain-prompt.md`` committed in the documentation
+repository — useful when a project has house conventions worth telling the model
+about. The CLI reports which prompt it used.
+
+Requirements and Traceability
+------------------------------
+
+What the CLI must do is written down as sphinx-needs requirements under
+:doc:`requirements/index`, and every requirement is linked to the tests that
+verify it. Coverage is declared in the test source — a ``// Requirements:`` doc
+comment on a Go test, ``[Tags]`` on a Robot test — and the matrix is generated
+from those declarations:
+
+.. code-block:: bash
+
+    make reqs          # regenerate docs/requirements/traceability.rst
+    make reqs-check    # fail on a gap, a bad reference, or a stale matrix
+    make check         # fmt + vet + unit tests + reqs-check
+
+``make check`` needs neither Docker nor Sphinx, so the traceability rules hold on
+a laptop and in CI. Adding a requirement without a test, or a test without a
+requirement, fails the check.
 
 Development Setup
 -------------------

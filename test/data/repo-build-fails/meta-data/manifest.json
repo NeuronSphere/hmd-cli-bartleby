@@ -1,0 +1,4 @@
+{
+  "name": "test-build-fails",
+  "bartleby": {"roots": {"main": {"root_doc": "does_not_exist", "builders": ["html"]}}}
+}
