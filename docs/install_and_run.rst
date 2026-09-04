@@ -6,23 +6,44 @@ Bartleby Install and Run
 Installation
 -------------
 
-Install via Homebrew (recommended)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Install via Homebrew — macOS (recommended)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: bash
 
-    brew tap neuronsphere/tap
-    brew install bartleby
+    brew install neuronsphere/tap/bartleby
 
-This installs a self-contained Go binary with no Python runtime required.
-Docker (or Colima) must be running when you execute builds.
+That is the whole thing: the ``neuronsphere/tap`` prefix registers the tap and
+installs the cask in one step. The prefix is **required** — bartleby is not in
+Homebrew core, so a bare ``brew install bartleby`` will not find it.
 
-To upgrade to the latest release:
+You get a self-contained Go binary; no Python runtime. Docker (or Colima) must
+be running when you execute builds.
+
+To upgrade:
 
 .. code-block:: bash
 
     brew update
-    brew upgrade bartleby
+    brew upgrade --cask bartleby
+
+Install on Linux
+~~~~~~~~~~~~~~~~~
+
+Homebrew supports casks on macOS only, so on Linux take the binary straight
+from the `release page
+<https://github.com/neuronsphere/hmd-cli-bartleby/releases/latest>`_:
+
+.. code-block:: bash
+
+    VERSION=2.0.0
+    ARCH="$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/')"
+    curl -fsSL "https://github.com/neuronsphere/hmd-cli-bartleby/releases/download/v${VERSION}/bartleby_${VERSION}_linux_${ARCH}.tar.gz" \
+      | tar -xz -C /tmp bartleby
+    sudo install -m 755 /tmp/bartleby /usr/local/bin/bartleby
+
+Releases carry ``linux/amd64`` and ``linux/arm64`` builds alongside the macOS
+ones.
 
 Build from Source
 ~~~~~~~~~~~~~~~~~~
