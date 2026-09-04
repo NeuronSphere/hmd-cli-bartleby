@@ -63,14 +63,17 @@ Cutting a Release
       make test
       make test-robot
 
-2. Tag and push:
+2. Bump ``meta-data/VERSION`` to match the tag you are about to cut, and commit
+   it.
+
+3. Tag and push:
 
    .. code-block:: bash
 
       git tag v2.1.0
       git push origin v2.1.0
 
-3. Watch the workflow in GitHub Actions, then verify:
+4. Watch the workflow in GitHub Actions, then verify:
 
    - the `release <https://github.com/neuronsphere/hmd-cli-bartleby/releases>`_
      has four tarballs and a checksums file
@@ -154,9 +157,9 @@ The version is set at build time through Go linker flags::
    -ldflags "-X main.version=2.0.0"
 
 GoReleaser injects the Git tag. The ``Makefile`` injects ``meta-data/VERSION``
-instead, which is the HMD Python build's version input and is not the released
-version — so a ``make build`` binary reports something like ``1.0`` while the
-released one reports ``2.0.0``.
+instead, which is also the HMD Python build's version input. Keep the two in
+step: bump ``meta-data/VERSION`` in the same change as the tag, so a ``make
+build`` binary and a released one report the same thing.
 
 A binary built without the flag — a plain ``go build`` — reports ``dev``. The
 CLI contract test in ``test/cli.robot`` asserts that a ``make build`` binary
