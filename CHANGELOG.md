@@ -7,6 +7,22 @@ the Python entrypoint is no longer the product — the Go binary is.
 
 ### Added
 
+- `bartleby agents` — the bundled agents install the same way, to
+  `~/.claude/agents`. An agent installs as a single `<name>.md` rather than a
+  directory, because that is what an agent runtime reads. Like the skills, they
+  previously shipped only in the Python package.
+- `bartleby skills` — the bundled agent skills are embedded in the binary and
+  install with `bartleby skills install`, defaulting to `~/.claude/skills`, or
+  `--project` for `.claude/skills` in the repository. `list` and `show` read them
+  without installing. Previously the skills reached users only through the Python
+  package, which a Homebrew install does not have. Re-running installs nothing
+  twice, and a locally edited skill is reported and left alone unless `--force`.
+- Two skills for requirements work, usable in any repository: `add-requirement`
+  (write a requirement into the baseline and cover it with a test in the same
+  change) and `check-traceability` (diagnose each way the check fails, and the
+  judgment about what a test may claim to cover). Both drive `reqtrace`, which is
+  installable on its own: `go install
+  github.com/neuronsphere/hmd-cli-bartleby/src/go/reqtrace/cmd/reqtrace@latest`.
 - A Homebrew cask, so installing is one command:
   `brew install neuronsphere/tap/bartleby`. The tap prefix is required; bartleby
   is not in Homebrew core. Linux installs come from the release tarballs, since
@@ -15,6 +31,14 @@ the Python entrypoint is no longer the product — the Go binary is.
 
 ### Changed
 
+- The skills and agents moved to `src/go/bartleby/{skills,agents}/` so the Go
+  binary can embed them. The install rules they share — idempotence, never
+  clobbering a local edit, reporting each outcome — live in one place
+  (`internal/bundle`), so the two cannot drift apart.
+  `setup.py` copies them from there, so the Python package still ships the same
+  files from one source. Their own instructions now say `bartleby` rather than
+  the legacy `hmd bartleby`.
+- `meta-data/VERSION` is `2.0.0`, matching the release.
 - `.goreleaser.yaml` publishes a `homebrew_casks` entry instead of the
   deprecated `brews` one. GoReleaser deprecated the formulae it generated for
   pre-compiled binaries; casks are the supported path. The cask clears
