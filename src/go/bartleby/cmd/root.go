@@ -126,7 +126,8 @@ func init() {
 		updateImageCmd,
 		configureCmd,
 		explainCmd,
-		skillsCmd,
+		skillCmds.root,
+		agentCmds.root,
 		versionCmd,
 	)
 }

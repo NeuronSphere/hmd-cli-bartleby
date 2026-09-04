@@ -9,8 +9,9 @@ version_file = repo_dir / "meta-data" / "VERSION"
 with open(version_file, "r") as vfl:
     version = vfl.read().strip()
 
-# Copy agents from src/agents/ into the package for distribution
-src_agents = repo_dir / "src" / "agents"
+# Copy agents into the package for distribution. Like the skills below, they
+# live in the Go module so the Go CLI can embed them into its binary.
+src_agents = repo_dir / "src" / "go" / "bartleby" / "agents"
 pkg_agents = pathlib.Path(__file__).parent / "hmd_cli_bartleby" / "agents"
 
 if src_agents.exists() and src_agents.is_dir():
