@@ -21,8 +21,10 @@ if src_agents.exists() and src_agents.is_dir():
         shutil.rmtree(pkg_agents)
     shutil.copytree(src_agents, pkg_agents)
 
-# Copy skills from src/skills/ into the package for distribution
-src_skills = repo_dir / "src" / "skills"
+# Copy skills into the package for distribution. They live in the Go module so
+# that the Go CLI can embed them into its binary; this keeps the legacy Python
+# package shipping the same files from that one source.
+src_skills = repo_dir / "src" / "go" / "bartleby" / "skills"
 pkg_skills = pathlib.Path(__file__).parent / "hmd_cli_bartleby" / "skills"
 
 if src_skills.exists() and src_skills.is_dir():

@@ -40,6 +40,28 @@ Which builders run, and for which root documents, comes from `bartleby` in
 `meta-data/manifest.json`. [`docs/install_and_run.rst`](docs/install_and_run.rst)
 covers the manifest, every flag, and `$HMD_HOME` configuration.
 
+## Agent skills
+
+The skills that describe how to do documentation and requirements work with
+bartleby are built into the binary:
+
+```bash
+bartleby skills                   # list them
+bartleby skills install           # install to ~/.claude/skills
+bartleby skills install --project # or into .claude/skills in this repository
+```
+
+| Skill | Covers |
+|-------|--------|
+| `add-nerd` | Writing a NERD — a proposal for a change |
+| `add-requirement` | Adding a requirement to the baseline and covering it with a test |
+| `check-traceability` | Fixing a failing traceability check, honestly |
+| `combine-docs` | Stitching several repositories' documentation into one build |
+| `document-api` | Documenting a microservice API in RST |
+
+Installing is safe to repeat, and a skill you have edited locally is reported
+and left alone rather than overwritten.
+
 ## Documentation
 
 | Document | Contents |

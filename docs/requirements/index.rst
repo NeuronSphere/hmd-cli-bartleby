@@ -56,6 +56,8 @@ area segment keeps the ID readable where it matters most — on a test:
      - Explaining a failed build with Claude.
    * - ``TRACE``
      - This traceability process itself.
+   * - ``SKILL``
+     - The agent skills the CLI bundles and installs.
 
 **Tests declare their own coverage**, in the test source rather than in a
 separate list that would drift. A Go test declares it in the doc comment on the
@@ -104,5 +106,6 @@ it *is* verified. There are two, both about pulling a multi-gigabyte image.
    environment
    autodoc
    explain
+   skills
    process
    traceability

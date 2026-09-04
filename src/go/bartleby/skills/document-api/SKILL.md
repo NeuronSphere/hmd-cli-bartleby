@@ -176,7 +176,7 @@ Add the new API reference document to the `docs/index.rst` toctree:
 After generating the documentation, offer to build and preview:
 
 ```bash
-hmd bartleby html
+bartleby html
 ```
 
 The rendered output will be in `./target/bartleby/`.

@@ -99,6 +99,7 @@ the repository into the transform container, and writes output to
     bartleby puml             # render docs/**/*.puml to images
     bartleby update-image     # re-pull the transform image
     bartleby configure        # write defaults to $HMD_HOME/.config/hmd.env
+    bartleby skills           # list the bundled agent skills
     bartleby version          # print the version
 
 Selecting builders and root documents
@@ -214,6 +215,59 @@ Interrupting a build
 
 Ctrl-C cancels the build and removes the container it started, so the next run
 does not trip over a leftover container with the same name.
+
+Agent Skills
+------------
+
+Bartleby ships the agent skills that describe how to do documentation and
+requirements work with it, embedded in the binary. Installing them needs no
+network access and no repository checkout:
+
+.. code-block:: bash
+
+    bartleby skills                       # list what is bundled
+    bartleby skills install               # install all of them to ~/.claude/skills
+    bartleby skills install add-requirement
+    bartleby skills show check-traceability
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 70
+
+   * - Skill
+     - Covers
+   * - ``add-nerd``
+     - Writing a NERD — a proposal for a change — with sphinx-needs directives.
+   * - ``add-requirement``
+     - Adding or amending a requirement in ``docs/requirements/``, and covering
+       it with a test in the same change.
+   * - ``check-traceability``
+     - Diagnosing a failing traceability check: uncovered requirements, untagged
+       tests, a stale matrix, and the judgment about what a tag may claim.
+   * - ``combine-docs``
+     - Stitching several repositories' documentation into one build.
+   * - ``document-api``
+     - Documenting a microservice API in RST.
+
+``--project`` installs into ``.claude/skills`` in the current repository instead
+of the home directory, so the skills travel with a checkout rather than being
+installed once per machine:
+
+.. code-block:: bash
+
+    bartleby skills install --project
+
+Installing is safe to repeat. A skill already present and identical is reported
+as current and left alone; one that **differs** is also left alone, since it may
+carry local edits, and reported so you can look at it. ``--force`` overwrites.
+
+The requirements skills work in any repository, not only this one. They drive
+``reqtrace``, which is published separately under Apache 2.0:
+
+.. code-block:: bash
+
+    go install github.com/neuronsphere/hmd-cli-bartleby/src/go/reqtrace/cmd/reqtrace@latest
+
 
 Configuring Multiple Root Documents
 -----------------------------------

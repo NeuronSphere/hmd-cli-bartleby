@@ -16,7 +16,7 @@ generated from those declarations.
 Summary
 -------
 
-102 requirement items, verified by 146 Go tests and 35 Robot tests.
+112 requirement items, verified by 165 Go tests and 35 Robot tests.
 
 .. list-table::
    :header-rows: 1
@@ -123,6 +123,14 @@ Summary
      - 1
      - 0
    * - SEL_002
+     - 1
+     - 1
+     - 0
+   * - SKILL
+     - 9
+     - 20
+     - 0
+   * - SKILL_007
      - 1
      - 1
      - 0
@@ -416,6 +424,36 @@ Coverage by requirement
    * - :need:`HMD_CLI_BARTLEBY_REQ_SEL_007`
      - buildplan.TestBuildsAreDeterministic
      - implemented
+   * - :need:`HMD_CLI_BARTLEBY_REQ_SKILL_001`
+     - skills.TestSkillsComeFromTheBinary, skills.TestTheRequirementsSkillsAreBundled
+     - implemented
+   * - :need:`HMD_CLI_BARTLEBY_REQ_SKILL_002`
+     - cmd.TestBareSkillsCommandLists, cmd.TestListShowsEverySkillWithItsDescription, skills.TestDescriptionIsReadFromFrontMatter, skills.TestEverySkillHasADescriptionToListIt
+     - implemented
+   * - :need:`HMD_CLI_BARTLEBY_REQ_SKILL_003`
+     - cmd.TestShowPrintsTheSkillAndNothingElse, skills.TestGetReturnsTheSkillVerbatim
+     - implemented
+   * - :need:`HMD_CLI_BARTLEBY_REQ_SKILL_004`
+     - cmd.TestInstallDirDefaultsToTheUserSkillsDirectory, skills.TestDefaultDirIsTheUserLevelSkillsDirectory, skills.TestInstallWritesSkillMdUnderTheSkillsName
+     - implemented
+   * - :need:`HMD_CLI_BARTLEBY_REQ_SKILL_005`
+     - skills.TestSelectTakesAllOrASubset
+     - implemented
+   * - :need:`HMD_CLI_BARTLEBY_REQ_SKILL_006`
+     - skills.TestALocallyEditedSkillIsLeftAlone, skills.TestForceOverwritesADifferingSkill, skills.TestInstallingTwiceChangesNothing
+     - implemented
+   * - :need:`HMD_CLI_BARTLEBY_REQ_SKILL_007`
+     - cmd.TestInstallDirResolvesTheDestinationFlags, skills.TestProjectDirIsInsideTheRepository
+     - implemented
+   * - :need:`HMD_CLI_BARTLEBY_REQ_SKILL_007_SPEC001`
+     - cmd.TestInstallDirResolvesTheDestinationFlags
+     - implemented
+   * - :need:`HMD_CLI_BARTLEBY_REQ_SKILL_008`
+     - skills.TestUnknownSkillNamesWhatIsAvailable
+     - implemented
+   * - :need:`HMD_CLI_BARTLEBY_REQ_SKILL_009`
+     - cmd.TestInstallReportsTheDestinationAndEachOutcome, skills.TestInstallWritesSkillMdUnderTheSkillsName
+     - implemented
    * - :need:`HMD_CLI_BARTLEBY_REQ_SRC_001`
      - sources.TestStageAndCleanup, bartleby_cli: Sources Are Staged Into The Build
      - implemented
@@ -637,6 +675,13 @@ Run with ``make test``. No Docker required.
 
     ``src/go/bartleby/internal/buildplan/buildplan_test.go:301``
 
+.. test:: cmd.TestBareSkillsCommandLists
+    :id: HMD_CLI_BARTLEBY_TEST_GO_3EFB14C5
+    :links: HMD_CLI_BARTLEBY_REQ_SKILL_002
+    :tags: go
+
+    ``src/go/bartleby/cmd/skills_test.go:46``
+
 .. test:: cmd.TestConfigureKeepsShownDefaults
     :id: HMD_CLI_BARTLEBY_TEST_GO_074272B2
     :links: HMD_CLI_BARTLEBY_REQ_CLI_005, HMD_CLI_BARTLEBY_REQ_ENV_004
@@ -714,6 +759,34 @@ Run with ``make test``. No Docker required.
 
     ``src/go/bartleby/cmd/root_test.go:51``
 
+.. test:: cmd.TestInstallDirDefaultsToTheUserSkillsDirectory
+    :id: HMD_CLI_BARTLEBY_TEST_GO_4DD04E11
+    :links: HMD_CLI_BARTLEBY_REQ_SKILL_004
+    :tags: go
+
+    ``src/go/bartleby/cmd/skills_test.go:96``
+
+.. test:: cmd.TestInstallDirResolvesTheDestinationFlags
+    :id: HMD_CLI_BARTLEBY_TEST_GO_834FAFE6
+    :links: HMD_CLI_BARTLEBY_REQ_SKILL_007, HMD_CLI_BARTLEBY_REQ_SKILL_007_SPEC001
+    :tags: go
+
+    ``src/go/bartleby/cmd/skills_test.go:107``
+
+.. test:: cmd.TestInstallReportsTheDestinationAndEachOutcome
+    :id: HMD_CLI_BARTLEBY_TEST_GO_CCCC7BCE
+    :links: HMD_CLI_BARTLEBY_REQ_SKILL_009
+    :tags: go
+
+    ``src/go/bartleby/cmd/skills_test.go:71``
+
+.. test:: cmd.TestListShowsEverySkillWithItsDescription
+    :id: HMD_CLI_BARTLEBY_TEST_GO_7A5A7D11
+    :links: HMD_CLI_BARTLEBY_REQ_SKILL_002
+    :tags: go
+
+    ``src/go/bartleby/cmd/skills_test.go:32``
+
 .. test:: cmd.TestRepoName
     :id: HMD_CLI_BARTLEBY_TEST_GO_CB8661D6
     :links: HMD_CLI_BARTLEBY_REQ_MAN_004
@@ -748,6 +821,13 @@ Run with ``make test``. No Docker required.
     :tags: go
 
     ``src/go/bartleby/cmd/root_test.go:300``
+
+.. test:: cmd.TestShowPrintsTheSkillAndNothingElse
+    :id: HMD_CLI_BARTLEBY_TEST_GO_C3D98FE3
+    :links: HMD_CLI_BARTLEBY_REQ_SKILL_003
+    :tags: go
+
+    ``src/go/bartleby/cmd/skills_test.go:58``
 
 .. test:: cmd.TestTruthy
     :id: HMD_CLI_BARTLEBY_TEST_GO_E4106ACD
@@ -1434,6 +1514,97 @@ Run with ``make test``. No Docker required.
     :tags: go
 
     ``src/go/bartleby/internal/sanitize/sanitize_test.go:6``
+
+.. test:: skills.TestALocallyEditedSkillIsLeftAlone
+    :id: HMD_CLI_BARTLEBY_TEST_GO_AF214A16
+    :links: HMD_CLI_BARTLEBY_REQ_SKILL_006
+    :tags: go
+
+    ``src/go/bartleby/skills/skills_test.go:189``
+
+.. test:: skills.TestDefaultDirIsTheUserLevelSkillsDirectory
+    :id: HMD_CLI_BARTLEBY_TEST_GO_1F2AD024
+    :links: HMD_CLI_BARTLEBY_REQ_SKILL_004
+    :tags: go
+
+    ``src/go/bartleby/skills/skills_test.go:153``
+
+.. test:: skills.TestDescriptionIsReadFromFrontMatter
+    :id: HMD_CLI_BARTLEBY_TEST_GO_41E76E95
+    :links: HMD_CLI_BARTLEBY_REQ_SKILL_002
+    :tags: go
+
+    ``src/go/bartleby/skills/skills_test.go:51``
+
+.. test:: skills.TestEverySkillHasADescriptionToListIt
+    :id: HMD_CLI_BARTLEBY_TEST_GO_4D3E2F18
+    :links: HMD_CLI_BARTLEBY_REQ_SKILL_002
+    :tags: go
+
+    ``src/go/bartleby/skills/skills_test.go:42``
+
+.. test:: skills.TestForceOverwritesADifferingSkill
+    :id: HMD_CLI_BARTLEBY_TEST_GO_533B6D2C
+    :links: HMD_CLI_BARTLEBY_REQ_SKILL_006
+    :tags: go
+
+    ``src/go/bartleby/skills/skills_test.go:221``
+
+.. test:: skills.TestGetReturnsTheSkillVerbatim
+    :id: HMD_CLI_BARTLEBY_TEST_GO_E1594BBC
+    :links: HMD_CLI_BARTLEBY_REQ_SKILL_003
+    :tags: go
+
+    ``src/go/bartleby/skills/skills_test.go:74``
+
+.. test:: skills.TestInstallWritesSkillMdUnderTheSkillsName
+    :id: HMD_CLI_BARTLEBY_TEST_GO_F3382B30
+    :links: HMD_CLI_BARTLEBY_REQ_SKILL_004, HMD_CLI_BARTLEBY_REQ_SKILL_009
+    :tags: go
+
+    ``src/go/bartleby/skills/skills_test.go:120``
+
+.. test:: skills.TestInstallingTwiceChangesNothing
+    :id: HMD_CLI_BARTLEBY_TEST_GO_DF1D2E2E
+    :links: HMD_CLI_BARTLEBY_REQ_SKILL_006
+    :tags: go
+
+    ``src/go/bartleby/skills/skills_test.go:171``
+
+.. test:: skills.TestProjectDirIsInsideTheRepository
+    :id: HMD_CLI_BARTLEBY_TEST_GO_6782404C
+    :links: HMD_CLI_BARTLEBY_REQ_SKILL_007
+    :tags: go
+
+    ``src/go/bartleby/skills/skills_test.go:164``
+
+.. test:: skills.TestSelectTakesAllOrASubset
+    :id: HMD_CLI_BARTLEBY_TEST_GO_365CDE24
+    :links: HMD_CLI_BARTLEBY_REQ_SKILL_005
+    :tags: go
+
+    ``src/go/bartleby/skills/skills_test.go:104``
+
+.. test:: skills.TestSkillsComeFromTheBinary
+    :id: HMD_CLI_BARTLEBY_TEST_GO_C39EEDDF
+    :links: HMD_CLI_BARTLEBY_REQ_SKILL_001
+    :tags: go
+
+    ``src/go/bartleby/skills/skills_test.go:11``
+
+.. test:: skills.TestTheRequirementsSkillsAreBundled
+    :id: HMD_CLI_BARTLEBY_TEST_GO_DC4A5B60
+    :links: HMD_CLI_BARTLEBY_REQ_SKILL_001
+    :tags: go
+
+    ``src/go/bartleby/skills/skills_test.go:30``
+
+.. test:: skills.TestUnknownSkillNamesWhatIsAvailable
+    :id: HMD_CLI_BARTLEBY_TEST_GO_E1FF3F6B
+    :links: HMD_CLI_BARTLEBY_REQ_SKILL_008
+    :tags: go
+
+    ``src/go/bartleby/skills/skills_test.go:90``
 
 .. test:: sources.TestCleanupWithNothingStaged
     :id: HMD_CLI_BARTLEBY_TEST_GO_128A07D4
