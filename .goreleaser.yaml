@@ -1,4 +1,12 @@
+version: 2
+
 project_name: bartleby
+
+# GoReleaser picks its release provider from whichever token it finds in the
+# environment, so a GITLAB_TOKEN exported for unrelated work is enough to make
+# it publish here as a GitLab project and generate a cask full of dead
+# gitlab.com URLs. Pin it.
+force_token: github
 
 before:
   hooks:
@@ -18,24 +26,35 @@ builds:
       - arm64
 
 archives:
-  - format: tar.gz
+  - formats:
+      - tar.gz
     name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
 
-brews:
+# A cask rather than a formula: Homebrew formulae are meant to build from
+# source, and GoReleaser deprecated the pre-compiled-binary formulas it used to
+# generate. Casks are macOS-only, so Linux installs come from the release
+# tarballs or `make build` — see docs/install_and_run.rst.
+homebrew_casks:
   - repository:
       owner: neuronsphere
       name: homebrew-tap
-    directory: Formula
+    directory: Casks
     homepage: https://github.com/neuronsphere/hmd-cli-bartleby
     description: "Render reStructuredText documentation using Sphinx inside Docker"
+    url:
+      verified: github.com/neuronsphere/hmd-cli-bartleby
     caveats: |
       bartleby requires Docker to run documentation builds.
       If you use Colima, make sure it is running:
         colima start
-    install: |
-      bin.install "bartleby"
-    test: |
-      assert_match "bartleby", shell_output("#{bin}/bartleby --help")
+    hooks:
+      post:
+        # The binary is not signed or notarized, so Gatekeeper would refuse to
+        # run it. Without this, `bartleby` dies on first launch.
+        install: |
+          if OS.mac?
+            system_command "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "#{staged_path}/bartleby"]
+          end
 
 release:
   github:

@@ -20,11 +20,40 @@ jobs:
         with:
           go-version-file: src/go/bartleby/go.mod
 
-      - uses: goreleaser/goreleaser-action@v6
+      # A release cut from a workstation publishes the tag itself, and that tag
+      # arriving here fires this workflow. Releasing the same tag twice fails,
+      # so recognise the finished work and stop.
+      - id: existing
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+            echo "published=true" >> "$GITHUB_OUTPUT"
+            echo "::notice::$GITHUB_REF_NAME is already released; nothing to do."
+          else
+            echo "published=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      # The built-in GITHUB_TOKEN cannot write to the tap, so the cask needs a
+      # PAT. Without it, publish the binaries rather than failing the release.
+      - id: tap
+        if: steps.existing.outputs.published == 'false'
+        env:
+          TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+        run: |
+          if [ -n "$TAP_TOKEN" ]; then
+            echo "skip=" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=--skip=homebrew_casks" >> "$GITHUB_OUTPUT"
+            echo "::warning::HOMEBREW_TAP_TOKEN is not set, so the Homebrew cask was not updated. Users will not see this version from brew until it is."
+          fi
+
+      - if: steps.existing.outputs.published == 'false'
+        uses: goreleaser/goreleaser-action@v6
         with:
-          args: release --clean
+          args: release --clean ${{ steps.tap.outputs.skip }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # PAT with repo scope on neuronsphere/homebrew-tap
-          # so GoReleaser can push the updated formula
+          # PAT with write access to neuronsphere/homebrew-tap so GoReleaser can
+          # commit the updated cask.
           HOMEBREW_TAP_GITHUB_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}

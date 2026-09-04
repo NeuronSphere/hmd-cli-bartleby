@@ -1,5 +1,40 @@
 # Changelog
 
+## 2026-09-04
+
+First released version of the Go CLI: **v2.0.0**. The major bump records that
+the Python entrypoint is no longer the product — the Go binary is.
+
+### Added
+
+- A Homebrew cask, so installing is one command:
+  `brew install neuronsphere/tap/bartleby`. The tap prefix is required; bartleby
+  is not in Homebrew core. Linux installs come from the release tarballs, since
+  Homebrew supports casks on macOS only.
+- A `README.md`, which the repository did not have.
+
+### Changed
+
+- `.goreleaser.yaml` publishes a `homebrew_casks` entry instead of the
+  deprecated `brews` one. GoReleaser deprecated the formulae it generated for
+  pre-compiled binaries; casks are the supported path. The cask clears
+  `com.apple.quarantine` in a `postflight` hook, without which Gatekeeper kills
+  an unsigned binary on first run.
+- `force_token: github` pins the release provider. GoReleaser picks it from
+  whichever token is in the environment, and a `GITLAB_TOKEN` exported for
+  unrelated work was enough to make it generate a cask pointing at `gitlab.com`
+  URLs that do not exist.
+
+### Fixed
+
+- The release workflow no longer republishes a tag that has already been
+  released, which is what a release cut from a workstation produces. When
+  `HOMEBREW_TAP_TOKEN` is absent it publishes the binaries and warns, instead of
+  failing the release.
+- `archives.format` renamed to `formats`, and the config declares `version: 2`.
+  As it stood, `goreleaser check` failed.
+
+
 ## 2026-09-01
 
 ### Added
