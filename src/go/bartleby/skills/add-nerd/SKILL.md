@@ -143,7 +143,7 @@ Check `docs/index.rst` and ensure `proposals/index` is in the toctree. If not, a
 After creating the NERD, offer to build:
 
 ```bash
-hmd bartleby html
+bartleby html
 ```
 
 ## Example
@@ -184,7 +184,7 @@ is already available in the Bartleby transform image.
     :links: HMD_CLI_BARTLEBY_NERD002
     :status: proposed
 
-    A new ``hmd bartleby slides`` subcommand will invoke the ``revealjs``
+    A new ``bartleby slides`` subcommand will invoke the ``revealjs``
     builder. It will follow the same pattern as the existing ``html`` and
     ``pdf`` subcommands, filtering roots that have ``revealjs`` in their
     builders list.
@@ -196,5 +196,5 @@ is already available in the Bartleby transform image.
 
     The ``bartleby.roots`` manifest configuration will accept ``revealjs``
     as a valid builder name. Roots that include this builder will be
-    rendered as slideshows when ``hmd bartleby slides`` is invoked.
+    rendered as slideshows when ``bartleby slides`` is invoked.
 ```

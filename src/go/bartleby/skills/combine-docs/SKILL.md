@@ -114,19 +114,19 @@ The combined documentation build requires two steps:
 hmd build -pdo
 
 # Step 2: Build documentation (stages sources, injects toctrees, builds, then cleans up)
-hmd bartleby
+bartleby
 ```
 
 Or as a single flow:
 
 ```bash
-hmd build -pdo && hmd bartleby
+hmd build -pdo && bartleby
 ```
 
 **What happens during the build:**
 
 1. `hmd build -pdo` downloads artifacts from each source repo into `target/artifacts/`
-2. `hmd bartleby` reads `bartleby.sources` from the manifest
+2. `bartleby` reads `bartleby.sources` from the manifest
 3. Source docs are staged into `docs/_sources/<key>/` (temporary copy)
 4. Toctree entries are injected into `index.rst` (at the marker or using fallback)
 5. Sphinx builds the combined documentation
@@ -137,7 +137,7 @@ hmd build -pdo && hmd bartleby
 After setup, offer to run the build and verify:
 
 ```bash
-hmd build -pdo && hmd bartleby html
+hmd build -pdo && bartleby html
 ```
 
 Check `./target/bartleby/` for the rendered output containing all source documentation.
@@ -202,7 +202,7 @@ After:
 ### Build Commands
 
 ```bash
-hmd build -pdo && hmd bartleby html
+hmd build -pdo && bartleby html
 ```
 
 The rendered HTML at `./target/bartleby/` will include the main repo's docs plus toctree sections for "Authentication Library" and "Gozer Microservice", each linking to the sourced documentation.
