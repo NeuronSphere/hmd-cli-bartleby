@@ -254,6 +254,22 @@ binary. Installing them needs no network access and no repository checkout:
      - Deciding what kind of document a piece of content is and where it
        belongs, using the Diátaxis four-mode model, and auditing a doc set
        against it.
+   * - ``write-from-template``
+     - Choosing a document template for that kind and filling it in — a rubric
+       over The Good Docs Project templates.
+   * - ``diagram-c4``
+     - Architecture diagrams with the C4 model, in PlantUML, rendered by this
+       pipeline. The C4 macros come from PlantUML's standard library, so they
+       need no network at render time.
+   * - ``review-prose``
+     - Style review against the Google developer documentation style guide.
+   * - ``review-plain-language``
+     - The harder question a style guide does not ask: can the reader find what
+       they need, understand it first time, and act on it. Also where the
+       :rfc:`2119` keyword discipline belongs.
+   * - ``review-vale``
+     - Enforcing the mechanical half of a style review with Vale, so human
+       review is spent on judgment.
 
 Agents work the same way, under ``bartleby agents``:
 
@@ -287,6 +303,11 @@ rather than being installed once per machine:
 Installing is safe to repeat. One already present and identical is reported as
 current and left alone; one that **differs** is also left alone, since it may
 carry local edits, and reported so you can look at it. ``--force`` overwrites.
+
+The review skills stack rather than duplicate: ``review-vale`` catches what a
+machine can, ``review-prose`` applies a style guide by judgment, and
+``review-plain-language`` asks whether the document works at all. Run them in
+that order.
 
 The requirements skills work in any repository, not only this one. They drive
 ``reqtrace``, which is licensed Apache-2.0 and installs on its own — no Docker,

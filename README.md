@@ -63,6 +63,11 @@ bartleby agents install           # install to ~/.claude/agents
 | `combine-docs` | Stitching several repositories' documentation into one build |
 | `document-api` | Documenting a microservice API in RST |
 | `plan-docs` | Deciding what kind of document something is, and where it belongs (Diátaxis) |
+| `write-from-template` | Picking a document template and filling it in (Good Docs, MIT-0) |
+| `diagram-c4` | Architecture diagrams with the C4 model in PlantUML |
+| `review-prose` | Style review against the Google developer documentation style guide |
+| `review-plain-language` | Whether the reader can find, understand, and act on it |
+| `review-vale` | Enforcing the mechanical half of style review with Vale, in CI |
 
 | Agent | Covers |
 |-------|--------|
