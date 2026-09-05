@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 2026-09-04 — v2.1.0
 
 ### Added
 
@@ -37,7 +37,7 @@
   `go install`. `docs/releasing.rst` spells out the consequence.
 
 
-## 2026-09-04
+## 2026-09-04 — v2.0.0
 
 First released version of the Go CLI: **v2.0.0**. The major bump records that
 the Python entrypoint is no longer the product — the Go binary is.
