@@ -250,6 +250,10 @@ binary. Installing them needs no network access and no repository checkout:
      - Stitching several repositories' documentation into one build.
    * - ``document-api``
      - Documenting a microservice API in RST.
+   * - ``plan-docs``
+     - Deciding what kind of document a piece of content is and where it
+       belongs, using the Diátaxis four-mode model, and auditing a doc set
+       against it.
 
 Agents work the same way, under ``bartleby agents``:
 

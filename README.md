@@ -62,6 +62,7 @@ bartleby agents install           # install to ~/.claude/agents
 | `check-traceability` | Fixing a failing traceability check, honestly |
 | `combine-docs` | Stitching several repositories' documentation into one build |
 | `document-api` | Documenting a microservice API in RST |
+| `plan-docs` | Deciding what kind of document something is, and where it belongs (Diátaxis) |
 
 | Agent | Covers |
 |-------|--------|

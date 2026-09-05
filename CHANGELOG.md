@@ -1,5 +1,17 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
+- `plan-docs` skill: decide which of the four Diátaxis modes a piece of content
+  belongs to — tutorial, how-to, reference, explanation — and audit an existing
+  doc set against them. Written as a restatement in our own words, citing
+  <https://diataxis.fr>, and quoting nothing: Diátaxis is CC BY-SA 4.0, so
+  verbatim inclusion would make the file adapted material and oblige it to carry
+  CC BY-SA 4.0 too. The skill says so, in case someone later wants to quote it.
+
+
 ## 2026-09-04 — v2.1.0
 
 ### Added
