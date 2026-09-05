@@ -11,9 +11,11 @@ force_token: github
 before:
   hooks:
     - go mod tidy -C src/go/bartleby
+    - go mod tidy -C src/go/reqtrace
 
 builds:
-  - main: .
+  - id: bartleby
+    main: .
     dir: src/go/bartleby
     binary: bartleby
     ldflags:
@@ -25,17 +27,48 @@ builds:
       - amd64
       - arm64
 
+  # reqtrace ships from this release too, but as its own binary, archive, and
+  # cask. GoReleaser's monorepo support — which would let the nested module
+  # release off its own src/go/reqtrace/v* tags — is Pro-only, so the tag that
+  # versions it is Bartleby's. Its Go module keeps its own tag line for
+  # `go install`; see docs/releasing.rst.
+  - id: reqtrace
+    main: ./cmd/reqtrace
+    dir: src/go/reqtrace
+    binary: reqtrace
+    ldflags:
+      - -X main.version={{ .Version }}
+    goos:
+      - darwin
+      - linux
+    goarch:
+      - amd64
+      - arm64
+
 archives:
-  - formats:
+  - id: bartleby
+    ids:
+      - bartleby
+    formats:
       - tar.gz
-    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    name_template: "bartleby_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+
+  - id: reqtrace
+    ids:
+      - reqtrace
+    formats:
+      - tar.gz
+    name_template: "reqtrace_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
 
 # A cask rather than a formula: Homebrew formulae are meant to build from
 # source, and GoReleaser deprecated the pre-compiled-binary formulas it used to
 # generate. Casks are macOS-only, so Linux installs come from the release
 # tarballs or `make build` — see docs/install_and_run.rst.
 homebrew_casks:
-  - repository:
+  - name: bartleby
+    ids:
+      - bartleby
+    repository:
       owner: neuronsphere
       name: homebrew-tap
     directory: Casks
@@ -54,6 +87,32 @@ homebrew_casks:
         install: |
           if OS.mac?
             system_command "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "#{staged_path}/bartleby"]
+          end
+
+  # A separate cask, not a second binary in Bartleby's: two casks cannot both
+  # link the same name, so bundling reqtrace would make installing it on its own
+  # impossible — and it is meant to be usable by projects that do not want
+  # Bartleby or a BSL dependency.
+  - name: reqtrace
+    ids:
+      - reqtrace
+    repository:
+      owner: neuronsphere
+      name: homebrew-tap
+    directory: Casks
+    homepage: https://github.com/neuronsphere/hmd-cli-bartleby/tree/main/src/go/reqtrace
+    description: "Generate and check a requirements traceability matrix from sphinx-needs directives and test annotations"
+    url:
+      verified: github.com/neuronsphere/hmd-cli-bartleby
+    caveats: |
+      reqtrace needs nothing else installed — no Docker, no Python.
+      Run it from a repository with requirements in docs/requirements/:
+        reqtrace -check
+    hooks:
+      post:
+        install: |
+          if OS.mac?
+            system_command "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "#{staged_path}/reqtrace"]
           end
 
 release:

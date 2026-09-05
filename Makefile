@@ -1,6 +1,13 @@
 BINARY    := bartleby
 GO_DIR    := src/go/bartleby
+REQTRACE_DIR := src/go/reqtrace
 BUILD_DIR := $(GO_DIR)/build
+
+# Two Go modules live here: the CLI, and reqtrace, which is carved out under
+# Apache-2.0 so projects that cannot take a BSL dependency can consume it.
+# Anything that checks sources has to walk both, or the carve-out quietly stops
+# being tested while its tests still count as requirement coverage.
+MODULES   := $(GO_DIR) $(REQTRACE_DIR)
 
 GO        := go
 GOFLAGS   :=
@@ -31,7 +38,10 @@ build:
 
 ## test: run the Go unit tests
 test:
-	cd $(GO_DIR) && $(GO) test $(GOFLAGS) ./...
+	@for m in $(MODULES); do \
+		echo "==> $$m"; \
+		( cd $$m && $(GO) test $(GOFLAGS) ./... ) || exit 1; \
+	done
 
 ## test-verbose: run the Go unit tests with verbose output
 test-verbose:
@@ -39,41 +49,58 @@ test-verbose:
 
 ## test-race: run the Go unit tests under the race detector
 test-race:
-	cd $(GO_DIR) && $(GO) test $(GOFLAGS) -race -count=1 ./...
+	@for m in $(MODULES); do \
+		echo "==> $$m"; \
+		( cd $$m && $(GO) test $(GOFLAGS) -race -count=1 ./... ) || exit 1; \
+	done
 
 ## cover: report unit-test coverage per package
 cover:
-	cd $(GO_DIR) && $(GO) test $(GOFLAGS) -cover ./...
+	@for m in $(MODULES); do \
+		echo "==> $$m"; \
+		( cd $$m && $(GO) test $(GOFLAGS) -cover ./... ) || exit 1; \
+	done
 
 ## vet: run go vet
 vet:
-	cd $(GO_DIR) && $(GO) vet ./...
+	@for m in $(MODULES); do \
+		echo "==> $$m"; \
+		( cd $$m && $(GO) vet ./... ) || exit 1; \
+	done
 
 ## fmt: format the Go sources
 fmt:
-	cd $(GO_DIR) && gofmt -w .
+	@for m in $(MODULES); do \
+		echo "==> $$m"; \
+		( cd $$m && gofmt -w . ) || exit 1; \
+	done
 
 ## fmt-check: fail if any Go source is unformatted
 fmt-check:
-	@cd $(GO_DIR) && files=$$(gofmt -l .); \
-	if [ -n "$$files" ]; then \
-		echo "unformatted files (run make fmt):"; echo "$$files"; exit 1; \
-	fi
+	@for m in $(MODULES); do \
+		files=$$(cd $$m && gofmt -l .); \
+		if [ -n "$$files" ]; then \
+			echo "unformatted files in $$m (run make fmt):"; echo "$$files"; exit 1; \
+		fi; \
+	done
 
 ## reqs: regenerate docs/requirements/traceability.rst from the requirements and test annotations
 reqs:
-	cd $(GO_DIR) && $(GO) run ./tools/reqtrace
+	cd $(REQTRACE_DIR) && $(GO) run ./cmd/reqtrace -repo $(CURDIR)
 
 ## reqs-check: fail if traceability has a gap or the generated matrix is stale
 reqs-check:
-	cd $(GO_DIR) && $(GO) run ./tools/reqtrace -check
+	cd $(REQTRACE_DIR) && $(GO) run ./cmd/reqtrace -repo $(CURDIR) -check
 
 ## check: fmt-check + vet + unit tests + traceability — what CI should run
 check: fmt-check vet test reqs-check
 
 ## tidy: tidy and verify Go modules
 tidy:
-	cd $(GO_DIR) && $(GO) mod tidy && $(GO) mod verify
+	@for m in $(MODULES); do \
+		echo "==> $$m"; \
+		( cd $$m && $(GO) mod tidy && $(GO) mod verify ) || exit 1; \
+	done
 
 ## clean: remove build artifacts and test output
 clean:

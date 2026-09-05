@@ -1,5 +1,42 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
+- `bartleby reqs` and `bartleby reqs --check` — the traceability tool is now
+  reachable from the CLI, so anyone who has bartleby needs no second install.
+  It and the standalone `reqtrace` binary are two front doors onto one
+  `reqtrace.Run`, rather than each orchestrating the steps, so they cannot drift
+  into disagreeing about what a check means. Requirement `TRACE_010`.
+- `reqtrace` ships as its own Homebrew cask: `brew install neuronsphere/tap/reqtrace`.
+  A separate cask rather than a second binary in bartleby's, because two casks
+  cannot both link the same binary name — bundling it would have made installing
+  it alone impossible, and being adoptable without bartleby (or its BSL licence)
+  is the reason it was carved out.
+- `reqtrace -version`, injected at build time, defaulting to `dev`. Tested by
+  building with the ldflag and running the binary, since the failure it guards
+  against is the ldflag silently ceasing to apply.
+- Requirements `TRACE_008` and `TRACE_009` for the carve-out and the version
+  flag. The tests assert the module path, the absence of any `require`
+  directive, and the Apache licence, rather than trusting review to notice a
+  dependency creeping in.
+
+### Changed
+
+- `reqtrace` moved out of the CLI module into `src/go/reqtrace`, its own
+  Apache-2.0 module with no dependency outside the standard library. The CLI
+  module no longer contains it at all.
+- Every Makefile target that checks sources — `test`, `test-race`, `cover`,
+  `vet`, `fmt`, `fmt-check`, `tidy` — now walks both modules. They only covered
+  `src/go/bartleby`, so after the carve-out `make check` stopped testing
+  reqtrace while the traceability matrix still counted its tests as coverage.
+- One release tag now publishes eight archives and two casks. GoReleaser's
+  per-module tag support (`monorepo.tag_prefix`) is Pro-only, so reqtrace's cask
+  version tracks the bartleby release; its Go module keeps its own tag line for
+  `go install`. `docs/releasing.rst` spells out the consequence.
+
+
 ## 2026-09-04
 
 First released version of the Go CLI: **v2.0.0**. The major bump records that

@@ -16,7 +16,7 @@ generated from those declarations.
 Summary
 -------
 
-118 requirement items, verified by 174 Go tests and 35 Robot tests.
+122 requirement items, verified by 182 Go tests and 35 Robot tests.
 
 .. list-table::
    :header-rows: 1
@@ -151,8 +151,8 @@ Summary
      - 4
      - 0
    * - TRACE
-     - 7
-     - 18
+     - 10
+     - 26
      - 0
    * - TRACE_002
      - 1
@@ -162,6 +162,10 @@ Summary
      - 1
      - 1
      - 0
+   * - TRACE_008
+     - 1
+     - 0
+     - 1
 
 Coverage by requirement
 -----------------------
@@ -527,6 +531,18 @@ Coverage by requirement
    * - :need:`HMD_CLI_BARTLEBY_REQ_TRACE_007`
      - reqtrace.TestValidateOrdersProblemsStably, reqtrace.TestValidateReportsUncoveredRequirements
      - implemented
+   * - :need:`HMD_CLI_BARTLEBY_REQ_TRACE_008`
+     - main.TestLicenceIsApacheNotBSL, main.TestReqtraceHasNoDependenciesToInherit, main.TestReqtraceIsItsOwnModule
+     - implemented
+   * - :need:`HMD_CLI_BARTLEBY_REQ_TRACE_008_SPEC001`
+     - *exempt: see the requirement text*
+     - implemented
+   * - :need:`HMD_CLI_BARTLEBY_REQ_TRACE_009`
+     - main.TestVersionDefaultsToDev, main.TestVersionIsInjectedAtBuildTime
+     - implemented
+   * - :need:`HMD_CLI_BARTLEBY_REQ_TRACE_010`
+     - cmd.TestReqsCheckFailsOnAGap, cmd.TestReqsGeneratesTheMatrix, cmd.TestReqsQuietPrintsNothingOnSuccess
+     - implemented
 
 Requirements and the tests that verify them
 -------------------------------------------
@@ -886,6 +902,27 @@ Run with ``make test``. No Docker required.
 
     ``src/go/bartleby/cmd/root_test.go:247``
 
+.. test:: cmd.TestReqsCheckFailsOnAGap
+    :id: HMD_CLI_BARTLEBY_TEST_GO_56ABD7A5
+    :links: HMD_CLI_BARTLEBY_REQ_TRACE_010
+    :tags: go
+
+    ``src/go/bartleby/cmd/reqs_test.go:95``
+
+.. test:: cmd.TestReqsGeneratesTheMatrix
+    :id: HMD_CLI_BARTLEBY_TEST_GO_4613D722
+    :links: HMD_CLI_BARTLEBY_REQ_TRACE_010
+    :tags: go
+
+    ``src/go/bartleby/cmd/reqs_test.go:68``
+
+.. test:: cmd.TestReqsQuietPrintsNothingOnSuccess
+    :id: HMD_CLI_BARTLEBY_TEST_GO_286EB09F
+    :links: HMD_CLI_BARTLEBY_REQ_TRACE_010
+    :tags: go
+
+    ``src/go/bartleby/cmd/reqs_test.go:120``
+
 .. test:: cmd.TestResolveConfidential
     :id: HMD_CLI_BARTLEBY_TEST_GO_D13A9289
     :links: HMD_CLI_BARTLEBY_REQ_CFG_005, HMD_CLI_BARTLEBY_REQ_CFG_005_SPEC001
@@ -1166,6 +1203,41 @@ Run with ``make test``. No Docker required.
 
     ``src/go/bartleby/internal/hmdenv/hmdenv_test.go:179``
 
+.. test:: main.TestLicenceIsApacheNotBSL
+    :id: HMD_CLI_BARTLEBY_TEST_GO_39B5D34B
+    :links: HMD_CLI_BARTLEBY_REQ_TRACE_008
+    :tags: go
+
+    ``src/go/reqtrace/cmd/reqtrace/main_test.go:75``
+
+.. test:: main.TestReqtraceHasNoDependenciesToInherit
+    :id: HMD_CLI_BARTLEBY_TEST_GO_1DD23C2B
+    :links: HMD_CLI_BARTLEBY_REQ_TRACE_008
+    :tags: go
+
+    ``src/go/reqtrace/cmd/reqtrace/main_test.go:46``
+
+.. test:: main.TestReqtraceIsItsOwnModule
+    :id: HMD_CLI_BARTLEBY_TEST_GO_6329D573
+    :links: HMD_CLI_BARTLEBY_REQ_TRACE_008
+    :tags: go
+
+    ``src/go/reqtrace/cmd/reqtrace/main_test.go:63``
+
+.. test:: main.TestVersionDefaultsToDev
+    :id: HMD_CLI_BARTLEBY_TEST_GO_B3D74E02
+    :links: HMD_CLI_BARTLEBY_REQ_TRACE_009
+    :tags: go
+
+    ``src/go/reqtrace/cmd/reqtrace/main_test.go:34``
+
+.. test:: main.TestVersionIsInjectedAtBuildTime
+    :id: HMD_CLI_BARTLEBY_TEST_GO_1F39FBAE
+    :links: HMD_CLI_BARTLEBY_REQ_TRACE_009
+    :tags: go
+
+    ``src/go/reqtrace/cmd/reqtrace/main_test.go:13``
+
 .. test:: manifest.TestConfigBuilderConfig
     :id: HMD_CLI_BARTLEBY_TEST_GO_C3F5F5F7
     :links: HMD_CLI_BARTLEBY_REQ_CFG_001
@@ -1283,126 +1355,126 @@ Run with ``make test``. No Docker required.
     :links: HMD_CLI_BARTLEBY_REQ_TRACE_006
     :tags: go
 
-    ``src/go/bartleby/internal/reqtrace/reqtrace_test.go:494``
+    ``src/go/reqtrace/reqtrace_test.go:519``
 
 .. test:: reqtrace.TestExpandID
     :id: HMD_CLI_BARTLEBY_TEST_GO_74A0C9B5
     :links: HMD_CLI_BARTLEBY_REQ_TRACE_002
     :tags: go
 
-    ``src/go/bartleby/internal/reqtrace/reqtrace_test.go:275``
+    ``src/go/reqtrace/reqtrace_test.go:279``
 
 .. test:: reqtrace.TestFindRepoRoot
     :id: HMD_CLI_BARTLEBY_TEST_GO_FD62435F
     :links: HMD_CLI_BARTLEBY_REQ_TRACE_001
     :tags: go
 
-    ``src/go/bartleby/internal/reqtrace/reqtrace_test.go:562``
+    ``src/go/reqtrace/reqtrace_test.go:587``
 
 .. test:: reqtrace.TestLoadReadsTheWholeRepository
     :id: HMD_CLI_BARTLEBY_TEST_GO_CCCB4CE7
     :links: HMD_CLI_BARTLEBY_REQ_TRACE_001, HMD_CLI_BARTLEBY_REQ_TRACE_002
     :tags: go
 
-    ``src/go/bartleby/internal/reqtrace/reqtrace_test.go:521``
+    ``src/go/reqtrace/reqtrace_test.go:546``
 
 .. test:: reqtrace.TestLoadWithoutARequirementsDirectory
     :id: HMD_CLI_BARTLEBY_TEST_GO_6ACE04F6
     :links: HMD_CLI_BARTLEBY_REQ_TRACE_001
     :tags: go
 
-    ``src/go/bartleby/internal/reqtrace/reqtrace_test.go:552``
+    ``src/go/reqtrace/reqtrace_test.go:577``
 
 .. test:: reqtrace.TestNeedIDIsStable
     :id: HMD_CLI_BARTLEBY_TEST_GO_18EB1572
     :links: HMD_CLI_BARTLEBY_REQ_TRACE_006_SPEC001
     :tags: go
 
-    ``src/go/bartleby/internal/reqtrace/reqtrace_test.go:473``
+    ``src/go/reqtrace/reqtrace_test.go:497``
 
 .. test:: reqtrace.TestParseGoTests
     :id: HMD_CLI_BARTLEBY_TEST_GO_1F09D962
     :links: HMD_CLI_BARTLEBY_REQ_TRACE_002
     :tags: go
 
-    ``src/go/bartleby/internal/reqtrace/reqtrace_test.go:149``
+    ``src/go/reqtrace/reqtrace_test.go:153``
 
 .. test:: reqtrace.TestParseGoTestsIgnoresNonTests
     :id: HMD_CLI_BARTLEBY_TEST_GO_6BC45491
     :links: HMD_CLI_BARTLEBY_REQ_TRACE_002_SPEC001
     :tags: go
 
-    ``src/go/bartleby/internal/reqtrace/reqtrace_test.go:188``
+    ``src/go/reqtrace/reqtrace_test.go:192``
 
 .. test:: reqtrace.TestParseGoTestsSkipsRequestedDirectories
     :id: HMD_CLI_BARTLEBY_TEST_GO_31275A9D
     :links: HMD_CLI_BARTLEBY_REQ_TRACE_002
     :tags: go
 
-    ``src/go/bartleby/internal/reqtrace/reqtrace_test.go:210``
+    ``src/go/reqtrace/reqtrace_test.go:214``
 
 .. test:: reqtrace.TestParseRequirements
     :id: HMD_CLI_BARTLEBY_TEST_GO_B2C4268B
     :links: HMD_CLI_BARTLEBY_REQ_TRACE_001
     :tags: go
 
-    ``src/go/bartleby/internal/reqtrace/reqtrace_test.go:62``
+    ``src/go/reqtrace/reqtrace_test.go:66``
 
 .. test:: reqtrace.TestParseRequirementsSkipsTheGeneratedPage
     :id: HMD_CLI_BARTLEBY_TEST_GO_CC3B1F6A
     :links: HMD_CLI_BARTLEBY_REQ_TRACE_001
     :tags: go
 
-    ``src/go/bartleby/internal/reqtrace/reqtrace_test.go:109``
+    ``src/go/reqtrace/reqtrace_test.go:113``
 
 .. test:: reqtrace.TestParseRobotTests
     :id: HMD_CLI_BARTLEBY_TEST_GO_616ABF52
     :links: HMD_CLI_BARTLEBY_REQ_TRACE_002
     :tags: go
 
-    ``src/go/bartleby/internal/reqtrace/reqtrace_test.go:248``
+    ``src/go/reqtrace/reqtrace_test.go:252``
 
 .. test:: reqtrace.TestRenderIsDeterministic
     :id: HMD_CLI_BARTLEBY_TEST_GO_4C8C9A8A
     :links: HMD_CLI_BARTLEBY_REQ_TRACE_006
     :tags: go
 
-    ``src/go/bartleby/internal/reqtrace/reqtrace_test.go:428``
+    ``src/go/reqtrace/reqtrace_test.go:452``
 
 .. test:: reqtrace.TestValidateAcceptsExemptRequirements
     :id: HMD_CLI_BARTLEBY_TEST_GO_E8735AA4
     :links: HMD_CLI_BARTLEBY_REQ_TRACE_003
     :tags: go
 
-    ``src/go/bartleby/internal/reqtrace/reqtrace_test.go:326``
+    ``src/go/reqtrace/reqtrace_test.go:350``
 
 .. test:: reqtrace.TestValidateOrdersProblemsStably
     :id: HMD_CLI_BARTLEBY_TEST_GO_C91FBBD4
     :links: HMD_CLI_BARTLEBY_REQ_TRACE_007
     :tags: go
 
-    ``src/go/bartleby/internal/reqtrace/reqtrace_test.go:401``
+    ``src/go/reqtrace/reqtrace_test.go:425``
 
 .. test:: reqtrace.TestValidateReportsUncoveredRequirements
     :id: HMD_CLI_BARTLEBY_TEST_GO_FE907348
     :links: HMD_CLI_BARTLEBY_REQ_TRACE_003, HMD_CLI_BARTLEBY_REQ_TRACE_007
     :tags: go
 
-    ``src/go/bartleby/internal/reqtrace/reqtrace_test.go:291``
+    ``src/go/reqtrace/reqtrace_test.go:315``
 
 .. test:: reqtrace.TestValidateReportsUnresolvableReferences
     :id: HMD_CLI_BARTLEBY_TEST_GO_E24D3965
     :links: HMD_CLI_BARTLEBY_REQ_TRACE_005
     :tags: go
 
-    ``src/go/bartleby/internal/reqtrace/reqtrace_test.go:370``
+    ``src/go/reqtrace/reqtrace_test.go:394``
 
 .. test:: reqtrace.TestValidateReportsUntaggedTests
     :id: HMD_CLI_BARTLEBY_TEST_GO_3A6FFD3F
     :links: HMD_CLI_BARTLEBY_REQ_TRACE_004
     :tags: go
 
-    ``src/go/bartleby/internal/reqtrace/reqtrace_test.go:341``
+    ``src/go/reqtrace/reqtrace_test.go:365``
 
 .. test:: runner.TestContainerNameIsAlwaysValid
     :id: HMD_CLI_BARTLEBY_TEST_GO_782398E0

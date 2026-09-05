@@ -195,6 +195,7 @@ Where `docs/requirements/` does not exist yet:
 4. Wire the check in:
 
    ```bash
+   brew install neuronsphere/tap/reqtrace   # macOS
    go install github.com/neuronsphere/hmd-cli-bartleby/src/go/reqtrace/cmd/reqtrace@latest
    ```
 
