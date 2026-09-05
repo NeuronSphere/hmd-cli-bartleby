@@ -4,6 +4,11 @@
 
 ### Added
 
+- `bartleby reqs` and `bartleby reqs --check` — the traceability tool is now
+  reachable from the CLI, so anyone who has bartleby needs no second install.
+  It and the standalone `reqtrace` binary are two front doors onto one
+  `reqtrace.Run`, rather than each orchestrating the steps, so they cannot drift
+  into disagreeing about what a check means. Requirement `TRACE_010`.
 - `reqtrace` ships as its own Homebrew cask: `brew install neuronsphere/tap/reqtrace`.
   A separate cask rather than a second binary in bartleby's, because two casks
   cannot both link the same binary name — bundling it would have made installing

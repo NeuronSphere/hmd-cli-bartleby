@@ -99,6 +99,7 @@ the repository into the transform container, and writes output to
     bartleby puml             # render docs/**/*.puml to images
     bartleby update-image     # re-pull the transform image
     bartleby configure        # write defaults to $HMD_HOME/.config/hmd.env
+    bartleby reqs             # generate the requirements traceability matrix
     bartleby skills           # list the bundled agent skills
     bartleby agents           # list the bundled agents
     bartleby version          # print the version
@@ -295,6 +296,16 @@ no Python, nothing outside the Go standard library:
 Its own cask, deliberately: a project can adopt the requirements practice
 without adopting Bartleby. ``reqtrace -check`` needs only a repository with
 requirements in ``docs/requirements/``.
+
+If you already have Bartleby, the same tool is built in — no second install:
+
+.. code-block:: bash
+
+    bartleby reqs             # regenerate docs/requirements/traceability.rst
+    bartleby reqs --check     # fail on a gap or stale output; for CI
+
+Both are front doors onto one function, so they cannot disagree about what a
+check means. Neither needs Docker or Sphinx.
 
 
 Configuring Multiple Root Documents

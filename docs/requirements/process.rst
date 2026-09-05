@@ -121,3 +121,15 @@ its own and its tests are traced the same way everything else is.
     (``goreleaser release --snapshot --skip=publish``, which writes both casks),
     plus installing from the tap. Exercising it in a unit test would mean
     publishing a release.
+
+.. req:: Reachable from the CLI as well
+    :id: HMD_CLI_BARTLEBY_REQ_TRACE_010
+    :status: implemented
+
+    ``bartleby reqs`` shall generate the matrix and ``bartleby reqs --check``
+    shall check it, with the same ``--repo`` and ``--quiet`` behaviour as the
+    standalone tool. Someone who already has the CLI shall not need to install a
+    second binary.
+
+    Both entry points shall call one function rather than each orchestrating the
+    steps, so that they cannot drift into disagreeing about what a check means.

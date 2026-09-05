@@ -16,7 +16,7 @@ generated from those declarations.
 Summary
 -------
 
-121 requirement items, verified by 179 Go tests and 35 Robot tests.
+122 requirement items, verified by 182 Go tests and 35 Robot tests.
 
 .. list-table::
    :header-rows: 1
@@ -151,8 +151,8 @@ Summary
      - 4
      - 0
    * - TRACE
-     - 9
-     - 23
+     - 10
+     - 26
      - 0
    * - TRACE_002
      - 1
@@ -540,6 +540,9 @@ Coverage by requirement
    * - :need:`HMD_CLI_BARTLEBY_REQ_TRACE_009`
      - main.TestVersionDefaultsToDev, main.TestVersionIsInjectedAtBuildTime
      - implemented
+   * - :need:`HMD_CLI_BARTLEBY_REQ_TRACE_010`
+     - cmd.TestReqsCheckFailsOnAGap, cmd.TestReqsGeneratesTheMatrix, cmd.TestReqsQuietPrintsNothingOnSuccess
+     - implemented
 
 Requirements and the tests that verify them
 -------------------------------------------
@@ -898,6 +901,27 @@ Run with ``make test``. No Docker required.
     :tags: go
 
     ``src/go/bartleby/cmd/root_test.go:247``
+
+.. test:: cmd.TestReqsCheckFailsOnAGap
+    :id: HMD_CLI_BARTLEBY_TEST_GO_56ABD7A5
+    :links: HMD_CLI_BARTLEBY_REQ_TRACE_010
+    :tags: go
+
+    ``src/go/bartleby/cmd/reqs_test.go:95``
+
+.. test:: cmd.TestReqsGeneratesTheMatrix
+    :id: HMD_CLI_BARTLEBY_TEST_GO_4613D722
+    :links: HMD_CLI_BARTLEBY_REQ_TRACE_010
+    :tags: go
+
+    ``src/go/bartleby/cmd/reqs_test.go:68``
+
+.. test:: cmd.TestReqsQuietPrintsNothingOnSuccess
+    :id: HMD_CLI_BARTLEBY_TEST_GO_286EB09F
+    :links: HMD_CLI_BARTLEBY_REQ_TRACE_010
+    :tags: go
+
+    ``src/go/bartleby/cmd/reqs_test.go:120``
 
 .. test:: cmd.TestResolveConfidential
     :id: HMD_CLI_BARTLEBY_TEST_GO_D13A9289

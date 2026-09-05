@@ -5,7 +5,8 @@
 //
 // It needs neither Docker nor Sphinx, so it runs on a laptop and in CI. In this
 // repository the Makefile wraps both as "make reqs" and "make reqs-check", and
-// "make check" runs the latter, so traceability breaks the build.
+// "make check" runs the latter, so traceability breaks the build. The same work
+// is reachable as "bartleby reqs" for anyone who already has the CLI.
 package main
 
 import (
@@ -33,7 +34,7 @@ func main() {
 		return
 	}
 
-	if err := run(*check, *repo, *quiet); err != nil {
+	if err := reqtrace.Run(reqtrace.RunOptions{Check: *check, Repo: *repo, Quiet: *quiet}); err != nil {
 		fmt.Fprintf(os.Stderr, "reqtrace: %v\n", err)
 		os.Exit(1)
 	}
@@ -42,65 +43,4 @@ func main() {
 // versionString is what -version prints.
 func versionString() string {
 	return "reqtrace " + version
-}
-
-func run(check bool, repo string, quiet bool) error {
-	if repo == "" {
-		cwd, err := os.Getwd()
-		if err != nil {
-			return err
-		}
-		repo, err = reqtrace.FindRepoRoot(cwd)
-		if err != nil {
-			return err
-		}
-	}
-
-	layout := reqtrace.DefaultLayout(repo)
-
-	model, err := reqtrace.Load(layout)
-	if err != nil {
-		return err
-	}
-
-	problems := reqtrace.Validate(model)
-	for _, problem := range problems {
-		fmt.Fprintln(os.Stderr, problem)
-	}
-
-	if check {
-		staleErr := reqtrace.CheckFresh(layout, model)
-		if staleErr != nil {
-			fmt.Fprintln(os.Stderr, staleErr)
-		}
-		if len(problems) > 0 || staleErr != nil {
-			return fmt.Errorf("traceability check failed: %d problem(s)%s",
-				len(problems), staleSuffix(staleErr))
-		}
-		if !quiet {
-			fmt.Printf("traceability ok: %s\n", reqtrace.Summary(model))
-		}
-		return nil
-	}
-
-	if err := reqtrace.Write(layout, model); err != nil {
-		return err
-	}
-	if !quiet {
-		fmt.Printf("wrote %s (%s)\n", layout.GeneratedPath(), reqtrace.Summary(model))
-	}
-
-	// Writing still reports problems: regenerating a matrix with a gap in it is
-	// not success, it just means the page now shows the gap.
-	if len(problems) > 0 {
-		return fmt.Errorf("%d traceability problem(s)", len(problems))
-	}
-	return nil
-}
-
-func staleSuffix(staleErr error) string {
-	if staleErr == nil {
-		return ""
-	}
-	return ", plus stale generated output"
 }

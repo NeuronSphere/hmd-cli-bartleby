@@ -5,6 +5,7 @@ go 1.25.0
 require (
 	github.com/anthropics/anthropic-sdk-go v1.68.0
 	github.com/docker/docker v27.3.1+incompatible
+	github.com/neuronsphere/hmd-cli-bartleby/src/go/reqtrace v0.1.0
 	github.com/opencontainers/image-spec v1.1.0
 	github.com/spf13/cobra v1.8.0
 )
@@ -47,3 +48,13 @@ require (
 	golang.org/x/time v0.15.0 // indirect
 	gotest.tools/v3 v3.5.2 // indirect
 )
+
+// reqtrace is a nested module in this same repository. The replace points at
+// the working tree so that `bartleby reqs` and the standalone `reqtrace` binary
+// are always built from the same source — without it, a change to reqtrace
+// would not reach the CLI until the module was tagged and the require bumped.
+//
+// The require is pinned to the module's published tag anyway, to record which
+// version this pairs with. Dropping the replace needs a `go get` to add the
+// go.sum entry the replace makes unnecessary.
+replace github.com/neuronsphere/hmd-cli-bartleby/src/go/reqtrace => ../reqtrace
