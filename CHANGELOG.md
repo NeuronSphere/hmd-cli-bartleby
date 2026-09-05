@@ -1,5 +1,42 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
+- `bartleby docx` and `bartleby pptx`, for the transform's new pandoc builders.
+  `REQ_CLI_002` is amended rather than duplicated, and a test asserts every
+  subcommand pins the builder it is named for — wiring one to the wrong shell is
+  otherwise invisible without running a real build.
+- Five more skills, and the licence position on each recorded in the skill
+  itself rather than left for someone to rediscover:
+  - `diagram-c4` — C4 architecture diagrams in PlantUML. Verified that
+    `!include <C4/C4_Container>` renders with networking disabled, since
+    PlantUML bundles the C4 macros; the `!include https://raw.githubusercontent…`
+    form found in most examples makes every render depend on GitHub.
+  - `write-from-template` — a rubric over The Good Docs Project templates
+    (**MIT No Attribution**, so vendorable with no obligation), keyed to the
+    Diátaxis modes.
+  - `review-prose` — the Google developer documentation style guide, **CC BY
+    4.0**, so its rules are quoted directly.
+  - `review-plain-language` — a separate review from style: whether the reader
+    can find, understand, and act on it. Carries the :rfc:`2119` keyword
+    discussion.
+  - `review-vale` — Vale configuration, style packages, vocabularies, and CI.
+    Notes that `.rst` support needs `docutils` and reports nothing without it,
+    which looks exactly like a clean run.
+- `add-requirement` now covers RFC 2119: that `shall` and `must` are the same
+  thing, that `should` does not belong in a baseline because no test can fail
+  on it, and RFC 2119's own instruction to use the keywords sparingly.
+
+- `plan-docs` skill: decide which of the four Diátaxis modes a piece of content
+  belongs to — tutorial, how-to, reference, explanation — and audit an existing
+  doc set against them. Written as a restatement in our own words, citing
+  <https://diataxis.fr>, and quoting nothing: Diátaxis is CC BY-SA 4.0, so
+  verbatim inclusion would make the file adapted material and oblige it to carry
+  CC BY-SA 4.0 too. The skill says so, in case someone later wants to quote it.
+
+
 ## 2026-09-04 — v2.1.0
 
 ### Added

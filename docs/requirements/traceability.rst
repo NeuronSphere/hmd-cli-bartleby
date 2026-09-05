@@ -16,7 +16,7 @@ generated from those declarations.
 Summary
 -------
 
-122 requirement items, verified by 182 Go tests and 35 Robot tests.
+123 requirement items, verified by 185 Go tests and 35 Robot tests.
 
 .. list-table::
    :header-rows: 1
@@ -60,7 +60,7 @@ Summary
      - 0
    * - CLI
      - 8
-     - 15
+     - 16
      - 1
    * - CLI_002
      - 1
@@ -151,8 +151,8 @@ Summary
      - 4
      - 0
    * - TRACE
-     - 10
-     - 26
+     - 11
+     - 28
      - 0
    * - TRACE_002
      - 1
@@ -247,7 +247,7 @@ Coverage by requirement
      - bartleby_cli: Default Build Produces Every Default Builder
      - implemented
    * - :need:`HMD_CLI_BARTLEBY_REQ_CLI_002`
-     - bartleby_cli: HTML Build Produces An Index File, bartleby_cli: PDF Build Produces A PDF File, preconditions: Explicit Roots In Manifest Builds Configured Builder
+     - cmd.TestEverySubcommandPinsItsBuilder, bartleby_cli: HTML Build Produces An Index File, bartleby_cli: PDF Build Produces A PDF File, preconditions: Explicit Roots In Manifest Builds Configured Builder
      - implemented
    * - :need:`HMD_CLI_BARTLEBY_REQ_CLI_002_SPEC001`
      - cmd.TestShellSubcommandRejectsConflictingFlag, cli: Shell Flag Contradicting A Subcommand Is Rejected
@@ -543,6 +543,9 @@ Coverage by requirement
    * - :need:`HMD_CLI_BARTLEBY_REQ_TRACE_010`
      - cmd.TestReqsCheckFailsOnAGap, cmd.TestReqsGeneratesTheMatrix, cmd.TestReqsQuietPrintsNothingOnSuccess
      - implemented
+   * - :need:`HMD_CLI_BARTLEBY_REQ_TRACE_011`
+     - reqtrace.TestLoadWorksWithRobotTestsOnly, reqtrace.TestParseGoTestsToleratesNoGoTree
+     - implemented
 
 Requirements and the tests that verify them
 -------------------------------------------
@@ -817,6 +820,13 @@ Run with ``make test``. No Docker required.
     :tags: go
 
     ``src/go/bartleby/cmd/root_test.go:391``
+
+.. test:: cmd.TestEverySubcommandPinsItsBuilder
+    :id: HMD_CLI_BARTLEBY_TEST_GO_F50D2F52
+    :links: HMD_CLI_BARTLEBY_REQ_CLI_002
+    :tags: go
+
+    ``src/go/bartleby/cmd/root_test.go:402``
 
 .. test:: cmd.TestExplainEnabled
     :id: HMD_CLI_BARTLEBY_TEST_GO_94843B55
@@ -1385,6 +1395,13 @@ Run with ``make test``. No Docker required.
 
     ``src/go/reqtrace/reqtrace_test.go:577``
 
+.. test:: reqtrace.TestLoadWorksWithRobotTestsOnly
+    :id: HMD_CLI_BARTLEBY_TEST_GO_0A8FB761
+    :links: HMD_CLI_BARTLEBY_REQ_TRACE_011
+    :tags: go
+
+    ``src/go/reqtrace/reqtrace_test.go:622``
+
 .. test:: reqtrace.TestNeedIDIsStable
     :id: HMD_CLI_BARTLEBY_TEST_GO_18EB1572
     :links: HMD_CLI_BARTLEBY_REQ_TRACE_006_SPEC001
@@ -1412,6 +1429,13 @@ Run with ``make test``. No Docker required.
     :tags: go
 
     ``src/go/reqtrace/reqtrace_test.go:214``
+
+.. test:: reqtrace.TestParseGoTestsToleratesNoGoTree
+    :id: HMD_CLI_BARTLEBY_TEST_GO_C5167366
+    :links: HMD_CLI_BARTLEBY_REQ_TRACE_011
+    :tags: go
+
+    ``src/go/reqtrace/reqtrace_test.go:611``
 
 .. test:: reqtrace.TestParseRequirements
     :id: HMD_CLI_BARTLEBY_TEST_GO_B2C4268B

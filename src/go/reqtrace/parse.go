@@ -144,6 +144,14 @@ func ParseGoTests(root, repoRoot string, skipDirs []string, scheme Scheme) ([]Te
 	var tests []TestCase
 	fileSet := token.NewFileSet()
 
+	// A repository with no Go in it has no Go tests — not an error. Requiring
+	// the directory to exist would make the tool unusable in exactly the
+	// repositories it is meant to be portable to, such as a Python and Robot
+	// one.
+	if _, err := os.Stat(root); os.IsNotExist(err) {
+		return nil, nil
+	}
+
 	err := filepath.WalkDir(root, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err

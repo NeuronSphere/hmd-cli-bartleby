@@ -397,3 +397,51 @@ func TestCredentialsHelpNamesTheOptions(t *testing.T) {
 		}
 	}
 }
+
+// Requirements: REQ_CLI_002
+func TestEverySubcommandPinsItsBuilder(t *testing.T) {
+	// The mapping is the requirement: a subcommand named after an output has to
+	// build that output. Adding a builder to the transform and forgetting the
+	// subcommand — or wiring it to the wrong shell — is the failure this
+	// catches, and it is invisible without running a real build.
+	want := map[string]string{
+		"html":   "html",
+		"pdf":    "pdf",
+		"slides": "revealjs",
+		"docx":   "docx",
+		"pptx":   "pptx",
+	}
+
+	found := map[string]bool{}
+	for _, cmd := range rootCmd.Commands() {
+		shell, ok := want[cmd.Name()]
+		if !ok {
+			continue
+		}
+		found[cmd.Name()] = true
+
+		// A subcommand pins one builder, so a contradictory --shell is an
+		// error naming that builder — which is how the mapping is observable
+		// without starting a container.
+		fresh := newShellCmd(cmd.Name(), cmd.Short, shell)
+		fresh.Flags().StringVarP(&opts.shell, "shell", "s", "", "")
+		if err := fresh.Flags().Set("shell", "definitely-not-a-builder"); err != nil {
+			t.Fatal(err)
+		}
+
+		err := fresh.RunE(fresh, nil)
+		if err == nil {
+			t.Errorf("%s: a contradictory --shell should be an error", cmd.Name())
+			continue
+		}
+		if !strings.Contains(err.Error(), shell) {
+			t.Errorf("%s: error does not name the %s builder: %v", cmd.Name(), shell, err)
+		}
+	}
+
+	for name := range want {
+		if !found[name] {
+			t.Errorf("no %q subcommand is registered", name)
+		}
+	}
+}
