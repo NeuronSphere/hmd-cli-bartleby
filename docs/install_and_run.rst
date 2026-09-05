@@ -284,11 +284,17 @@ current and left alone; one that **differs** is also left alone, since it may
 carry local edits, and reported so you can look at it. ``--force`` overwrites.
 
 The requirements skills work in any repository, not only this one. They drive
-``reqtrace``, which is published separately under Apache 2.0:
+``reqtrace``, which is licensed Apache-2.0 and installs on its own — no Docker,
+no Python, nothing outside the Go standard library:
 
 .. code-block:: bash
 
+    brew install neuronsphere/tap/reqtrace   # macOS
     go install github.com/neuronsphere/hmd-cli-bartleby/src/go/reqtrace/cmd/reqtrace@latest
+
+Its own cask, deliberately: a project can adopt the requirements practice
+without adopting Bartleby. ``reqtrace -check`` needs only a repository with
+requirements in ``docs/requirements/``.
 
 
 Configuring Multiple Root Documents

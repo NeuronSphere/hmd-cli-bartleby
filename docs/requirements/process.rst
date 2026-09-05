@@ -84,3 +84,40 @@ its own and its tests are traced the same way everything else is.
     Every reported problem shall name the file and line it concerns and say what
     to do about it, and problems shall be reported in a stable order so the output
     is comparable between runs.
+
+.. req:: Be usable without taking the CLI on
+    :id: HMD_CLI_BARTLEBY_REQ_TRACE_008
+    :status: implemented
+
+    The traceability tool shall be a self-contained module — its own ``go.mod``,
+    licensed Apache-2.0, with no dependency outside the Go standard library — so
+    that a project can adopt it without adopting Bartleby or a BSL dependency.
+
+    This is why it lives in ``src/go/reqtrace`` rather than inside the CLI. All
+    three conditions have to hold for the carve-out to mean anything, so the
+    tests assert the module path, the absence of ``require`` directives, and the
+    licence itself rather than trusting review to notice.
+
+.. req:: Report which build is running
+    :id: HMD_CLI_BARTLEBY_REQ_TRACE_009
+    :status: implemented
+
+    ``reqtrace -version`` shall report the version, injected at build time. A
+    binary built without the injection shall report ``dev``, so a local build is
+    distinguishable from a released one.
+
+.. spec:: Distributed as its own Homebrew cask
+    :id: HMD_CLI_BARTLEBY_REQ_TRACE_008_SPEC001
+    :links: HMD_CLI_BARTLEBY_REQ_TRACE_008
+    :status: implemented
+    :tags: trace-exempt
+
+    ``reqtrace`` shall be installable as ``brew install neuronsphere/tap/reqtrace``
+    — its own cask, not a second binary inside Bartleby's, since two casks cannot
+    both link the same binary name and bundling it would foreclose installing it
+    alone.
+
+    *Verification:* by inspection of ``.goreleaser.yaml`` and a rehearsed release
+    (``goreleaser release --snapshot --skip=publish``, which writes both casks),
+    plus installing from the tap. Exercising it in a unit test would mean
+    publishing a release.

@@ -16,7 +16,7 @@ generated from those declarations.
 Summary
 -------
 
-118 requirement items, verified by 174 Go tests and 35 Robot tests.
+121 requirement items, verified by 179 Go tests and 35 Robot tests.
 
 .. list-table::
    :header-rows: 1
@@ -151,8 +151,8 @@ Summary
      - 4
      - 0
    * - TRACE
-     - 7
-     - 18
+     - 9
+     - 23
      - 0
    * - TRACE_002
      - 1
@@ -162,6 +162,10 @@ Summary
      - 1
      - 1
      - 0
+   * - TRACE_008
+     - 1
+     - 0
+     - 1
 
 Coverage by requirement
 -----------------------
@@ -526,6 +530,15 @@ Coverage by requirement
      - implemented
    * - :need:`HMD_CLI_BARTLEBY_REQ_TRACE_007`
      - reqtrace.TestValidateOrdersProblemsStably, reqtrace.TestValidateReportsUncoveredRequirements
+     - implemented
+   * - :need:`HMD_CLI_BARTLEBY_REQ_TRACE_008`
+     - main.TestLicenceIsApacheNotBSL, main.TestReqtraceHasNoDependenciesToInherit, main.TestReqtraceIsItsOwnModule
+     - implemented
+   * - :need:`HMD_CLI_BARTLEBY_REQ_TRACE_008_SPEC001`
+     - *exempt: see the requirement text*
+     - implemented
+   * - :need:`HMD_CLI_BARTLEBY_REQ_TRACE_009`
+     - main.TestVersionDefaultsToDev, main.TestVersionIsInjectedAtBuildTime
      - implemented
 
 Requirements and the tests that verify them
@@ -1165,6 +1178,41 @@ Run with ``make test``. No Docker required.
     :tags: go
 
     ``src/go/bartleby/internal/hmdenv/hmdenv_test.go:179``
+
+.. test:: main.TestLicenceIsApacheNotBSL
+    :id: HMD_CLI_BARTLEBY_TEST_GO_39B5D34B
+    :links: HMD_CLI_BARTLEBY_REQ_TRACE_008
+    :tags: go
+
+    ``src/go/reqtrace/cmd/reqtrace/main_test.go:75``
+
+.. test:: main.TestReqtraceHasNoDependenciesToInherit
+    :id: HMD_CLI_BARTLEBY_TEST_GO_1DD23C2B
+    :links: HMD_CLI_BARTLEBY_REQ_TRACE_008
+    :tags: go
+
+    ``src/go/reqtrace/cmd/reqtrace/main_test.go:46``
+
+.. test:: main.TestReqtraceIsItsOwnModule
+    :id: HMD_CLI_BARTLEBY_TEST_GO_6329D573
+    :links: HMD_CLI_BARTLEBY_REQ_TRACE_008
+    :tags: go
+
+    ``src/go/reqtrace/cmd/reqtrace/main_test.go:63``
+
+.. test:: main.TestVersionDefaultsToDev
+    :id: HMD_CLI_BARTLEBY_TEST_GO_B3D74E02
+    :links: HMD_CLI_BARTLEBY_REQ_TRACE_009
+    :tags: go
+
+    ``src/go/reqtrace/cmd/reqtrace/main_test.go:34``
+
+.. test:: main.TestVersionIsInjectedAtBuildTime
+    :id: HMD_CLI_BARTLEBY_TEST_GO_1F39FBAE
+    :links: HMD_CLI_BARTLEBY_REQ_TRACE_009
+    :tags: go
+
+    ``src/go/reqtrace/cmd/reqtrace/main_test.go:13``
 
 .. test:: manifest.TestConfigBuilderConfig
     :id: HMD_CLI_BARTLEBY_TEST_GO_C3F5F5F7

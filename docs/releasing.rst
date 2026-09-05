@@ -4,9 +4,14 @@ Releasing Bartleby
 ==================
 
 Bartleby uses `GoReleaser <https://goreleaser.com>`_ to cross-compile the CLI
-and publish it to GitHub Releases. A Homebrew cask in the
-``neuronsphere/homebrew-tap`` repository is updated in the same pass, so
+and publish it to GitHub Releases. Homebrew casks in the
+``neuronsphere/homebrew-tap`` repository are updated in the same pass, so
 ``brew install neuronsphere/tap/bartleby`` gets the new version.
+
+**One tag releases two tools.** ``reqtrace`` — the traceability tool, carved out
+under Apache-2.0 in ``src/go/reqtrace`` — is built, archived, and given its own
+cask by the same release. See *Two Tools, One Tag* below for why it works that
+way and what it costs.
 
 Prerequisites
 -------------
@@ -43,12 +48,17 @@ Releases are driven by Git tags matching ``v*``. When one is pushed,
    - ``linux/amd64``
    - ``linux/arm64``
 
-2. Packages each binary as ``bartleby_<version>_<os>_<arch>.tar.gz``.
+   …and ``reqtrace`` for the same four.
+
+2. Packages each binary separately as
+   ``bartleby_<version>_<os>_<arch>.tar.gz`` and
+   ``reqtrace_<version>_<os>_<arch>.tar.gz`` — eight archives.
 
 3. Creates a GitHub Release with the tarballs and a checksums file attached.
 
-4. Commits an updated ``Casks/bartleby.rb`` to ``neuronsphere/homebrew-tap``
-   with the new version, URLs, and sha256 checksums.
+4. Commits an updated ``Casks/bartleby.rb`` **and** ``Casks/reqtrace.rb`` to
+   ``neuronsphere/homebrew-tap`` with the new versions, URLs, and sha256
+   checksums.
 
 The tag prefix matters: the workflow triggers on ``v*``, so the ``1.0.x`` tags
 from the Python build train never fired it and never will.
@@ -130,10 +140,47 @@ worth knowing:
    The tarball naming template, which the cask's URLs are generated from.
 
 ``homebrew_casks``
-   Which tap to write to, plus the cask's metadata and its ``postflight`` hook.
+   Which tap to write to, plus each cask's metadata and its ``postflight`` hook.
+   Both casks pin ``ids`` so each ships only its own binary.
 
 ``changelog``
    Release notes from commit messages, excluding ``docs:`` and ``test:``.
+
+Two Tools, One Tag
+------------------
+
+``reqtrace`` is a separate Go module with its own version tags
+(``src/go/reqtrace/v0.1.0``), because that is what Go requires of a nested
+module. It would be tidier for it to release off those tags — and GoReleaser can
+do exactly that, with ``monorepo.tag_prefix`` — but **that feature is
+Pro-only**. So the free tooling gives two choices: release ``reqtrace`` off
+Bartleby's ``v*`` tag, or stand up a separate release pipeline for it.
+
+It releases off Bartleby's tag. The consequence to know:
+
+- The **cask** version tracks Bartleby's release — ``reqtrace 2.1.0`` means "the
+  reqtrace shipped with Bartleby 2.1.0".
+- The **Go module** version is independent — ``go install
+  …/src/go/reqtrace/cmd/reqtrace@v0.1.0`` resolves from the module's own tag.
+- So the same code can be "2.1.0" to Homebrew and "v0.1.0" to Go. ``reqtrace
+  -version`` reports the former, since that is what a released binary was built
+  from.
+
+Tag the module too when its code changes, or ``go install`` consumers stay on
+the old one:
+
+.. code-block:: bash
+
+   git tag src/go/reqtrace/v0.2.0
+   git push origin src/go/reqtrace/v0.2.0
+
+That tag does **not** trigger the release workflow, which matches on ``v*``.
+
+It is a separate cask rather than a second binary inside Bartleby's, because two
+casks cannot both link the same binary name — bundling ``reqtrace`` into
+Bartleby's cask would make ``brew install neuronsphere/tap/reqtrace``
+impossible, and the whole point of the carve-out is that it can be adopted
+without adopting Bartleby.
 
 A Cask, Not a Formula
 ---------------------
