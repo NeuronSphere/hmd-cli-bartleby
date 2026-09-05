@@ -31,6 +31,8 @@ Run it from the root of the repository you want to document:
 bartleby              # every builder configured for every root document
 bartleby html         # HTML only
 bartleby pdf          # PDF only
+bartleby docx         # Word document
+bartleby pptx         # PowerPoint deck
 bartleby explain      # ask Claude why the last build failed
 bartleby reqs --check # check the requirements traceability matrix
 ```

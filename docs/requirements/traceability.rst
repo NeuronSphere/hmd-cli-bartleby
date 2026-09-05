@@ -16,7 +16,7 @@ generated from those declarations.
 Summary
 -------
 
-123 requirement items, verified by 184 Go tests and 35 Robot tests.
+123 requirement items, verified by 185 Go tests and 35 Robot tests.
 
 .. list-table::
    :header-rows: 1
@@ -60,7 +60,7 @@ Summary
      - 0
    * - CLI
      - 8
-     - 15
+     - 16
      - 1
    * - CLI_002
      - 1
@@ -247,7 +247,7 @@ Coverage by requirement
      - bartleby_cli: Default Build Produces Every Default Builder
      - implemented
    * - :need:`HMD_CLI_BARTLEBY_REQ_CLI_002`
-     - bartleby_cli: HTML Build Produces An Index File, bartleby_cli: PDF Build Produces A PDF File, preconditions: Explicit Roots In Manifest Builds Configured Builder
+     - cmd.TestEverySubcommandPinsItsBuilder, bartleby_cli: HTML Build Produces An Index File, bartleby_cli: PDF Build Produces A PDF File, preconditions: Explicit Roots In Manifest Builds Configured Builder
      - implemented
    * - :need:`HMD_CLI_BARTLEBY_REQ_CLI_002_SPEC001`
      - cmd.TestShellSubcommandRejectsConflictingFlag, cli: Shell Flag Contradicting A Subcommand Is Rejected
@@ -820,6 +820,13 @@ Run with ``make test``. No Docker required.
     :tags: go
 
     ``src/go/bartleby/cmd/root_test.go:391``
+
+.. test:: cmd.TestEverySubcommandPinsItsBuilder
+    :id: HMD_CLI_BARTLEBY_TEST_GO_F50D2F52
+    :links: HMD_CLI_BARTLEBY_REQ_CLI_002
+    :tags: go
+
+    ``src/go/bartleby/cmd/root_test.go:402``
 
 .. test:: cmd.TestExplainEnabled
     :id: HMD_CLI_BARTLEBY_TEST_GO_94843B55

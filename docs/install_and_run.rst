@@ -95,6 +95,8 @@ the repository into the transform container, and writes output to
     bartleby                  # every builder configured for every root document
     bartleby html             # HTML only
     bartleby pdf              # PDF only
+    bartleby docx             # Word document
+    bartleby pptx             # PowerPoint deck
     bartleby slides           # RevealJS slideshow
     bartleby puml             # render docs/**/*.puml to images
     bartleby update-image     # re-pull the transform image

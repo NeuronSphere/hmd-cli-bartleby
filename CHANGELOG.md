@@ -4,6 +4,10 @@
 
 ### Added
 
+- `bartleby docx` and `bartleby pptx`, for the transform's new pandoc builders.
+  `REQ_CLI_002` is amended rather than duplicated, and a test asserts every
+  subcommand pins the builder it is named for — wiring one to the wrong shell is
+  otherwise invisible without running a real build.
 - Five more skills, and the licence position on each recorded in the skill
   itself rather than left for someone to rediscover:
   - `diagram-c4` — C4 architecture diagrams in PlantUML. Verified that
