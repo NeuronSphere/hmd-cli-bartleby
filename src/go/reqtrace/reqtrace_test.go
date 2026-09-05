@@ -606,3 +606,48 @@ func TestFindRepoRoot(t *testing.T) {
 		t.Error("expected an error where there is no manifest above the directory")
 	}
 }
+
+// Requirements: REQ_TRACE_011
+func TestParseGoTestsToleratesNoGoTree(t *testing.T) {
+	tests, err := ParseGoTests(filepath.Join(t.TempDir(), "does-not-exist"), t.TempDir(), nil, testScheme)
+	if err != nil {
+		t.Fatalf("a repository with no Go tree should not be an error: %v", err)
+	}
+	if len(tests) != 0 {
+		t.Errorf("got %d tests from a nonexistent tree", len(tests))
+	}
+}
+
+// Requirements: REQ_TRACE_011
+func TestLoadWorksWithRobotTestsOnly(t *testing.T) {
+	// The shape of a Python and Robot repository: requirements, a Robot suite,
+	// and no src/go at all.
+	root := t.TempDir()
+	write(t, filepath.Join(root, "meta-data", "manifest.json"), `{"name": "hmd-cli-bartleby"}`)
+	write(t, filepath.Join(root, "docs", "requirements", "sel.rst"), `
+.. req:: Do the thing
+    :id: HMD_CLI_BARTLEBY_REQ_SEL_001
+    :status: implemented
+
+    It shall do the thing.
+`)
+	write(t, filepath.Join(root, "test", "suite.robot"), `*** Test Cases ***
+The Thing Happens
+    [Tags]    REQ_SEL_001
+    No Operation
+`)
+
+	model, err := Load(DefaultLayout(root))
+	if err != nil {
+		t.Fatalf("Load: %v", err)
+	}
+	if len(model.Requirements) != 1 {
+		t.Fatalf("got %d requirements", len(model.Requirements))
+	}
+	if len(model.Tests) != 1 {
+		t.Fatalf("got %d tests", len(model.Tests))
+	}
+	if problems := Validate(model); len(problems) != 0 {
+		t.Errorf("expected a clean model, got %v", problems)
+	}
+}

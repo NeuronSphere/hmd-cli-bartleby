@@ -16,7 +16,7 @@ generated from those declarations.
 Summary
 -------
 
-122 requirement items, verified by 182 Go tests and 35 Robot tests.
+123 requirement items, verified by 184 Go tests and 35 Robot tests.
 
 .. list-table::
    :header-rows: 1
@@ -151,8 +151,8 @@ Summary
      - 4
      - 0
    * - TRACE
-     - 10
-     - 26
+     - 11
+     - 28
      - 0
    * - TRACE_002
      - 1
@@ -542,6 +542,9 @@ Coverage by requirement
      - implemented
    * - :need:`HMD_CLI_BARTLEBY_REQ_TRACE_010`
      - cmd.TestReqsCheckFailsOnAGap, cmd.TestReqsGeneratesTheMatrix, cmd.TestReqsQuietPrintsNothingOnSuccess
+     - implemented
+   * - :need:`HMD_CLI_BARTLEBY_REQ_TRACE_011`
+     - reqtrace.TestLoadWorksWithRobotTestsOnly, reqtrace.TestParseGoTestsToleratesNoGoTree
      - implemented
 
 Requirements and the tests that verify them
@@ -1385,6 +1388,13 @@ Run with ``make test``. No Docker required.
 
     ``src/go/reqtrace/reqtrace_test.go:577``
 
+.. test:: reqtrace.TestLoadWorksWithRobotTestsOnly
+    :id: HMD_CLI_BARTLEBY_TEST_GO_0A8FB761
+    :links: HMD_CLI_BARTLEBY_REQ_TRACE_011
+    :tags: go
+
+    ``src/go/reqtrace/reqtrace_test.go:622``
+
 .. test:: reqtrace.TestNeedIDIsStable
     :id: HMD_CLI_BARTLEBY_TEST_GO_18EB1572
     :links: HMD_CLI_BARTLEBY_REQ_TRACE_006_SPEC001
@@ -1412,6 +1422,13 @@ Run with ``make test``. No Docker required.
     :tags: go
 
     ``src/go/reqtrace/reqtrace_test.go:214``
+
+.. test:: reqtrace.TestParseGoTestsToleratesNoGoTree
+    :id: HMD_CLI_BARTLEBY_TEST_GO_C5167366
+    :links: HMD_CLI_BARTLEBY_REQ_TRACE_011
+    :tags: go
+
+    ``src/go/reqtrace/reqtrace_test.go:611``
 
 .. test:: reqtrace.TestParseRequirements
     :id: HMD_CLI_BARTLEBY_TEST_GO_B2C4268B

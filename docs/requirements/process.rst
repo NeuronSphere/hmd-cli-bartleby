@@ -133,3 +133,16 @@ its own and its tests are traced the same way everything else is.
 
     Both entry points shall call one function rather than each orchestrating the
     steps, so that they cannot drift into disagreeing about what a check means.
+
+.. req:: Work in a repository that has no Go in it
+    :id: HMD_CLI_BARTLEBY_REQ_TRACE_011
+    :status: implemented
+
+    A repository with no Go tree shall be read as having no Go tests, not as an
+    error. Coverage shall come from whatever test sources the repository does
+    have.
+
+    Found by adopting the tool in ``hmd-tf-bartleby``, which is Python and Robot:
+    it failed outright with ``lstat src/go: no such file or directory``, so the
+    tool was unusable in precisely the kind of repository ``REQ_TRACE_008``
+    exists to serve.
