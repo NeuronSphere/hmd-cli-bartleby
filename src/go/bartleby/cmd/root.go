@@ -122,6 +122,8 @@ func init() {
 		newShellCmd("html", "Render HTML documentation", "html"),
 		newShellCmd("pdf", "Render PDF documentation", "pdf"),
 		newShellCmd("slides", "Render a RevealJS slideshow", "revealjs"),
+		newShellCmd("docx", "Render a Word document", "docx"),
+		newShellCmd("pptx", "Render a PowerPoint deck", "pptx"),
 		pumlCmd,
 		updateImageCmd,
 		configureCmd,

@@ -115,9 +115,44 @@ What makes a requirement worth having:
   builder shall be an error that lists the valid ones" is a requirement; "shall
   support builders" is a wish.
 - **`shall` for the obligation.** It marks the testable sentence apart from the
-  prose around it.
+  prose around it, and it has a defined meaning — see *Keywords* below.
 - **No unmeasurable adjectives.** "fast", "robust", "user-friendly" cannot fail a
   test. Give the number, or the specific behaviour that stands in for the quality.
+
+### Keywords: use RFC 2119, and sparingly
+
+The modal verbs are defined vocabulary, not style. :rfc:`2119` — quotable
+directly, as IETF RFCs may be reproduced with attribution:
+
+> "MUST — This word, or the terms 'REQUIRED' or 'SHALL', mean that the
+> definition is an absolute requirement of the specification."
+>
+> "SHOULD — This word, or the adjective 'RECOMMENDED', mean that there may exist
+> valid reasons in particular circumstances to ignore a particular item, but the
+> full implications must be understood and carefully weighed before choosing a
+> different course."
+>
+> "MAY — This word, or the adjective 'OPTIONAL', mean that an item is truly
+> optional."
+
+Three consequences for a baseline like this one:
+
+- **`shall` and `must` mean the same thing.** Pick one and hold to it — this
+  repository uses `shall`. Plain-language guidance prefers "must" as the clearer
+  word, and that is compatible with RFC 2119 rather than opposed to it, so
+  either is defensible. Mixing them in one baseline is not.
+- **Avoid `should` in requirements.** A recommendation cannot fail a test, so a
+  `should` in a baseline is a requirement the traceability check will demand
+  coverage for and no test can honestly provide. Put recommendations in the
+  prose, or in a `spec::` that says what is actually required.
+- **Use them sparingly**, which is the part most often skipped. RFC 2119: *"they
+  MUST only be used where it is actually required for interoperation or to limit
+  behavior which has potential for causing harm."* A baseline where every
+  sentence is a `shall` has stopped distinguishing anything.
+
+The prose *around* the obligation — why the requirement exists, what breaks
+without it — is ordinary writing. `review-plain-language` applies to it in full;
+it does not apply to the keyword sentence.
 
 `:status:` is `implemented` once the code is in. Use `proposed` only while the
 requirement is genuinely ahead of the code, and expect the traceability check to

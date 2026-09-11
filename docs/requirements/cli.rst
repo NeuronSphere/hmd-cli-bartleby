@@ -14,9 +14,10 @@ Command Surface
     :id: HMD_CLI_BARTLEBY_REQ_CLI_002
     :status: implemented
 
-    ``bartleby html``, ``bartleby pdf``, and ``bartleby slides`` shall build the
-    ``html``, ``pdf``, and ``revealjs`` builders respectively, and shall be
-    equivalent to passing that builder to ``--shell``.
+    ``bartleby html``, ``bartleby pdf``, ``bartleby slides``, ``bartleby docx``
+    and ``bartleby pptx`` shall build the ``html``, ``pdf``, ``revealjs``,
+    ``docx`` and ``pptx`` builders respectively, and each shall be equivalent to
+    passing that builder to ``--shell``.
 
 .. spec:: A subcommand and a contradictory --shell is an error
     :id: HMD_CLI_BARTLEBY_REQ_CLI_002_SPEC001
