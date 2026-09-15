@@ -25,5 +25,84 @@
         }
       }
     }
+  },
+  "discovery": {
+    "summary": "Bartleby renders a NeuronSphere repo's RST documentation (docs/) into HTML, PDF, and RevealJS slides using Sphinx-needs inside a Docker container, and can render standalone PlantUML diagrams to images. It ships two parallel implementations: a self-contained Go CLI (src/go/bartleby, distributed via Homebrew, no Python runtime needed) and the original hmd CLI Python plugin (src/python/hmd_cli_bartleby, invoked as 'hmd bartleby ...'). The Go CLI adds an 'explain' command that asks Claude to diagnose the last failed build.",
+    "entry_points": [
+      {
+        "path": "src/go/bartleby/cmd/root.go",
+        "description": "Go CLI root command: defines the 'bartleby' cobra app, its global flags, and how html/pdf/slides/puml/configure/explain/update-image subcommands are wired up."
+      },
+      {
+        "path": "src/python/hmd_cli_bartleby/controller.py",
+        "description": "Python hmd CLI plugin (Cement Controller) implementing the same html/pdf/slides/puml/configure/update_image subcommands as 'hmd bartleby ...'."
+      },
+      {
+        "path": "docs/install_and_run.rst",
+        "description": "Install (Homebrew Go binary vs. Python plugin) and run instructions for both CLI implementations."
+      },
+      {
+        "path": "docs/requirements/index.rst",
+        "description": "Index of Bartleby's NERD requirements docs (CLI, config, execution, gather, manifest, selection, sources, traceability)."
+      }
+    ],
+    "capabilities": [
+      {
+        "name": "html",
+        "kind": "cli_command",
+        "description": "Render HTML documentation from docs/ with Sphinx.",
+        "location": "src/go/bartleby/cmd/root.go"
+      },
+      {
+        "name": "pdf",
+        "kind": "cli_command",
+        "description": "Render PDF documentation from docs/ with Sphinx/LaTeX.",
+        "location": "src/go/bartleby/cmd/root.go"
+      },
+      {
+        "name": "slides",
+        "kind": "cli_command",
+        "description": "Render a RevealJS slideshow from docs/.",
+        "location": "src/go/bartleby/cmd/root.go"
+      },
+      {
+        "name": "puml",
+        "kind": "cli_command",
+        "description": "Render PlantUML (.puml) files under docs/ to images.",
+        "location": "src/go/bartleby/cmd/puml.go"
+      },
+      {
+        "name": "explain",
+        "kind": "cli_command",
+        "description": "Ask Claude to diagnose what went wrong in the last Bartleby build (Go CLI only).",
+        "location": "src/go/bartleby/cmd/explain.go"
+      },
+      {
+        "name": "configure",
+        "kind": "cli_command",
+        "description": "Set Bartleby defaults (e.g. default logo) in $HMD_HOME/.config/hmd.env.",
+        "location": "src/go/bartleby/cmd/configure.go"
+      },
+      {
+        "name": "update-image",
+        "kind": "cli_command",
+        "description": "Pull the latest Bartleby Sphinx-build Docker transform image.",
+        "location": "src/go/bartleby/cmd/update_image.go"
+      }
+    ],
+    "related_docs": [
+      {
+        "title": "Install and Run",
+        "path": "docs/install_and_run.rst"
+      },
+      {
+        "title": "Releasing",
+        "path": "docs/releasing.rst"
+      },
+      {
+        "title": "NERD Requirements Index",
+        "path": "docs/requirements/index.rst"
+      }
+    ]
   }
 }
