@@ -16,6 +16,12 @@ type RunOptions struct {
 	Repo string
 	// Quiet suppresses the success summary.
 	Quiet bool
+	// IncludeProposals also scans docs/proposals — where NERD documents live —
+	// for req/spec items, in addition to docs/requirements. Off by default: a
+	// repository opts in once it is ready to be judged against its NERDs too,
+	// rather than this silently failing an existing "-check" the first time a
+	// repository happens to have an uncovered NERD proposal.
+	IncludeProposals bool
 	// Out receives the summary, Err the problems. Nil means stdout and stderr.
 	Out, Err io.Writer
 }
@@ -47,6 +53,9 @@ func Run(o RunOptions) error {
 	}
 
 	layout := DefaultLayout(repo)
+	if o.IncludeProposals {
+		layout.ExtraRequirementsDirs = append(layout.ExtraRequirementsDirs, ProposalsDir())
+	}
 
 	model, err := Load(layout)
 	if err != nil {

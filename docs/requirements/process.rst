@@ -146,3 +146,28 @@ its own and its tests are traced the same way everything else is.
     it failed outright with ``lstat src/go: no such file or directory``, so the
     tool was unusable in precisely the kind of repository ``REQ_TRACE_008``
     exists to serve.
+
+.. req:: Optionally also read requirements from docs/proposals
+    :id: HMD_CLI_BARTLEBY_REQ_TRACE_012
+    :status: implemented
+
+    With ``-include-proposals`` (``bartleby reqs --include-proposals``),
+    ``req``/``spec`` items under ``docs/proposals`` shall be read in addition to
+    ``docs/requirements``, not instead of it, so that NERD documents — which the
+    platform's other repositories keep under ``docs/proposals`` — can be covered
+    by the same traceability check without moving them. A repository with items
+    in only one of the two directories shall still be read correctly, and the
+    generated page shall still be written even when ``docs/requirements`` did not
+    already exist.
+
+    This is opt-in, not the default: a repository that already runs
+    ``reqtrace -check`` in CI may itself own NERD proposals with no test
+    annotations yet, and turning this on unconditionally would fail that build
+    the moment the repository adopted this change, rather than when its owner
+    chose to be judged against its NERDs too. (Found in this repository itself —
+    ``hmd-cli-bartleby``'s own ``NERD001``/``NERD002`` have no test annotations,
+    so an unconditional default would have broken ``make check`` here.)
+
+    NERD IDs already follow the ``HMD_<TYPE>_<NAME>_`` convention this tool
+    derives from the manifest, so no change to the ID scheme was needed — only to
+    where the scan looks.

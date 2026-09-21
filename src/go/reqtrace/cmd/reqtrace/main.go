@@ -26,6 +26,7 @@ func main() {
 	check := flag.Bool("check", false, "report problems and stale output instead of writing; exit non-zero on either")
 	repo := flag.String("repo", "", "repository root (default: found by walking up from the working directory)")
 	quiet := flag.Bool("quiet", false, "print nothing on success")
+	includeProposals := flag.Bool("include-proposals", false, "also scan docs/proposals (NERD documents) for req/spec items")
 	showVersion := flag.Bool("version", false, "print the version and exit")
 	flag.Parse()
 
@@ -34,7 +35,8 @@ func main() {
 		return
 	}
 
-	if err := reqtrace.Run(reqtrace.RunOptions{Check: *check, Repo: *repo, Quiet: *quiet}); err != nil {
+	opts := reqtrace.RunOptions{Check: *check, Repo: *repo, Quiet: *quiet, IncludeProposals: *includeProposals}
+	if err := reqtrace.Run(opts); err != nil {
 		fmt.Fprintf(os.Stderr, "reqtrace: %v\n", err)
 		os.Exit(1)
 	}

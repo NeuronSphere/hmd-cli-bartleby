@@ -4,6 +4,13 @@
 
 ### Added
 
+- `reqtrace -include-proposals` / `bartleby reqs --include-proposals`: also scan
+  `docs/proposals` — where NERD documents live across the platform's other
+  repositories — for `req`/`spec` items, alongside `docs/requirements`. Off by
+  default: `hmd-cli-bartleby` itself owns `NERD001`/`NERD002` with no test
+  annotations yet, and turning this on unconditionally would have broken this
+  repository's own `make check` the moment the change landed, rather than when
+  a repository's owner chooses to be judged against its NERDs too. `REQ_TRACE_012`.
 - `bartleby docx` and `bartleby pptx`, for the transform's new pandoc builders.
   `REQ_CLI_002` is amended rather than duplicated, and a test asserts every
   subcommand pins the builder it is named for — wiring one to the wrong shell is
