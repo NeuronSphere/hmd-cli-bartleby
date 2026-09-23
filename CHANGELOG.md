@@ -44,6 +44,18 @@
   CC BY-SA 4.0 too. The skill says so, in case someone later wants to quote it.
 
 
+### Fixed
+
+- `brew install`/`brew upgrade` of the `bartleby` and `reqtrace` casks no longer
+  warns about a deprecated stanza. Homebrew 6.0.16 deprecated free-form
+  `postflight do ... end` blocks in favour of the declarative `postflight_steps`,
+  and GoReleaser only ever emits the old wrapper for `homebrew_casks.hooks`, so
+  every install printed a warning naming the tap. The quarantine strip -- which
+  these unsigned binaries still need, or Gatekeeper refuses to run them -- now
+  goes in as a `custom_block` carrying the `postflight_steps` form. Reaches users
+  when the next release regenerates the casks.
+
+
 ## 2026-09-04 — v2.1.0
 
 ### Added

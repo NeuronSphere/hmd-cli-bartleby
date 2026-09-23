@@ -80,14 +80,29 @@ homebrew_casks:
       bartleby requires Docker to run documentation builds.
       If you use Colima, make sure it is running:
         colima start
-    hooks:
-      post:
-        # The binary is not signed or notarized, so Gatekeeper would refuse to
-        # run it. Without this, `bartleby` dies on first launch.
-        install: |
-          if OS.mac?
-            system_command "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "#{staged_path}/bartleby"]
+    # `custom_block` rather than `hooks.post.install`: the binary is not signed
+    # or notarized, and Homebrew quarantines cask downloads on macOS, so without
+    # stripping com.apple.quarantine Gatekeeper would refuse to run it and
+    # bartleby would die on first launch. GoReleaser wraps `hooks` in
+    # `postflight do`, which Homebrew 6.0.16 deprecated in favour of the
+    # declarative `postflight_steps` -- every install printed a warning naming
+    # the tap -- and no hook option emits the new stanza, so the Ruby is
+    # injected verbatim instead. The staged path is Homebrew's own step template
+    # token, expanded when the step runs, not Ruby interpolation: the steps
+    # block is instance_eval'd on the step DSL, which has no `staged_path`
+    # method. GoReleaser templates this block too, so the token's braces are
+    # escaped past its own templating. `on_macos` replaces the old `if OS.mac?`,
+    # which the steps DSL cannot express.
+    custom_block: |
+      postflight_steps do
+        on_macos do
+          if_path_exists "/usr/bin/xattr" do
+            run "/usr/bin/xattr",
+                args:         ["-dr", "com.apple.quarantine", "{{ "{{" }}staged_path}}/bartleby"],
+                must_succeed: false
           end
+        end
+      end
 
   # A separate cask, not a second binary in Bartleby's: two casks cannot both
   # link the same name, so bundling reqtrace would make installing it on its own
@@ -108,12 +123,29 @@ homebrew_casks:
       reqtrace needs nothing else installed — no Docker, no Python.
       Run it from a repository with requirements in docs/requirements/:
         reqtrace -check
-    hooks:
-      post:
-        install: |
-          if OS.mac?
-            system_command "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "#{staged_path}/reqtrace"]
+    # `custom_block` rather than `hooks.post.install`: the binary is not signed
+    # or notarized, and Homebrew quarantines cask downloads on macOS, so without
+    # stripping com.apple.quarantine Gatekeeper would refuse to run it and
+    # reqtrace would die on first launch. GoReleaser wraps `hooks` in
+    # `postflight do`, which Homebrew 6.0.16 deprecated in favour of the
+    # declarative `postflight_steps` -- every install printed a warning naming
+    # the tap -- and no hook option emits the new stanza, so the Ruby is
+    # injected verbatim instead. The staged path is Homebrew's own step template
+    # token, expanded when the step runs, not Ruby interpolation: the steps
+    # block is instance_eval'd on the step DSL, which has no `staged_path`
+    # method. GoReleaser templates this block too, so the token's braces are
+    # escaped past its own templating. `on_macos` replaces the old `if OS.mac?`,
+    # which the steps DSL cannot express.
+    custom_block: |
+      postflight_steps do
+        on_macos do
+          if_path_exists "/usr/bin/xattr" do
+            run "/usr/bin/xattr",
+                args:         ["-dr", "com.apple.quarantine", "{{ "{{" }}staged_path}}/reqtrace"],
+                must_succeed: false
           end
+        end
+      end
 
 release:
   github:
