@@ -74,8 +74,6 @@ homebrew_casks:
     directory: Casks
     homepage: https://github.com/neuronsphere/hmd-cli-bartleby
     description: "Render reStructuredText documentation using Sphinx inside Docker"
-    url:
-      verified: github.com/neuronsphere/hmd-cli-bartleby
     caveats: |
       bartleby requires Docker to run documentation builds.
       If you use Colima, make sure it is running:
@@ -84,6 +82,11 @@ homebrew_casks:
       post:
         # The binary is not signed or notarized, so Gatekeeper would refuse to
         # run it. Without this, `bartleby` dies on first launch.
+        #
+        # This renders as a `postflight do...end` block, which `brew` flags as
+        # deprecated in favor of `postflight_steps`. GoReleaser has no config
+        # that emits the newer form yet — tracked upstream in
+        # goreleaser/goreleaser#6870, targeted for v2.19.0. Switch once it ships.
         install: |
           if OS.mac?
             system_command "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "#{staged_path}/bartleby"]
@@ -102,14 +105,14 @@ homebrew_casks:
     directory: Casks
     homepage: https://github.com/neuronsphere/hmd-cli-bartleby/tree/main/src/go/reqtrace
     description: "Generate and check a requirements traceability matrix from sphinx-needs directives and test annotations"
-    url:
-      verified: github.com/neuronsphere/hmd-cli-bartleby
     caveats: |
       reqtrace needs nothing else installed — no Docker, no Python.
       Run it from a repository with requirements in docs/requirements/:
         reqtrace -check
     hooks:
       post:
+        # Same deprecated `postflight` block as the bartleby cask above, and
+        # the same upstream gap (goreleaser/goreleaser#6870).
         install: |
           if OS.mac?
             system_command "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "#{staged_path}/reqtrace"]

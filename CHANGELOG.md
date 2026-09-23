@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 2026-09-23 — v2.2.0
 
 ### Added
 
@@ -35,6 +35,20 @@
   <https://diataxis.fr>, and quoting nothing: Diátaxis is CC BY-SA 4.0, so
   verbatim inclusion would make the file adapted material and oblige it to carry
   CC BY-SA 4.0 too. The skill says so, in case someone later wants to quote it.
+
+### Fixed
+
+- Removed the `url.verified` key from both `homebrew_casks` entries in
+  `.goreleaser.yaml`. It is no longer a recognized GoReleaser field — left
+  over from an older GoReleaser version, it rendered as the deprecated
+  `verified:` param on the cask's `url` stanza that `brew` warns about. This
+  release clears that half of the warning once published.
+  The other `brew` warning — the deprecated `postflight` block, which should
+  be `postflight_steps` — is **not** fixed here: GoReleaser has no config
+  that emits `postflight_steps` yet (tracked upstream in
+  [goreleaser/goreleaser#6870](https://github.com/goreleaser/goreleaser/issues/6870),
+  targeted for v2.19.0). Revisit `.goreleaser.yaml`'s `homebrew_casks.hooks`
+  once that ships.
 
 
 ## 2026-09-04 — v2.1.0
