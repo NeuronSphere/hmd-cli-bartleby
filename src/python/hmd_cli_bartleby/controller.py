@@ -205,13 +205,7 @@ def _generate_toctree_entries(sources: Dict) -> str:
             path = f"{SOURCES_STAGING_DIR}/{key}/index"
         else:
             path = f"{key}/index"
-        block = (
-            f".. toctree::\n"
-            f"   :maxdepth: 2\n"
-            f"   :caption: {title}\n"
-            f"\n"
-            f"   {path}\n"
-        )
+        block = f".. toctree::\n   :maxdepth: 2\n   :caption: {title}\n\n   {path}\n"
         blocks.append(block)
     return "\n".join(blocks) + "\n"
 
@@ -602,7 +596,7 @@ class LocalController(Controller):
             os.makedirs(output_path)
         if input_path.exists():
             with cd(input_path):
-                puml_files = list(filter(lambda x: (x.endswith(".puml")), get_files()))
+                puml_files = list(filter(lambda x: x.endswith(".puml"), get_files()))
                 if len(puml_files) > 0:
                     from .hmd_cli_bartleby import transform_puml
 
