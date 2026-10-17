@@ -375,6 +375,8 @@ func runBuilds(cmd *cobra.Command, shellFilter string) error {
 			HTMLDefaultLogo:          htmlLogo,
 			PDFDefaultLogo:           pdfLogo,
 			GlobalStylesPath:         globalStylesPath(env),
+			DeploymentAPIURL:         env("HMD_DEPLOYMENT_API_URL"),
+			DeploymentAPIToken:       env("HMD_DEPLOYMENT_API_TOKEN"),
 		}
 
 		if err := runner.RunTransform(ctx, cfg); err != nil {

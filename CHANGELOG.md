@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-10-17
+
+- feat: `bartleby` passes `HMD_DEPLOYMENT_API_URL` and `HMD_DEPLOYMENT_API_TOKEN` into the transform, for the `ns-architecture` directive that draws a view the NeuronSphere deployment service renders (NERD036, hmd-cli-neuronsphere); like every optional value they are absent when unset
+
 ## 2026-09-23 — v2.2.0
 
 ### Added

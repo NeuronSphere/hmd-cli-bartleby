@@ -282,3 +282,26 @@ func hasMount(mounts []mount.Mount, source, target string) bool {
 		return m.Source == source && m.Target == target && m.Type == mount.TypeBind
 	})
 }
+
+// NERD036 (hmd-cli-neuronsphere): the ns-architecture directive fetches a view
+// from the deployment API, so its address and token reach the container --
+// and, like every optional value, are absent rather than empty when unset.
+func TestEnvPassesTheDeploymentAPIWhenSet(t *testing.T) {
+	cfg := baseConfig(t)
+	env := envMap(t, cfg)
+	for _, key := range []string{"HMD_DEPLOYMENT_API_URL", "HMD_DEPLOYMENT_API_TOKEN"} {
+		if _, present := env[key]; present {
+			t.Errorf("%s should be absent when unset", key)
+		}
+	}
+
+	cfg.DeploymentAPIURL = "http://host.docker.internal:8080/hmd_ms_deployment"
+	cfg.DeploymentAPIToken = "t0ken"
+	env = envMap(t, cfg)
+	if got := env["HMD_DEPLOYMENT_API_URL"]; got != cfg.DeploymentAPIURL {
+		t.Errorf("HMD_DEPLOYMENT_API_URL = %q", got)
+	}
+	if got := env["HMD_DEPLOYMENT_API_TOKEN"]; got != "t0ken" {
+		t.Errorf("HMD_DEPLOYMENT_API_TOKEN = %q", got)
+	}
+}
