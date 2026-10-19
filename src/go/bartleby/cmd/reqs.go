@@ -7,9 +7,10 @@ import (
 )
 
 type reqsOptions struct {
-	check bool
-	repo  string
-	quiet bool
+	check            bool
+	repo             string
+	quiet            bool
+	includeProposals bool
 }
 
 var reqsOpts reqsOptions
@@ -36,11 +37,12 @@ repository that does not otherwise use bartleby.`,
 	SilenceErrors: true,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		return reqtrace.Run(reqtrace.RunOptions{
-			Check: reqsOpts.check,
-			Repo:  reqsOpts.repo,
-			Quiet: reqsOpts.quiet,
-			Out:   cmd.OutOrStdout(),
-			Err:   cmd.ErrOrStderr(),
+			Check:            reqsOpts.check,
+			Repo:             reqsOpts.repo,
+			Quiet:            reqsOpts.quiet,
+			IncludeProposals: reqsOpts.includeProposals,
+			Out:              cmd.OutOrStdout(),
+			Err:              cmd.ErrOrStderr(),
 		})
 	},
 }
@@ -53,4 +55,6 @@ func init() {
 		"repository root (default: found by walking up from the working directory)")
 	flags.BoolVar(&reqsOpts.quiet, "quiet", false,
 		"print nothing on success")
+	flags.BoolVar(&reqsOpts.includeProposals, "include-proposals", false,
+		"also scan docs/proposals (NERD documents) for req/spec items")
 }

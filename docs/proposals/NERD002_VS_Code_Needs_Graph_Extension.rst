@@ -432,6 +432,52 @@ consumer pinned to ``v0.1.0`` keeps working through every milestone.
     plans as ``docs.graph_mismatch``; a "Sphinx view" toggle in the graph and
     ``sphinx-mismatch`` diagnostics follow from it.
 
+.. spec:: The extension exports an API other extensions call
+    :id: HMD_CLI_BARTLEBY_NERD002_SPEC010
+    :links: HMD_CLI_BARTLEBY_NERD002
+    :status: proposed
+
+    The extension's ``activate`` shall return an API object, obtainable by any
+    other extension through ``vscode.extensions.getExtension("neuronsphere.needs").exports``,
+    carrying an integer ``apiVersion`` and three functions:
+
+    .. list-table::
+       :header-rows: 1
+       :widths: 30 70
+
+       * - Call
+         - Behaviour
+       * - ``openNeed(id, repo?)``
+         - Opens the file at the ``:id:`` span of the need — resolved as
+           ``needs/need`` resolves it, the calling repository first, then a
+           unique sibling; an ambiguous or unknown identifier rejects with the
+           candidates rather than guessing.
+       * - ``showGraph(ids, opts?)``
+         - Opens or focuses the graph panel on the neighbourhood of the given
+           identifiers, with ``opts`` a subset of the filter bar (hops,
+           direction, layout, show tests).
+       * - ``highlight(ids, label)``
+         - Marks the given nodes in the graph under a named layer — a badge
+           and a legend entry — until cleared by the same label; several
+           layers coexist.
+
+    Each is also a command (``needs.openNeed``, ``needs.showGraph``,
+    ``needs.highlight``) taking the same arguments, for a caller that would
+    rather not hold the exports object. ``apiVersion`` increments when a
+    call's arguments or behaviour change incompatibly, not when a call is
+    added; a caller compares it and degrades.
+
+    *Why.* The first consumer is ``nsx``'s own extension
+    (``neuronsphere.nsx``, ``NEURONSPHERE_NSX_NERD001`` in the
+    ``neuronsphere`` repository): the run it watches writes needs, names them
+    by identifier in every sentence, and wants a click to land in this graph.
+    The operator's decision was that this happens by integration — the two
+    extensions installed, versioned and released apart, joined by a string —
+    and not by a run view inside this extension. Three calls are what that
+    join needs, and this extension stays what it is: the one place that
+    decides what a need is and where it lives. A consumer that instead spoke
+    to ``reqtrace lsp`` itself would be a second such place.
+
 Roadmap
 -------
 
@@ -476,7 +522,8 @@ exists.
    * - M3 — graph
      - both
      - The ``needs/*`` requests; the Cytoscape webview with neighbourhood
-       and overview modes, filters, details, open-at-span, follow-editor.
+       and overview modes, filters, details, open-at-span, follow-editor;
+       the exported API of ``SPEC010``, exercised by the ``nsx`` extension.
      - "Show graph at cursor" on a spec, expand a hop, double-click into a
        requirement in another repository; the four bare ``NERD001`` render as
        four nodes.

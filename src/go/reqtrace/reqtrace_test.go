@@ -1,6 +1,7 @@
 package reqtrace
 
 import (
+	"io"
 	"os"
 	"path/filepath"
 	"strings"
@@ -649,5 +650,126 @@ The Thing Happens
 	}
 	if problems := Validate(model); len(problems) != 0 {
 		t.Errorf("expected a clean model, got %v", problems)
+	}
+}
+
+// Requirements: REQ_TRACE_012
+func TestLoadAlsoReadsDocsProposals(t *testing.T) {
+	root := t.TempDir()
+	write(t, filepath.Join(root, "meta-data", "manifest.json"), `{"name": "hmd-cli-bartleby"}`)
+	write(t, filepath.Join(root, "docs", "requirements", "sample.rst"), sampleRequirements)
+	write(t, filepath.Join(root, "docs", "proposals", "NERD001_Sample.rst"), `
+.. req:: A NERD requirement
+    :id: HMD_CLI_BARTLEBY_NERD001
+    :status: proposed
+
+    Body text.
+
+.. spec:: A NERD spec
+    :id: HMD_CLI_BARTLEBY_NERD001_SPEC001
+    :links: HMD_CLI_BARTLEBY_NERD001
+    :status: proposed
+    :tags: trace-exempt
+
+    More body text.
+`)
+
+	// Scanning docs/proposals is opt-in — a caller asks for it explicitly by
+	// adding ProposalsDir, the same thing RunOptions.IncludeProposals does.
+	layout := DefaultLayout(root)
+	layout.ExtraRequirementsDirs = append(layout.ExtraRequirementsDirs, ProposalsDir())
+
+	model, err := Load(layout)
+	if err != nil {
+		t.Fatalf("Load: %v", err)
+	}
+
+	// 3 from docs/requirements (sampleRequirements) + 2 from docs/proposals.
+	if len(model.Requirements) != 5 {
+		t.Fatalf("got %d requirements, want 5: %+v", len(model.Requirements), model.Requirements)
+	}
+
+	index := model.RequirementIndex()
+	nerdReq, ok := index["HMD_CLI_BARTLEBY_NERD001"]
+	if !ok {
+		t.Fatal("expected a requirement parsed from docs/proposals")
+	}
+	if nerdReq.File != "docs/proposals/NERD001_Sample.rst" {
+		t.Errorf("file = %q, want the repo-relative path under docs/proposals", nerdReq.File)
+	}
+}
+
+// Requirements: REQ_TRACE_012
+func TestLoadWorksWithOnlyDocsProposals(t *testing.T) {
+	root := t.TempDir()
+	write(t, filepath.Join(root, "meta-data", "manifest.json"), `{"name": "hmd-ms-transform"}`)
+	write(t, filepath.Join(root, "docs", "proposals", "NERD001_Sample.rst"), `
+.. req:: A NERD requirement with no docs/requirements directory at all
+    :id: HMD_MS_TRANSFORM_NERD001
+    :status: proposed
+    :tags: trace-exempt
+
+    Body text.
+`)
+
+	layout := DefaultLayout(root)
+	layout.ExtraRequirementsDirs = append(layout.ExtraRequirementsDirs, ProposalsDir())
+
+	model, err := Load(layout)
+	if err != nil {
+		t.Fatalf("Load: %v — a repository with only docs/proposals should still load", err)
+	}
+	if len(model.Requirements) != 1 {
+		t.Fatalf("got %d requirements, want 1", len(model.Requirements))
+	}
+
+	// Writing the generated page must not fail just because docs/requirements
+	// was never created — reqtrace should not force that directory into
+	// existence just to hold nothing but the generated page's own home.
+	if err := Write(layout, model); err != nil {
+		t.Fatalf("Write: %v", err)
+	}
+	if _, err := os.Stat(layout.GeneratedPath()); err != nil {
+		t.Errorf("generated page was not written: %v", err)
+	}
+}
+
+// Requirements: REQ_TRACE_012
+func TestRunOnlyScansProposalsWhenIncluded(t *testing.T) {
+	root := t.TempDir()
+	write(t, filepath.Join(root, "meta-data", "manifest.json"), `{"name": "hmd-cli-bartleby"}`)
+	write(t, filepath.Join(root, "docs", "requirements", "sample.rst"), sampleRequirements)
+	write(t, filepath.Join(root, "docs", "proposals", "NERD001_Sample.rst"), `
+.. req:: A NERD requirement
+    :id: HMD_CLI_BARTLEBY_NERD001
+    :status: proposed
+    :tags: trace-exempt
+
+    Body text.
+`)
+	generatedPage := filepath.Join(root, "docs", "requirements", GeneratedFile)
+
+	// Without the flag: generation still succeeds (sampleRequirements has its
+	// own pre-existing uncovered item, so Run's error is not the thing under
+	// test here); what matters is that the written page makes no mention of the
+	// docs/proposals requirement — the same behaviour as before this feature
+	// existed.
+	_ = Run(RunOptions{Repo: root, Quiet: true, Out: io.Discard, Err: io.Discard})
+	page, err := os.ReadFile(generatedPage)
+	if err != nil {
+		t.Fatalf("reading generated page: %v", err)
+	}
+	if strings.Contains(string(page), "HMD_CLI_BARTLEBY_NERD001") {
+		t.Error("the generated page should not mention a docs/proposals requirement when IncludeProposals is false")
+	}
+
+	// With the flag: it does.
+	_ = Run(RunOptions{Repo: root, Quiet: true, IncludeProposals: true, Out: io.Discard, Err: io.Discard})
+	page, err = os.ReadFile(generatedPage)
+	if err != nil {
+		t.Fatalf("reading generated page: %v", err)
+	}
+	if !strings.Contains(string(page), "HMD_CLI_BARTLEBY_NERD001") {
+		t.Error("the generated page should mention the docs/proposals requirement when IncludeProposals is true")
 	}
 }

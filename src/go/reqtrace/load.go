@@ -15,8 +15,15 @@ import (
 type Layout struct {
 	// RepoRoot is the directory holding meta-data/, docs/, src/, and test/.
 	RepoRoot string
-	// RequirementsDir holds the requirement documents, relative to RepoRoot.
+	// RequirementsDir holds the requirement documents, relative to RepoRoot,
+	// and is where the generated traceability page is written.
 	RequirementsDir string
+	// ExtraRequirementsDirs holds additional directories, relative to
+	// RepoRoot, also scanned for requirement documents. NERD documents live
+	// under docs/proposals alongside — not instead of — docs/requirements, so
+	// this is additive: a directory that does not exist is skipped rather than
+	// treated as an error, as long as at least one requirements directory does.
+	ExtraRequirementsDirs []string
 	// GoRoot is the tree to scan for annotated Go tests, relative to RepoRoot.
 	// It may contain more than one module.
 	GoRoot string
@@ -40,18 +47,54 @@ func DefaultLayout(repoRoot string) Layout {
 	}
 }
 
+// ProposalsDir is where NERD documents live: req/spec items under
+// docs/proposals, alongside — never instead of — docs/requirements.
+//
+// Scanning it is opt-in (see RunOptions.IncludeProposals) rather than part of
+// DefaultLayout, because a repository already running "reqtrace -check" in CI
+// may itself own NERD proposals with no test annotations yet; turning this on
+// unconditionally would fail that build the moment this package adopted it,
+// which is exactly the gap this tool exists to surface, not to spring on
+// someone as a side effect of an unrelated change.
+func ProposalsDir() string {
+	return filepath.Join("docs", "proposals")
+}
+
 // GeneratedPath is the full path of the generated traceability page.
 func (l Layout) GeneratedPath() string {
 	return filepath.Join(l.RepoRoot, l.RequirementsDir, GeneratedFile)
+}
+
+// existingRequirementsDirs returns the absolute paths of RequirementsDir and
+// ExtraRequirementsDirs that actually exist, in that order. A repository is
+// free to keep its requirements in only one of them — e.g. only
+// docs/proposals, for a repository whose requirements are all NERD documents
+// — so a missing directory is skipped rather than treated as an error, unless
+// none of them exist.
+func (l Layout) existingRequirementsDirs() ([]string, error) {
+	candidates := append([]string{l.RequirementsDir}, l.ExtraRequirementsDirs...)
+
+	var dirs []string
+	for _, candidate := range candidates {
+		dir := filepath.Join(l.RepoRoot, candidate)
+		if _, err := os.Stat(dir); err == nil {
+			dirs = append(dirs, dir)
+		}
+	}
+
+	if len(dirs) == 0 {
+		return nil, fmt.Errorf("no requirements directory found (tried %s)", strings.Join(candidates, ", "))
+	}
+	return dirs, nil
 }
 
 // Load parses the requirements and every annotated test.
 func Load(l Layout) (Model, error) {
 	var m Model
 
-	requirementsDir := filepath.Join(l.RepoRoot, l.RequirementsDir)
-	if _, err := os.Stat(requirementsDir); err != nil {
-		return m, fmt.Errorf("requirements directory %s: %w", requirementsDir, err)
+	requirementsDirs, err := l.existingRequirementsDirs()
+	if err != nil {
+		return m, err
 	}
 
 	scheme := l.Scheme
@@ -63,11 +106,13 @@ func Load(l Layout) (Model, error) {
 		scheme = derived
 	}
 
-	requirements, err := ParseRequirements(requirementsDir, l.RepoRoot, scheme)
-	if err != nil {
-		return m, err
+	for _, dir := range requirementsDirs {
+		requirements, err := ParseRequirements(dir, l.RepoRoot, scheme)
+		if err != nil {
+			return m, err
+		}
+		m.Requirements = append(m.Requirements, requirements...)
 	}
-	m.Requirements = requirements
 
 	goTests, err := ParseGoTests(filepath.Join(l.RepoRoot, l.GoRoot), l.RepoRoot, l.GoSkipDirs, scheme)
 	if err != nil {
@@ -127,6 +172,13 @@ var ErrStale = errors.New("generated traceability page is out of date")
 // Write regenerates the traceability page.
 func Write(l Layout, m Model) error {
 	path := l.GeneratedPath()
+	// RequirementsDir may not exist yet — a repository whose requirements are
+	// all NERD documents under docs/proposals has no reason to have created
+	// docs/requirements before now, and the generated page still has to live
+	// somewhere predictable.
+	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+		return fmt.Errorf("creating %s: %w", filepath.Dir(path), err)
+	}
 	if err := os.WriteFile(path, []byte(Render(m)), 0o644); err != nil {
 		return fmt.Errorf("writing %s: %w", path, err)
 	}
