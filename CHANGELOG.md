@@ -1,6 +1,117 @@
 # Changelog
 
-## 2026-09-04
+## 2026-10-17
+
+- feat: `bartleby` passes `HMD_DEPLOYMENT_API_URL` and `HMD_DEPLOYMENT_API_TOKEN` into the transform, for the `ns-architecture` directive that draws a view the NeuronSphere deployment service renders (NERD036, hmd-cli-neuronsphere); like every optional value they are absent when unset
+
+## 2026-09-23 — v2.2.0
+
+### Added
+
+- `reqtrace -include-proposals` / `bartleby reqs --include-proposals`: also scan
+  `docs/proposals` — where NERD documents live across the platform's other
+  repositories — for `req`/`spec` items, alongside `docs/requirements`. Off by
+  default: `hmd-cli-bartleby` itself owns `NERD001`/`NERD002` with no test
+  annotations yet, and turning this on unconditionally would have broken this
+  repository's own `make check` the moment the change landed, rather than when
+  a repository's owner chooses to be judged against its NERDs too. `REQ_TRACE_012`.
+- `bartleby docx` and `bartleby pptx`, for the transform's new pandoc builders.
+  `REQ_CLI_002` is amended rather than duplicated, and a test asserts every
+  subcommand pins the builder it is named for — wiring one to the wrong shell is
+  otherwise invisible without running a real build.
+- Five more skills, and the licence position on each recorded in the skill
+  itself rather than left for someone to rediscover:
+  - `diagram-c4` — C4 architecture diagrams in PlantUML. Verified that
+    `!include <C4/C4_Container>` renders with networking disabled, since
+    PlantUML bundles the C4 macros; the `!include https://raw.githubusercontent…`
+    form found in most examples makes every render depend on GitHub.
+  - `write-from-template` — a rubric over The Good Docs Project templates
+    (**MIT No Attribution**, so vendorable with no obligation), keyed to the
+    Diátaxis modes.
+  - `review-prose` — the Google developer documentation style guide, **CC BY
+    4.0**, so its rules are quoted directly.
+  - `review-plain-language` — a separate review from style: whether the reader
+    can find, understand, and act on it. Carries the :rfc:`2119` keyword
+    discussion.
+  - `review-vale` — Vale configuration, style packages, vocabularies, and CI.
+    Notes that `.rst` support needs `docutils` and reports nothing without it,
+    which looks exactly like a clean run.
+- `add-requirement` now covers RFC 2119: that `shall` and `must` are the same
+  thing, that `should` does not belong in a baseline because no test can fail
+  on it, and RFC 2119's own instruction to use the keywords sparingly.
+
+- `plan-docs` skill: decide which of the four Diátaxis modes a piece of content
+  belongs to — tutorial, how-to, reference, explanation — and audit an existing
+  doc set against them. Written as a restatement in our own words, citing
+  <https://diataxis.fr>, and quoting nothing: Diátaxis is CC BY-SA 4.0, so
+  verbatim inclusion would make the file adapted material and oblige it to carry
+  CC BY-SA 4.0 too. The skill says so, in case someone later wants to quote it.
+
+### Fixed
+
+- Removed the `url.verified` key from both `homebrew_casks` entries in
+  `.goreleaser.yaml`. It is no longer a recognized GoReleaser field — left
+  over from an older GoReleaser version, it rendered as the deprecated
+  `verified:` param on the cask's `url` stanza that `brew` warns about. This
+  release clears that half of the warning once published.
+  The other `brew` warning — the deprecated `postflight` block, which should
+  be `postflight_steps` — is **not** fixed here: GoReleaser has no config
+  that emits `postflight_steps` yet (tracked upstream in
+  [goreleaser/goreleaser#6870](https://github.com/goreleaser/goreleaser/issues/6870),
+  targeted for v2.19.0). Revisit `.goreleaser.yaml`'s `homebrew_casks.hooks`
+  once that ships.
+
+
+### Fixed
+
+- `brew install`/`brew upgrade` of the `bartleby` and `reqtrace` casks no longer
+  warns about a deprecated stanza. Homebrew 6.0.16 deprecated free-form
+  `postflight do ... end` blocks in favour of the declarative `postflight_steps`,
+  and GoReleaser only ever emits the old wrapper for `homebrew_casks.hooks`, so
+  every install printed a warning naming the tap. The quarantine strip -- which
+  these unsigned binaries still need, or Gatekeeper refuses to run them -- now
+  goes in as a `custom_block` carrying the `postflight_steps` form. Reaches users
+  when the next release regenerates the casks.
+
+
+## 2026-09-04 — v2.1.0
+
+### Added
+
+- `bartleby reqs` and `bartleby reqs --check` — the traceability tool is now
+  reachable from the CLI, so anyone who has bartleby needs no second install.
+  It and the standalone `reqtrace` binary are two front doors onto one
+  `reqtrace.Run`, rather than each orchestrating the steps, so they cannot drift
+  into disagreeing about what a check means. Requirement `TRACE_010`.
+- `reqtrace` ships as its own Homebrew cask: `brew install neuronsphere/tap/reqtrace`.
+  A separate cask rather than a second binary in bartleby's, because two casks
+  cannot both link the same binary name — bundling it would have made installing
+  it alone impossible, and being adoptable without bartleby (or its BSL licence)
+  is the reason it was carved out.
+- `reqtrace -version`, injected at build time, defaulting to `dev`. Tested by
+  building with the ldflag and running the binary, since the failure it guards
+  against is the ldflag silently ceasing to apply.
+- Requirements `TRACE_008` and `TRACE_009` for the carve-out and the version
+  flag. The tests assert the module path, the absence of any `require`
+  directive, and the Apache licence, rather than trusting review to notice a
+  dependency creeping in.
+
+### Changed
+
+- `reqtrace` moved out of the CLI module into `src/go/reqtrace`, its own
+  Apache-2.0 module with no dependency outside the standard library. The CLI
+  module no longer contains it at all.
+- Every Makefile target that checks sources — `test`, `test-race`, `cover`,
+  `vet`, `fmt`, `fmt-check`, `tidy` — now walks both modules. They only covered
+  `src/go/bartleby`, so after the carve-out `make check` stopped testing
+  reqtrace while the traceability matrix still counted its tests as coverage.
+- One release tag now publishes eight archives and two casks. GoReleaser's
+  per-module tag support (`monorepo.tag_prefix`) is Pro-only, so reqtrace's cask
+  version tracks the bartleby release; its Go module keeps its own tag line for
+  `go install`. `docs/releasing.rst` spells out the consequence.
+
+
+## 2026-09-04 — v2.0.0
 
 First released version of the Go CLI: **v2.0.0**. The major bump records that
 the Python entrypoint is no longer the product — the Go binary is.

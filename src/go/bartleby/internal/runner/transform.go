@@ -63,6 +63,12 @@ type TransformConfig struct {
 	// GlobalStylesPath is $HMD_HOME/bartleby/styles, mounted read-only when it
 	// exists.
 	GlobalStylesPath string
+
+	// DeploymentAPIURL and DeploymentAPIToken are where the ns-architecture
+	// directive fetches an architecture view's rendering (NERD036 in
+	// hmd-cli-neuronsphere), passed through from the caller's environment.
+	DeploymentAPIURL   string
+	DeploymentAPIToken string
 }
 
 // Env builds the container environment.
@@ -100,6 +106,8 @@ func (c TransformConfig) Env() ([]string, error) {
 		{"DEFAULT_LOGO", c.DefaultLogo},
 		{"HTML_DEFAULT_LOGO", c.HTMLDefaultLogo},
 		{"PDF_DEFAULT_LOGO", c.PDFDefaultLogo},
+		{"HMD_DEPLOYMENT_API_URL", c.DeploymentAPIURL},
+		{"HMD_DEPLOYMENT_API_TOKEN", c.DeploymentAPIToken},
 	}
 	for _, o := range optional {
 		if o.value != "" {

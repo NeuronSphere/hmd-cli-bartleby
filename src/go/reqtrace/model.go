@@ -25,10 +25,61 @@ import (
 	"strings"
 )
 
-// IDPrefix is prepended to the short form used in test annotations, so a test
-// tags REQ_SHELL_001 and means HMD_CLI_BARTLEBY_REQ_SHELL_001. The prefix
-// follows the HMD_<REPO_TYPE>_<NAME>_ convention the NERD documents use.
-const IDPrefix = "HMD_CLI_BARTLEBY_"
+// Scheme is the ID naming scheme for one repository. Prefix is prepended to the
+// short form used in test annotations, so in hmd-cli-bartleby a test tags
+// REQ_SHELL_001 and means HMD_CLI_BARTLEBY_REQ_SHELL_001. Org is the first
+// segment of that prefix, which identifies IDs belonging to a sibling
+// repository rather than this one.
+//
+// Both are derived from the repository name in meta-data/manifest.json, so the
+// HMD_<REPO_TYPE>_<NAME>_ convention the NERD documents use falls out of the
+// name rather than being compiled in.
+type Scheme struct {
+	Prefix string // e.g. "HMD_CLI_BARTLEBY_"
+	Org    string // e.g. "HMD_"
+}
+
+// SchemeFromName derives the scheme from a repository name: upper-cased, with
+// every run of non-alphanumeric characters collapsed to a single underscore, so
+// hmd-cli-bartleby yields HMD_CLI_BARTLEBY_ and glint-jira yields GLINT_JIRA_.
+// The result contains only the [A-Z0-9_] that sphinx-needs IDs allow.
+func SchemeFromName(name string) Scheme {
+	var b strings.Builder
+	pendingSeparator := false
+	for _, r := range name {
+		switch {
+		case r >= 'a' && r <= 'z':
+			if pendingSeparator && b.Len() > 0 {
+				b.WriteByte('_')
+			}
+			b.WriteRune(r - ('a' - 'A'))
+			pendingSeparator = false
+		case (r >= 'A' && r <= 'Z') || (r >= '0' && r <= '9'):
+			if pendingSeparator && b.Len() > 0 {
+				b.WriteByte('_')
+			}
+			b.WriteRune(r)
+			pendingSeparator = false
+		default:
+			pendingSeparator = true
+		}
+	}
+
+	body := b.String()
+	if body == "" {
+		return Scheme{}
+	}
+
+	scheme := Scheme{Prefix: body + "_"}
+	scheme.Org = scheme.Prefix
+	if idx := strings.Index(body, "_"); idx > 0 {
+		scheme.Org = body[:idx] + "_"
+	}
+	return scheme
+}
+
+// IsZero reports whether the scheme is unset.
+func (s Scheme) IsZero() bool { return s.Prefix == "" }
 
 // ExemptTag marks a requirement that no automated test can reasonably verify.
 // Such a requirement must say in its own text how it is verified instead.
@@ -57,6 +108,9 @@ type Requirement struct {
 	Links  []string // :links: targets, e.g. a spec pointing at its req
 	File   string   // path relative to the repo root
 	Line   int
+	// Prefix is the ID prefix of the repository this item was parsed from.
+	// Carried per item so a model may hold items from more than one repository.
+	Prefix string
 }
 
 // Exempt reports whether this requirement is excused from needing a test.
@@ -73,7 +127,7 @@ func (r Requirement) Exempt() bool {
 // HMD_CLI_BARTLEBY_REQ_SHELL_001. It returns "" for IDs that do not follow the
 // pattern, such as the NERD documents.
 func (r Requirement) Area() string {
-	rest, ok := cutPrefix(r.ID, IDPrefix+"REQ_")
+	rest, ok := cutPrefix(r.ID, r.Prefix+"REQ_")
 	if !ok {
 		return ""
 	}
@@ -92,6 +146,8 @@ type TestCase struct {
 	File         string // path relative to the repo root
 	Line         int
 	Requirements []string // full requirement IDs, sorted and deduplicated
+	// Prefix is the ID prefix of the repository this test was parsed from.
+	Prefix string
 }
 
 // NeedID returns the sphinx-needs ID for the generated test item. It is derived
@@ -100,7 +156,7 @@ type TestCase struct {
 func (t TestCase) NeedID() string {
 	h := fnv.New32a()
 	fmt.Fprintf(h, "%s\x00%s\x00%s", t.Kind, t.Suite, t.Name)
-	return fmt.Sprintf("%sTEST_%s_%08X", IDPrefix, strings.ToUpper(string(t.Kind)), h.Sum32())
+	return fmt.Sprintf("%sTEST_%s_%08X", t.Prefix, strings.ToUpper(string(t.Kind)), h.Sum32())
 }
 
 // Title returns the human-readable label for the generated test item.
@@ -156,29 +212,30 @@ func (m Model) Coverage() map[string][]TestCase {
 }
 
 // ExpandID turns a short annotation such as REQ_SHELL_001 into a full ID. An ID
-// that already carries the prefix is returned unchanged, so tests may spell it
-// either way.
-func ExpandID(id string) string {
+// that already carries this repository's prefix is returned unchanged, so tests
+// may spell it either way, and so is an ID carrying the organisation prefix of a
+// sibling repository or a NERD reference.
+func (s Scheme) ExpandID(id string) string {
 	id = strings.TrimSpace(id)
-	if id == "" {
-		return ""
-	}
-	if strings.HasPrefix(id, IDPrefix) {
+	if id == "" || s.IsZero() {
 		return id
 	}
-	if strings.HasPrefix(id, "HMD_") {
-		// Another repo's ID, or a NERD reference: leave it alone.
+	if strings.HasPrefix(id, s.Prefix) {
 		return id
 	}
-	return IDPrefix + id
+	if s.Org != "" && strings.HasPrefix(id, s.Org) {
+		// Another repository's ID, or a NERD reference: leave it alone.
+		return id
+	}
+	return s.Prefix + id
 }
 
 // normalizeIDs expands, deduplicates, and sorts a list of referenced IDs.
-func normalizeIDs(raw []string) []string {
+func (s Scheme) normalizeIDs(raw []string) []string {
 	seen := make(map[string]bool, len(raw))
 	var out []string
 	for _, id := range raw {
-		full := ExpandID(id)
+		full := s.ExpandID(id)
 		if full == "" || seen[full] {
 			continue
 		}

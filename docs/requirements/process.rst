@@ -84,3 +84,90 @@ its own and its tests are traced the same way everything else is.
     Every reported problem shall name the file and line it concerns and say what
     to do about it, and problems shall be reported in a stable order so the output
     is comparable between runs.
+
+.. req:: Be usable without taking the CLI on
+    :id: HMD_CLI_BARTLEBY_REQ_TRACE_008
+    :status: implemented
+
+    The traceability tool shall be a self-contained module — its own ``go.mod``,
+    licensed Apache-2.0, with no dependency outside the Go standard library — so
+    that a project can adopt it without adopting Bartleby or a BSL dependency.
+
+    This is why it lives in ``src/go/reqtrace`` rather than inside the CLI. All
+    three conditions have to hold for the carve-out to mean anything, so the
+    tests assert the module path, the absence of ``require`` directives, and the
+    licence itself rather than trusting review to notice.
+
+.. req:: Report which build is running
+    :id: HMD_CLI_BARTLEBY_REQ_TRACE_009
+    :status: implemented
+
+    ``reqtrace -version`` shall report the version, injected at build time. A
+    binary built without the injection shall report ``dev``, so a local build is
+    distinguishable from a released one.
+
+.. spec:: Distributed as its own Homebrew cask
+    :id: HMD_CLI_BARTLEBY_REQ_TRACE_008_SPEC001
+    :links: HMD_CLI_BARTLEBY_REQ_TRACE_008
+    :status: implemented
+    :tags: trace-exempt
+
+    ``reqtrace`` shall be installable as ``brew install neuronsphere/tap/reqtrace``
+    — its own cask, not a second binary inside Bartleby's, since two casks cannot
+    both link the same binary name and bundling it would foreclose installing it
+    alone.
+
+    *Verification:* by inspection of ``.goreleaser.yaml`` and a rehearsed release
+    (``goreleaser release --snapshot --skip=publish``, which writes both casks),
+    plus installing from the tap. Exercising it in a unit test would mean
+    publishing a release.
+
+.. req:: Reachable from the CLI as well
+    :id: HMD_CLI_BARTLEBY_REQ_TRACE_010
+    :status: implemented
+
+    ``bartleby reqs`` shall generate the matrix and ``bartleby reqs --check``
+    shall check it, with the same ``--repo`` and ``--quiet`` behaviour as the
+    standalone tool. Someone who already has the CLI shall not need to install a
+    second binary.
+
+    Both entry points shall call one function rather than each orchestrating the
+    steps, so that they cannot drift into disagreeing about what a check means.
+
+.. req:: Work in a repository that has no Go in it
+    :id: HMD_CLI_BARTLEBY_REQ_TRACE_011
+    :status: implemented
+
+    A repository with no Go tree shall be read as having no Go tests, not as an
+    error. Coverage shall come from whatever test sources the repository does
+    have.
+
+    Found by adopting the tool in ``hmd-tf-bartleby``, which is Python and Robot:
+    it failed outright with ``lstat src/go: no such file or directory``, so the
+    tool was unusable in precisely the kind of repository ``REQ_TRACE_008``
+    exists to serve.
+
+.. req:: Optionally also read requirements from docs/proposals
+    :id: HMD_CLI_BARTLEBY_REQ_TRACE_012
+    :status: implemented
+
+    With ``-include-proposals`` (``bartleby reqs --include-proposals``),
+    ``req``/``spec`` items under ``docs/proposals`` shall be read in addition to
+    ``docs/requirements``, not instead of it, so that NERD documents — which the
+    platform's other repositories keep under ``docs/proposals`` — can be covered
+    by the same traceability check without moving them. A repository with items
+    in only one of the two directories shall still be read correctly, and the
+    generated page shall still be written even when ``docs/requirements`` did not
+    already exist.
+
+    This is opt-in, not the default: a repository that already runs
+    ``reqtrace -check`` in CI may itself own NERD proposals with no test
+    annotations yet, and turning this on unconditionally would fail that build
+    the moment the repository adopted this change, rather than when its owner
+    chose to be judged against its NERDs too. (Found in this repository itself —
+    ``hmd-cli-bartleby``'s own ``NERD001``/``NERD002`` have no test annotations,
+    so an unconditional default would have broken ``make check`` here.)
+
+    NERD IDs already follow the ``HMD_<TYPE>_<NAME>_`` convention this tool
+    derives from the manifest, so no change to the ID scheme was needed — only to
+    where the scan looks.

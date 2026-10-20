@@ -122,10 +122,13 @@ func init() {
 		newShellCmd("html", "Render HTML documentation", "html"),
 		newShellCmd("pdf", "Render PDF documentation", "pdf"),
 		newShellCmd("slides", "Render a RevealJS slideshow", "revealjs"),
+		newShellCmd("docx", "Render a Word document", "docx"),
+		newShellCmd("pptx", "Render a PowerPoint deck", "pptx"),
 		pumlCmd,
 		updateImageCmd,
 		configureCmd,
 		explainCmd,
+		reqsCmd,
 		skillCmds.root,
 		agentCmds.root,
 		versionCmd,
@@ -372,6 +375,8 @@ func runBuilds(cmd *cobra.Command, shellFilter string) error {
 			HTMLDefaultLogo:          htmlLogo,
 			PDFDefaultLogo:           pdfLogo,
 			GlobalStylesPath:         globalStylesPath(env),
+			DeploymentAPIURL:         env("HMD_DEPLOYMENT_API_URL"),
+			DeploymentAPIToken:       env("HMD_DEPLOYMENT_API_TOKEN"),
 		}
 
 		if err := runner.RunTransform(ctx, cfg); err != nil {

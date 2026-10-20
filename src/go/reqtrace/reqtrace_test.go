@@ -1,6 +1,7 @@
 package reqtrace
 
 import (
+	"io"
 	"os"
 	"path/filepath"
 	"strings"
@@ -33,6 +34,10 @@ const sampleRequirements = `Sample
 
 // writeRepo lays out a miniature repository with requirements, a Go test file,
 // and a Robot suite.
+// testScheme matches the repository name writeRepo puts in meta-data/manifest.json,
+// so direct parser calls expand IDs the same way Load would.
+var testScheme = SchemeFromName("hmd-cli-bartleby")
+
 func writeRepo(t *testing.T, requirements, goTest, robot string) string {
 	t.Helper()
 	root := t.TempDir()
@@ -62,7 +67,7 @@ func write(t *testing.T, path, content string) {
 func TestParseRequirements(t *testing.T) {
 	root := writeRepo(t, sampleRequirements, "", "")
 
-	requirements, err := ParseRequirements(filepath.Join(root, "docs", "requirements"), root)
+	requirements, err := ParseRequirements(filepath.Join(root, "docs", "requirements"), root, testScheme)
 	if err != nil {
 		t.Fatalf("ParseRequirements: %v", err)
 	}
@@ -111,7 +116,7 @@ func TestParseRequirementsSkipsTheGeneratedPage(t *testing.T) {
 	write(t, filepath.Join(root, "docs", "requirements", GeneratedFile),
 		".. test:: x\n    :id: HMD_CLI_BARTLEBY_TEST_GO_00000000\n\n"+sampleRequirements)
 
-	requirements, err := ParseRequirements(filepath.Join(root, "docs", "requirements"), root)
+	requirements, err := ParseRequirements(filepath.Join(root, "docs", "requirements"), root, testScheme)
 	if err != nil {
 		t.Fatalf("ParseRequirements: %v", err)
 	}
@@ -149,7 +154,7 @@ func TestWithBodyComment(t *testing.T) {
 func TestParseGoTests(t *testing.T) {
 	root := writeRepo(t, sampleRequirements, sampleGoTest, "")
 
-	tests, err := ParseGoTests(filepath.Join(root, "src", "go", "bartleby"), root, nil)
+	tests, err := ParseGoTests(filepath.Join(root, "src", "go", "bartleby"), root, nil, testScheme)
 	if err != nil {
 		t.Fatalf("ParseGoTests: %v", err)
 	}
@@ -188,7 +193,7 @@ func TestParseGoTests(t *testing.T) {
 func TestParseGoTestsIgnoresNonTests(t *testing.T) {
 	root := writeRepo(t, sampleRequirements, sampleGoTest, "")
 
-	tests, err := ParseGoTests(filepath.Join(root, "src", "go", "bartleby"), root, nil)
+	tests, err := ParseGoTests(filepath.Join(root, "src", "go", "bartleby"), root, nil, testScheme)
 	if err != nil {
 		t.Fatalf("ParseGoTests: %v", err)
 	}
@@ -212,7 +217,7 @@ func TestParseGoTestsSkipsRequestedDirectories(t *testing.T) {
 	write(t, filepath.Join(root, "src", "go", "bartleby", "build", "gen_test.go"),
 		"package build\n\nimport \"testing\"\n\nfunc TestGenerated(t *testing.T) {}\n")
 
-	tests, err := ParseGoTests(filepath.Join(root, "src", "go", "bartleby"), root, []string{"build"})
+	tests, err := ParseGoTests(filepath.Join(root, "src", "go", "bartleby"), root, []string{"build"}, testScheme)
 	if err != nil {
 		t.Fatalf("ParseGoTests: %v", err)
 	}
@@ -248,7 +253,7 @@ Not A Test
 func TestParseRobotTests(t *testing.T) {
 	root := writeRepo(t, sampleRequirements, "", sampleRobot)
 
-	tests, err := ParseRobotTests([]string{filepath.Join(root, "test", "sample.robot")}, root)
+	tests, err := ParseRobotTests([]string{filepath.Join(root, "test", "sample.robot")}, root, testScheme)
 	if err != nil {
 		t.Fatalf("ParseRobotTests: %v", err)
 	}
@@ -281,9 +286,29 @@ func TestExpandID(t *testing.T) {
 		"":                             "",
 	}
 	for in, want := range cases {
-		if got := ExpandID(in); got != want {
+		if got := testScheme.ExpandID(in); got != want {
 			t.Errorf("ExpandID(%q) = %q, want %q", in, got, want)
 		}
+	}
+
+	// The prefix is derived from the repository name, not compiled in.
+	schemes := map[string]Scheme{
+		"hmd-cli-bartleby": {Prefix: "HMD_CLI_BARTLEBY_", Org: "HMD_"},
+		"glint-jira":       {Prefix: "GLINT_JIRA_", Org: "GLINT_"},
+		"bartleby":         {Prefix: "BARTLEBY_", Org: "BARTLEBY_"},
+		"hmd_ms_gozer":     {Prefix: "HMD_MS_GOZER_", Org: "HMD_"},
+		"weird..name--x":   {Prefix: "WEIRD_NAME_X_", Org: "WEIRD_"},
+		"":                 {},
+	}
+	for name, want := range schemes {
+		if got := SchemeFromName(name); got != want {
+			t.Errorf("SchemeFromName(%q) = %+v, want %+v", name, got, want)
+		}
+	}
+
+	// An unset scheme leaves IDs alone rather than corrupting them.
+	if got := (Scheme{}).ExpandID("REQ_SEL_001"); got != "REQ_SEL_001" {
+		t.Errorf("zero scheme ExpandID = %q, want the input unchanged", got)
 	}
 }
 
@@ -471,10 +496,11 @@ func TestRenderIsDeterministic(t *testing.T) {
 //
 // Requirements: REQ_TRACE_006_SPEC001
 func TestNeedIDIsStable(t *testing.T) {
-	one := TestCase{Kind: KindGo, Name: "TestOne", Suite: "thing"}
-	same := TestCase{Kind: KindGo, Name: "TestOne", Suite: "thing", File: "moved_test.go", Line: 99}
-	other := TestCase{Kind: KindGo, Name: "TestTwo", Suite: "thing"}
-	otherKind := TestCase{Kind: KindRobot, Name: "TestOne", Suite: "thing"}
+	prefix := testScheme.Prefix
+	one := TestCase{Kind: KindGo, Name: "TestOne", Suite: "thing", Prefix: prefix}
+	same := TestCase{Kind: KindGo, Name: "TestOne", Suite: "thing", File: "moved_test.go", Line: 99, Prefix: prefix}
+	other := TestCase{Kind: KindGo, Name: "TestTwo", Suite: "thing", Prefix: prefix}
+	otherKind := TestCase{Kind: KindRobot, Name: "TestOne", Suite: "thing", Prefix: prefix}
 
 	if one.NeedID() != same.NeedID() {
 		t.Error("moving a test within its file should not change its ID")
@@ -485,7 +511,7 @@ func TestNeedIDIsStable(t *testing.T) {
 	if one.NeedID() == otherKind.NeedID() {
 		t.Error("a Go test and a Robot test with the same name must not share an ID")
 	}
-	if !strings.HasPrefix(one.NeedID(), IDPrefix+"TEST_GO_") {
+	if !strings.HasPrefix(one.NeedID(), prefix+"TEST_GO_") {
 		t.Errorf("ID = %q, want the repo prefix and kind", one.NeedID())
 	}
 }
@@ -579,5 +605,171 @@ func TestFindRepoRoot(t *testing.T) {
 
 	if _, err := FindRepoRoot(t.TempDir()); err == nil {
 		t.Error("expected an error where there is no manifest above the directory")
+	}
+}
+
+// Requirements: REQ_TRACE_011
+func TestParseGoTestsToleratesNoGoTree(t *testing.T) {
+	tests, err := ParseGoTests(filepath.Join(t.TempDir(), "does-not-exist"), t.TempDir(), nil, testScheme)
+	if err != nil {
+		t.Fatalf("a repository with no Go tree should not be an error: %v", err)
+	}
+	if len(tests) != 0 {
+		t.Errorf("got %d tests from a nonexistent tree", len(tests))
+	}
+}
+
+// Requirements: REQ_TRACE_011
+func TestLoadWorksWithRobotTestsOnly(t *testing.T) {
+	// The shape of a Python and Robot repository: requirements, a Robot suite,
+	// and no src/go at all.
+	root := t.TempDir()
+	write(t, filepath.Join(root, "meta-data", "manifest.json"), `{"name": "hmd-cli-bartleby"}`)
+	write(t, filepath.Join(root, "docs", "requirements", "sel.rst"), `
+.. req:: Do the thing
+    :id: HMD_CLI_BARTLEBY_REQ_SEL_001
+    :status: implemented
+
+    It shall do the thing.
+`)
+	write(t, filepath.Join(root, "test", "suite.robot"), `*** Test Cases ***
+The Thing Happens
+    [Tags]    REQ_SEL_001
+    No Operation
+`)
+
+	model, err := Load(DefaultLayout(root))
+	if err != nil {
+		t.Fatalf("Load: %v", err)
+	}
+	if len(model.Requirements) != 1 {
+		t.Fatalf("got %d requirements", len(model.Requirements))
+	}
+	if len(model.Tests) != 1 {
+		t.Fatalf("got %d tests", len(model.Tests))
+	}
+	if problems := Validate(model); len(problems) != 0 {
+		t.Errorf("expected a clean model, got %v", problems)
+	}
+}
+
+// Requirements: REQ_TRACE_012
+func TestLoadAlsoReadsDocsProposals(t *testing.T) {
+	root := t.TempDir()
+	write(t, filepath.Join(root, "meta-data", "manifest.json"), `{"name": "hmd-cli-bartleby"}`)
+	write(t, filepath.Join(root, "docs", "requirements", "sample.rst"), sampleRequirements)
+	write(t, filepath.Join(root, "docs", "proposals", "NERD001_Sample.rst"), `
+.. req:: A NERD requirement
+    :id: HMD_CLI_BARTLEBY_NERD001
+    :status: proposed
+
+    Body text.
+
+.. spec:: A NERD spec
+    :id: HMD_CLI_BARTLEBY_NERD001_SPEC001
+    :links: HMD_CLI_BARTLEBY_NERD001
+    :status: proposed
+    :tags: trace-exempt
+
+    More body text.
+`)
+
+	// Scanning docs/proposals is opt-in — a caller asks for it explicitly by
+	// adding ProposalsDir, the same thing RunOptions.IncludeProposals does.
+	layout := DefaultLayout(root)
+	layout.ExtraRequirementsDirs = append(layout.ExtraRequirementsDirs, ProposalsDir())
+
+	model, err := Load(layout)
+	if err != nil {
+		t.Fatalf("Load: %v", err)
+	}
+
+	// 3 from docs/requirements (sampleRequirements) + 2 from docs/proposals.
+	if len(model.Requirements) != 5 {
+		t.Fatalf("got %d requirements, want 5: %+v", len(model.Requirements), model.Requirements)
+	}
+
+	index := model.RequirementIndex()
+	nerdReq, ok := index["HMD_CLI_BARTLEBY_NERD001"]
+	if !ok {
+		t.Fatal("expected a requirement parsed from docs/proposals")
+	}
+	if nerdReq.File != "docs/proposals/NERD001_Sample.rst" {
+		t.Errorf("file = %q, want the repo-relative path under docs/proposals", nerdReq.File)
+	}
+}
+
+// Requirements: REQ_TRACE_012
+func TestLoadWorksWithOnlyDocsProposals(t *testing.T) {
+	root := t.TempDir()
+	write(t, filepath.Join(root, "meta-data", "manifest.json"), `{"name": "hmd-ms-transform"}`)
+	write(t, filepath.Join(root, "docs", "proposals", "NERD001_Sample.rst"), `
+.. req:: A NERD requirement with no docs/requirements directory at all
+    :id: HMD_MS_TRANSFORM_NERD001
+    :status: proposed
+    :tags: trace-exempt
+
+    Body text.
+`)
+
+	layout := DefaultLayout(root)
+	layout.ExtraRequirementsDirs = append(layout.ExtraRequirementsDirs, ProposalsDir())
+
+	model, err := Load(layout)
+	if err != nil {
+		t.Fatalf("Load: %v — a repository with only docs/proposals should still load", err)
+	}
+	if len(model.Requirements) != 1 {
+		t.Fatalf("got %d requirements, want 1", len(model.Requirements))
+	}
+
+	// Writing the generated page must not fail just because docs/requirements
+	// was never created — reqtrace should not force that directory into
+	// existence just to hold nothing but the generated page's own home.
+	if err := Write(layout, model); err != nil {
+		t.Fatalf("Write: %v", err)
+	}
+	if _, err := os.Stat(layout.GeneratedPath()); err != nil {
+		t.Errorf("generated page was not written: %v", err)
+	}
+}
+
+// Requirements: REQ_TRACE_012
+func TestRunOnlyScansProposalsWhenIncluded(t *testing.T) {
+	root := t.TempDir()
+	write(t, filepath.Join(root, "meta-data", "manifest.json"), `{"name": "hmd-cli-bartleby"}`)
+	write(t, filepath.Join(root, "docs", "requirements", "sample.rst"), sampleRequirements)
+	write(t, filepath.Join(root, "docs", "proposals", "NERD001_Sample.rst"), `
+.. req:: A NERD requirement
+    :id: HMD_CLI_BARTLEBY_NERD001
+    :status: proposed
+    :tags: trace-exempt
+
+    Body text.
+`)
+	generatedPage := filepath.Join(root, "docs", "requirements", GeneratedFile)
+
+	// Without the flag: generation still succeeds (sampleRequirements has its
+	// own pre-existing uncovered item, so Run's error is not the thing under
+	// test here); what matters is that the written page makes no mention of the
+	// docs/proposals requirement — the same behaviour as before this feature
+	// existed.
+	_ = Run(RunOptions{Repo: root, Quiet: true, Out: io.Discard, Err: io.Discard})
+	page, err := os.ReadFile(generatedPage)
+	if err != nil {
+		t.Fatalf("reading generated page: %v", err)
+	}
+	if strings.Contains(string(page), "HMD_CLI_BARTLEBY_NERD001") {
+		t.Error("the generated page should not mention a docs/proposals requirement when IncludeProposals is false")
+	}
+
+	// With the flag: it does.
+	_ = Run(RunOptions{Repo: root, Quiet: true, IncludeProposals: true, Out: io.Discard, Err: io.Discard})
+	page, err = os.ReadFile(generatedPage)
+	if err != nil {
+		t.Fatalf("reading generated page: %v", err)
+	}
+	if !strings.Contains(string(page), "HMD_CLI_BARTLEBY_NERD001") {
+		t.Error("the generated page should mention the docs/proposals requirement when IncludeProposals is true")
 	}
 }

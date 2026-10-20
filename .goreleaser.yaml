@@ -11,9 +11,11 @@ force_token: github
 before:
   hooks:
     - go mod tidy -C src/go/bartleby
+    - go mod tidy -C src/go/reqtrace
 
 builds:
-  - main: .
+  - id: bartleby
+    main: .
     dir: src/go/bartleby
     binary: bartleby
     ldflags:
@@ -25,36 +27,121 @@ builds:
       - amd64
       - arm64
 
+  # reqtrace ships from this release too, but as its own binary, archive, and
+  # cask. GoReleaser's monorepo support — which would let the nested module
+  # release off its own src/go/reqtrace/v* tags — is Pro-only, so the tag that
+  # versions it is Bartleby's. Its Go module keeps its own tag line for
+  # `go install`; see docs/releasing.rst.
+  - id: reqtrace
+    main: ./cmd/reqtrace
+    dir: src/go/reqtrace
+    binary: reqtrace
+    ldflags:
+      - -X main.version={{ .Version }}
+    goos:
+      - darwin
+      - linux
+    goarch:
+      - amd64
+      - arm64
+
 archives:
-  - formats:
+  - id: bartleby
+    ids:
+      - bartleby
+    formats:
       - tar.gz
-    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    name_template: "bartleby_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+
+  - id: reqtrace
+    ids:
+      - reqtrace
+    formats:
+      - tar.gz
+    name_template: "reqtrace_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
 
 # A cask rather than a formula: Homebrew formulae are meant to build from
 # source, and GoReleaser deprecated the pre-compiled-binary formulas it used to
 # generate. Casks are macOS-only, so Linux installs come from the release
 # tarballs or `make build` — see docs/install_and_run.rst.
 homebrew_casks:
-  - repository:
+  - name: bartleby
+    ids:
+      - bartleby
+    repository:
       owner: neuronsphere
       name: homebrew-tap
     directory: Casks
     homepage: https://github.com/neuronsphere/hmd-cli-bartleby
     description: "Render reStructuredText documentation using Sphinx inside Docker"
-    url:
-      verified: github.com/neuronsphere/hmd-cli-bartleby
     caveats: |
       bartleby requires Docker to run documentation builds.
       If you use Colima, make sure it is running:
         colima start
-    hooks:
-      post:
-        # The binary is not signed or notarized, so Gatekeeper would refuse to
-        # run it. Without this, `bartleby` dies on first launch.
-        install: |
-          if OS.mac?
-            system_command "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "#{staged_path}/bartleby"]
+    # `custom_block` rather than `hooks.post.install`: the binary is not signed
+    # or notarized, and Homebrew quarantines cask downloads on macOS, so without
+    # stripping com.apple.quarantine Gatekeeper would refuse to run it and
+    # bartleby would die on first launch. GoReleaser wraps `hooks` in
+    # `postflight do`, which Homebrew 6.0.16 deprecated in favour of the
+    # declarative `postflight_steps` -- every install printed a warning naming
+    # the tap -- and no hook option emits the new stanza, so the Ruby is
+    # injected verbatim instead. The staged path is Homebrew's own step template
+    # token, expanded when the step runs, not Ruby interpolation: the steps
+    # block is instance_eval'd on the step DSL, which has no `staged_path`
+    # method. GoReleaser templates this block too, so the token's braces are
+    # escaped past its own templating. `on_macos` replaces the old `if OS.mac?`,
+    # which the steps DSL cannot express.
+    custom_block: |
+      postflight_steps do
+        on_macos do
+          if_path_exists "/usr/bin/xattr" do
+            run "/usr/bin/xattr",
+                args:         ["-dr", "com.apple.quarantine", "{{ "{{" }}staged_path}}/bartleby"],
+                must_succeed: false
           end
+        end
+      end
+
+  # A separate cask, not a second binary in Bartleby's: two casks cannot both
+  # link the same name, so bundling reqtrace would make installing it on its own
+  # impossible — and it is meant to be usable by projects that do not want
+  # Bartleby or a BSL dependency.
+  - name: reqtrace
+    ids:
+      - reqtrace
+    repository:
+      owner: neuronsphere
+      name: homebrew-tap
+    directory: Casks
+    homepage: https://github.com/neuronsphere/hmd-cli-bartleby/tree/main/src/go/reqtrace
+    description: "Generate and check a requirements traceability matrix from sphinx-needs directives and test annotations"
+    caveats: |
+      reqtrace needs nothing else installed — no Docker, no Python.
+      Run it from a repository with requirements in docs/requirements/:
+        reqtrace -check
+    # `custom_block` rather than `hooks.post.install`: the binary is not signed
+    # or notarized, and Homebrew quarantines cask downloads on macOS, so without
+    # stripping com.apple.quarantine Gatekeeper would refuse to run it and
+    # reqtrace would die on first launch. GoReleaser wraps `hooks` in
+    # `postflight do`, which Homebrew 6.0.16 deprecated in favour of the
+    # declarative `postflight_steps` -- every install printed a warning naming
+    # the tap -- and no hook option emits the new stanza, so the Ruby is
+    # injected verbatim instead. The staged path is Homebrew's own step template
+    # token, expanded when the step runs, not Ruby interpolation: the steps
+    # block is instance_eval'd on the step DSL, which has no `staged_path`
+    # method. GoReleaser templates this block too, so the token's braces are
+    # escaped past its own templating. `on_macos` replaces the old `if OS.mac?`,
+    # which the steps DSL cannot express.
+    custom_block: |
+      postflight_steps do
+        on_macos do
+          if_path_exists "/usr/bin/xattr" do
+            run "/usr/bin/xattr",
+                args:         ["-dr", "com.apple.quarantine", "{{ "{{" }}staged_path}}/reqtrace"],
+                must_succeed: false
+          end
+        end
+      end
 
 release:
   github:

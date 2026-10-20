@@ -50,6 +50,7 @@ reqtrace -check      # anywhere; -repo <path> if not run from the repo
 If `reqtrace` is not installed:
 
 ```bash
+brew install neuronsphere/tap/reqtrace   # macOS
 go install github.com/neuronsphere/hmd-cli-bartleby/src/go/reqtrace/cmd/reqtrace@latest
 ```
 

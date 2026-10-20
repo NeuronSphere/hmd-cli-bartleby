@@ -95,10 +95,13 @@ the repository into the transform container, and writes output to
     bartleby                  # every builder configured for every root document
     bartleby html             # HTML only
     bartleby pdf              # PDF only
+    bartleby docx             # Word document
+    bartleby pptx             # PowerPoint deck
     bartleby slides           # RevealJS slideshow
     bartleby puml             # render docs/**/*.puml to images
     bartleby update-image     # re-pull the transform image
     bartleby configure        # write defaults to $HMD_HOME/.config/hmd.env
+    bartleby reqs             # generate the requirements traceability matrix
     bartleby skills           # list the bundled agent skills
     bartleby agents           # list the bundled agents
     bartleby version          # print the version
@@ -249,6 +252,26 @@ binary. Installing them needs no network access and no repository checkout:
      - Stitching several repositories' documentation into one build.
    * - ``document-api``
      - Documenting a microservice API in RST.
+   * - ``plan-docs``
+     - Deciding what kind of document a piece of content is and where it
+       belongs, using the Diátaxis four-mode model, and auditing a doc set
+       against it.
+   * - ``write-from-template``
+     - Choosing a document template for that kind and filling it in — a rubric
+       over The Good Docs Project templates.
+   * - ``diagram-c4``
+     - Architecture diagrams with the C4 model, in PlantUML, rendered by this
+       pipeline. The C4 macros come from PlantUML's standard library, so they
+       need no network at render time.
+   * - ``review-prose``
+     - Style review against the Google developer documentation style guide.
+   * - ``review-plain-language``
+     - The harder question a style guide does not ask: can the reader find what
+       they need, understand it first time, and act on it. Also where the
+       :rfc:`2119` keyword discipline belongs.
+   * - ``review-vale``
+     - Enforcing the mechanical half of a style review with Vale, so human
+       review is spent on judgment.
 
 Agents work the same way, under ``bartleby agents``:
 
@@ -283,12 +306,33 @@ Installing is safe to repeat. One already present and identical is reported as
 current and left alone; one that **differs** is also left alone, since it may
 carry local edits, and reported so you can look at it. ``--force`` overwrites.
 
+The review skills stack rather than duplicate: ``review-vale`` catches what a
+machine can, ``review-prose`` applies a style guide by judgment, and
+``review-plain-language`` asks whether the document works at all. Run them in
+that order.
+
 The requirements skills work in any repository, not only this one. They drive
-``reqtrace``, which is published separately under Apache 2.0:
+``reqtrace``, which is licensed Apache-2.0 and installs on its own — no Docker,
+no Python, nothing outside the Go standard library:
 
 .. code-block:: bash
 
+    brew install neuronsphere/tap/reqtrace   # macOS
     go install github.com/neuronsphere/hmd-cli-bartleby/src/go/reqtrace/cmd/reqtrace@latest
+
+Its own cask, deliberately: a project can adopt the requirements practice
+without adopting Bartleby. ``reqtrace -check`` needs only a repository with
+requirements in ``docs/requirements/``.
+
+If you already have Bartleby, the same tool is built in — no second install:
+
+.. code-block:: bash
+
+    bartleby reqs             # regenerate docs/requirements/traceability.rst
+    bartleby reqs --check     # fail on a gap or stale output; for CI
+
+Both are front doors onto one function, so they cannot disagree about what a
+check means. Neither needs Docker or Sphinx.
 
 
 Configuring Multiple Root Documents
