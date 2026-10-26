@@ -286,6 +286,8 @@ func hasMount(mounts []mount.Mount, source, target string) bool {
 // NERD036 (hmd-cli-neuronsphere): the ns-architecture directive fetches a view
 // from the deployment API, so its address and token reach the container --
 // and, like every optional value, are absent rather than empty when unset.
+//
+// Requirements: REQ_EXEC_004
 func TestEnvPassesTheDeploymentAPIWhenSet(t *testing.T) {
 	cfg := baseConfig(t)
 	env := envMap(t, cfg)

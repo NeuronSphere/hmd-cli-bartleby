@@ -37,7 +37,9 @@ Running the Transform Container
     :status: implemented
 
     Optional variables — company name, document title, confidentiality statement,
-    the logos, and ``NO_TIMESTAMP_TITLE`` — shall be absent from the container
+    the logos, ``NO_TIMESTAMP_TITLE``, and the deployment API's
+    ``HMD_DEPLOYMENT_API_URL`` and ``HMD_DEPLOYMENT_API_TOKEN`` (NERD036 in
+    hmd-cli-neuronsphere) — shall be absent from the container
     environment when they have no value. The image tests several of them for
     presence, so an empty string is not equivalent to unset.
 
