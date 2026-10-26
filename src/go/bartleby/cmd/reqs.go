@@ -11,6 +11,11 @@ type reqsOptions struct {
 	repo             string
 	quiet            bool
 	includeProposals bool
+	verify           bool
+	needs            string
+	results          []string
+	out              string
+	json             bool
 }
 
 var reqsOpts reqsOptions
@@ -36,14 +41,20 @@ repository that does not otherwise use bartleby.`,
 	SilenceUsage:  true,
 	SilenceErrors: true,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		return reqtrace.Run(reqtrace.RunOptions{
+		opts := reqtrace.RunOptions{
 			Check:            reqsOpts.check,
 			Repo:             reqsOpts.repo,
 			Quiet:            reqsOpts.quiet,
 			IncludeProposals: reqsOpts.includeProposals,
 			Out:              cmd.OutOrStdout(),
 			Err:              cmd.ErrOrStderr(),
-		})
+		}
+		if reqsOpts.verify {
+			opts.Verify = &reqtrace.VerifyOptions{
+				Needs: reqsOpts.needs, Results: reqsOpts.results, Out: reqsOpts.out, JSON: reqsOpts.json,
+			}
+		}
+		return reqtrace.Run(opts)
 	},
 }
 
@@ -57,4 +68,14 @@ func init() {
 		"print nothing on success")
 	flags.BoolVar(&reqsOpts.includeProposals, "include-proposals", false,
 		"also scan docs/proposals (NERD documents) for req/spec items")
+	flags.BoolVar(&reqsOpts.verify, "verify", false,
+		"join needs.json with test results instead of generating the matrix; exit non-zero if a requirement fails or has no result")
+	flags.StringVar(&reqsOpts.needs, "needs", "",
+		"needs.json from a bartleby build, for --verify (default target/bartleby/html/needs.json)")
+	flags.StringArrayVar(&reqsOpts.results, "results", nil,
+		"for --verify: LABEL[@VERSION]=PATH of a Robot output.xml or go test -json output; repeatable")
+	flags.StringVar(&reqsOpts.out, "out", "",
+		"for --verify: page to write (default docs/requirements/verification_matrix.rst; - for none)")
+	flags.BoolVar(&reqsOpts.json, "json", false,
+		"for --verify: print the verification as JSON")
 }

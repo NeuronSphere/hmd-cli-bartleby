@@ -16,7 +16,7 @@ generated from those declarations.
 Summary
 -------
 
-124 requirement items, verified by 188 Go tests and 35 Robot tests.
+129 requirement items, verified by 201 Go tests and 35 Robot tests.
 
 .. list-table::
    :header-rows: 1
@@ -76,7 +76,7 @@ Summary
      - 0
    * - EXEC
      - 16
-     - 33
+     - 34
      - 1
    * - EXEC_016
      - 1
@@ -166,6 +166,10 @@ Summary
      - 1
      - 0
      - 1
+   * - VERIFY
+     - 5
+     - 13
+     - 0
 
 Coverage by requirement
 -----------------------
@@ -298,7 +302,7 @@ Coverage by requirement
      - runner.TestEnvAutodocMatchesPythonBool
      - implemented
    * - :need:`HMD_CLI_BARTLEBY_REQ_EXEC_004`
-     - runner.TestEnvIncludesOptionalValuesWhenSet, runner.TestEnvOmitsEmptyOptionalValues
+     - runner.TestEnvIncludesOptionalValuesWhenSet, runner.TestEnvOmitsEmptyOptionalValues, runner.TestEnvPassesTheDeploymentAPIWhenSet
      - implemented
    * - :need:`HMD_CLI_BARTLEBY_REQ_EXEC_005`
      - runner.TestMountsAlwaysIncludeInputAndOutput, runner.TestMountsIncludePipConfigWhenPresent, runner.TestMountsIncludeStylesReadOnly, runner.TestMountsSkipMissingOptionalPaths
@@ -548,6 +552,21 @@ Coverage by requirement
      - implemented
    * - :need:`HMD_CLI_BARTLEBY_REQ_TRACE_012`
      - reqtrace.TestLoadAlsoReadsDocsProposals, reqtrace.TestLoadWorksWithOnlyDocsProposals, reqtrace.TestRunOnlyScansProposalsWhenIncluded
+     - implemented
+   * - :need:`HMD_CLI_BARTLEBY_REQ_VERIFY_001`
+     - reqtrace.TestLoadNeedsReadsRequirementsAndTestItems, reqtrace.TestWithoutProposalsDropsNERDItems
+     - implemented
+   * - :need:`HMD_CLI_BARTLEBY_REQ_VERIFY_002`
+     - reqtrace.TestParseGoTestJSONKeepsTopLevelTests, reqtrace.TestParseRobotOutputSchema4, reqtrace.TestParseRobotOutputSchema5WithNestedSuites
+     - implemented
+   * - :need:`HMD_CLI_BARTLEBY_REQ_VERIFY_003`
+     - reqtrace.TestParseResultSpec, reqtrace.TestVerifyGivesOneVerdictPerImplementation, reqtrace.TestVerifyReportsResultsTheDocsDoNotDeclare
+     - implemented
+   * - :need:`HMD_CLI_BARTLEBY_REQ_VERIFY_004`
+     - reqtrace.TestVerifyCountsBaselineApartFromNewTests
+     - implemented
+   * - :need:`HMD_CLI_BARTLEBY_REQ_VERIFY_005`
+     - cmd.TestReqsVerifyIsTheSameToolAsReqtraceVerify, reqtrace.TestRenderVerification, reqtrace.TestRunVerifyWritesPageJSONAndFailsOnGaps, reqtrace.TestVerifyReportsResultsTheDocsDoNotDeclare
      - implemented
 
 Requirements and the tests that verify them
@@ -935,6 +954,13 @@ Run with ``make test``. No Docker required.
     :tags: go
 
     ``src/go/bartleby/cmd/reqs_test.go:120``
+
+.. test:: cmd.TestReqsVerifyIsTheSameToolAsReqtraceVerify
+    :id: HMD_CLI_BARTLEBY_TEST_GO_F939B01C
+    :links: HMD_CLI_BARTLEBY_REQ_VERIFY_005
+    :tags: go
+
+    ``src/go/bartleby/cmd/reqs_test.go:137``
 
 .. test:: cmd.TestResolveConfidential
     :id: HMD_CLI_BARTLEBY_TEST_GO_D13A9289
@@ -1391,6 +1417,13 @@ Run with ``make test``. No Docker required.
 
     ``src/go/reqtrace/reqtrace_test.go:657``
 
+.. test:: reqtrace.TestLoadNeedsReadsRequirementsAndTestItems
+    :id: HMD_CLI_BARTLEBY_TEST_GO_479416DD
+    :links: HMD_CLI_BARTLEBY_REQ_VERIFY_001
+    :tags: go
+
+    ``src/go/reqtrace/verify_test.go:55``
+
 .. test:: reqtrace.TestLoadReadsTheWholeRepository
     :id: HMD_CLI_BARTLEBY_TEST_GO_CCCB4CE7
     :links: HMD_CLI_BARTLEBY_REQ_TRACE_001, HMD_CLI_BARTLEBY_REQ_TRACE_002
@@ -1425,6 +1458,13 @@ Run with ``make test``. No Docker required.
     :tags: go
 
     ``src/go/reqtrace/reqtrace_test.go:498``
+
+.. test:: reqtrace.TestParseGoTestJSONKeepsTopLevelTests
+    :id: HMD_CLI_BARTLEBY_TEST_GO_43BC245D
+    :links: HMD_CLI_BARTLEBY_REQ_VERIFY_002
+    :tags: go
+
+    ``src/go/reqtrace/verify_test.go:117``
 
 .. test:: reqtrace.TestParseGoTests
     :id: HMD_CLI_BARTLEBY_TEST_GO_1F09D962
@@ -1468,6 +1508,27 @@ Run with ``make test``. No Docker required.
 
     ``src/go/reqtrace/reqtrace_test.go:114``
 
+.. test:: reqtrace.TestParseResultSpec
+    :id: HMD_CLI_BARTLEBY_TEST_GO_AB5D5E21
+    :links: HMD_CLI_BARTLEBY_REQ_VERIFY_003
+    :tags: go
+
+    ``src/go/reqtrace/verify_test.go:131``
+
+.. test:: reqtrace.TestParseRobotOutputSchema4
+    :id: HMD_CLI_BARTLEBY_TEST_GO_ACE6C4E1
+    :links: HMD_CLI_BARTLEBY_REQ_VERIFY_002
+    :tags: go
+
+    ``src/go/reqtrace/verify_test.go:103``
+
+.. test:: reqtrace.TestParseRobotOutputSchema5WithNestedSuites
+    :id: HMD_CLI_BARTLEBY_TEST_GO_83846A84
+    :links: HMD_CLI_BARTLEBY_REQ_VERIFY_002
+    :tags: go
+
+    ``src/go/reqtrace/verify_test.go:81``
+
 .. test:: reqtrace.TestParseRobotTests
     :id: HMD_CLI_BARTLEBY_TEST_GO_616ABF52
     :links: HMD_CLI_BARTLEBY_REQ_TRACE_002
@@ -1482,12 +1543,26 @@ Run with ``make test``. No Docker required.
 
     ``src/go/reqtrace/reqtrace_test.go:453``
 
+.. test:: reqtrace.TestRenderVerification
+    :id: HMD_CLI_BARTLEBY_TEST_GO_F4DD945B
+    :links: HMD_CLI_BARTLEBY_REQ_VERIFY_005
+    :tags: go
+
+    ``src/go/reqtrace/verify_test.go:208``
+
 .. test:: reqtrace.TestRunOnlyScansProposalsWhenIncluded
     :id: HMD_CLI_BARTLEBY_TEST_GO_C306D06E
     :links: HMD_CLI_BARTLEBY_REQ_TRACE_012
     :tags: go
 
     ``src/go/reqtrace/reqtrace_test.go:738``
+
+.. test:: reqtrace.TestRunVerifyWritesPageJSONAndFailsOnGaps
+    :id: HMD_CLI_BARTLEBY_TEST_GO_7C71803B
+    :links: HMD_CLI_BARTLEBY_REQ_VERIFY_005
+    :tags: go
+
+    ``src/go/reqtrace/verify_test.go:233``
 
 .. test:: reqtrace.TestValidateAcceptsExemptRequirements
     :id: HMD_CLI_BARTLEBY_TEST_GO_E8735AA4
@@ -1523,6 +1598,34 @@ Run with ``make test``. No Docker required.
     :tags: go
 
     ``src/go/reqtrace/reqtrace_test.go:366``
+
+.. test:: reqtrace.TestVerifyCountsBaselineApartFromNewTests
+    :id: HMD_CLI_BARTLEBY_TEST_GO_C435B0C7
+    :links: HMD_CLI_BARTLEBY_REQ_VERIFY_004
+    :tags: go
+
+    ``src/go/reqtrace/verify_test.go:193``
+
+.. test:: reqtrace.TestVerifyGivesOneVerdictPerImplementation
+    :id: HMD_CLI_BARTLEBY_TEST_GO_23493C1D
+    :links: HMD_CLI_BARTLEBY_REQ_VERIFY_003
+    :tags: go
+
+    ``src/go/reqtrace/verify_test.go:149``
+
+.. test:: reqtrace.TestVerifyReportsResultsTheDocsDoNotDeclare
+    :id: HMD_CLI_BARTLEBY_TEST_GO_C6922126
+    :links: HMD_CLI_BARTLEBY_REQ_VERIFY_003, HMD_CLI_BARTLEBY_REQ_VERIFY_005
+    :tags: go
+
+    ``src/go/reqtrace/verify_test.go:185``
+
+.. test:: reqtrace.TestWithoutProposalsDropsNERDItems
+    :id: HMD_CLI_BARTLEBY_TEST_GO_6105578C
+    :links: HMD_CLI_BARTLEBY_REQ_VERIFY_001
+    :tags: go
+
+    ``src/go/reqtrace/verify_test.go:70``
 
 .. test:: runner.TestContainerNameIsAlwaysValid
     :id: HMD_CLI_BARTLEBY_TEST_GO_782398E0
@@ -1572,6 +1675,13 @@ Run with ``make test``. No Docker required.
     :tags: go
 
     ``src/go/bartleby/internal/runner/transform_test.go:91``
+
+.. test:: runner.TestEnvPassesTheDeploymentAPIWhenSet
+    :id: HMD_CLI_BARTLEBY_TEST_GO_C6F22CC7
+    :links: HMD_CLI_BARTLEBY_REQ_EXEC_004
+    :tags: go
+
+    ``src/go/bartleby/internal/runner/transform_test.go:291``
 
 .. test:: runner.TestEnvPipConfOnlyWithAutodocAndAPath
     :id: HMD_CLI_BARTLEBY_TEST_GO_67DCEB07

@@ -56,6 +56,8 @@ area segment keeps the ID readable where it matters most — on a test:
      - Explaining a failed build with Claude.
    * - ``TRACE``
      - This traceability process itself.
+   * - ``VERIFY``
+     - Joining needs.json with test results: the verification matrix.
    * - ``SKILL``
      - The agent skills the CLI bundles and installs.
    * - ``AGENT``
@@ -111,4 +113,5 @@ it *is* verified. There are two, both about pulling a multi-gigabyte image.
    skills
    agents
    process
+   verification
    traceability

@@ -1,0 +1,23 @@
+{
+  "created": "2026-10-26T10:00:00.000000",
+  "current_version": "",
+  "project": "hmd-ms-sample-1.0",
+  "versions": {
+    "": {
+      "created": "2026-10-26T10:00:00.000000",
+      "needs_amount": 10,
+      "needs": {
+        "HMD_MS_SAMPLE_REQ_CRUD_001": {"id": "HMD_MS_SAMPLE_REQ_CRUD_001", "type": "req", "title": "Create an entity", "status": "implemented", "tags": [], "links": []},
+        "HMD_MS_SAMPLE_REQ_CRUD_002": {"id": "HMD_MS_SAMPLE_REQ_CRUD_002", "type": "req", "title": "Delete an entity", "status": "implemented", "tags": [], "links": []},
+        "HMD_MS_SAMPLE_REQ_CRUD_003": {"id": "HMD_MS_SAMPLE_REQ_CRUD_003", "type": "req", "title": "Search by date", "status": "implemented", "tags": [], "links": []},
+        "HMD_MS_SAMPLE_NERD001": {"id": "HMD_MS_SAMPLE_NERD001", "type": "req", "title": "A proposal", "status": "proposed", "tags": [], "links": [], "docname": "proposals/NERD001_Sample"},
+        "HMD_MS_SAMPLE_REQ_DOC_001": {"id": "HMD_MS_SAMPLE_REQ_DOC_001", "type": "req", "title": "Documented by review", "status": "implemented", "tags": ["trace-exempt"], "links": []},
+        "HMD_MS_SAMPLE_TEST_ROBOT_00000001": {"id": "HMD_MS_SAMPLE_TEST_ROBOT_00000001", "type": "test", "title": "robot_test: Create Entity", "status": null, "tags": ["robot"], "links": ["HMD_MS_SAMPLE_REQ_CRUD_001"]},
+        "HMD_MS_SAMPLE_TEST_ROBOT_00000002": {"id": "HMD_MS_SAMPLE_TEST_ROBOT_00000002", "type": "test", "title": "robot_test: Delete Entity", "status": null, "tags": ["robot"], "links": ["HMD_MS_SAMPLE_REQ_CRUD_002"]},
+        "HMD_MS_SAMPLE_TEST_ROBOT_00000003": {"id": "HMD_MS_SAMPLE_TEST_ROBOT_00000003", "type": "test", "title": "robot_test: Search On Dates", "status": null, "tags": ["robot"], "links": ["HMD_MS_SAMPLE_REQ_CRUD_003"]},
+        "HMD_MS_SAMPLE_TEST_GO_00000004": {"id": "HMD_MS_SAMPLE_TEST_GO_00000004", "type": "test", "title": "engine.TestCreate", "status": null, "tags": ["go"], "links": ["HMD_MS_SAMPLE_REQ_CRUD_001"]},
+        "HMD_MS_SAMPLE_TEST_GO_00000005": {"id": "HMD_MS_SAMPLE_TEST_GO_00000005", "type": "test", "title": "main.TestDeleteCLI", "status": null, "tags": ["go"], "links": ["HMD_MS_SAMPLE_REQ_CRUD_002"]}
+      }
+    }
+  }
+}

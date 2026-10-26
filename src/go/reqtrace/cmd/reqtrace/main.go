@@ -2,6 +2,9 @@
 //
 //	reqtrace            # regenerate docs/requirements/traceability.rst
 //	reqtrace -check     # fail if it is stale or coverage has a gap
+//	reqtrace -verify -results python=bender/output.xml -results go=go-output.xml
+//	                    # join needs.json with test results: one verdict per
+//	                    # requirement and implementation
 //
 // It needs neither Docker nor Sphinx, so it runs on a laptop and in CI. In this
 // repository the Makefile wraps both as "make reqs" and "make reqs-check", and
@@ -13,6 +16,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/neuronsphere/hmd-cli-bartleby/src/go/reqtrace"
 )
@@ -28,6 +32,12 @@ func main() {
 	quiet := flag.Bool("quiet", false, "print nothing on success")
 	includeProposals := flag.Bool("include-proposals", false, "also scan docs/proposals (NERD documents) for req/spec items")
 	showVersion := flag.Bool("version", false, "print the version and exit")
+	verify := flag.Bool("verify", false, "join needs.json with test results instead of generating the matrix; exit non-zero if a requirement fails or has no result")
+	needs := flag.String("needs", "", "needs.json from a bartleby build, for -verify (default target/bartleby/html/needs.json)")
+	var results stringList
+	flag.Var(&results, "results", "for -verify: LABEL[@VERSION]=PATH of a Robot output.xml or go test -json output; repeatable")
+	out := flag.String("out", "", "for -verify: page to write (default docs/requirements/verification_matrix.rst; - for none)")
+	asJSON := flag.Bool("json", false, "for -verify: print the verification as JSON")
 	flag.Parse()
 
 	if *showVersion {
@@ -36,6 +46,9 @@ func main() {
 	}
 
 	opts := reqtrace.RunOptions{Check: *check, Repo: *repo, Quiet: *quiet, IncludeProposals: *includeProposals}
+	if *verify {
+		opts.Verify = &reqtrace.VerifyOptions{Needs: *needs, Results: results, Out: *out, JSON: *asJSON}
+	}
 	if err := reqtrace.Run(opts); err != nil {
 		fmt.Fprintf(os.Stderr, "reqtrace: %v\n", err)
 		os.Exit(1)
@@ -45,4 +58,14 @@ func main() {
 // versionString is what -version prints.
 func versionString() string {
 	return "reqtrace " + version
+}
+
+// stringList is a repeatable string flag.
+type stringList []string
+
+func (s *stringList) String() string { return strings.Join(*s, ",") }
+
+func (s *stringList) Set(v string) error {
+	*s = append(*s, v)
+	return nil
 }

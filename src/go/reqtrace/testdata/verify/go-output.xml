@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<robot generator="Robot 6.1.1 (Python 3.11.9 on linux)" generated="20261026 09:30:00.000" rpa="false" schemaversion="4">
+<suite id="s1" name="Robot Test" source="/hmd_transform/input/test/robot_test.robot">
+<test id="s1-t1" name="Create Entity" line="10">
+<tag>REQ_CRUD_001</tag>
+<tag>baseline</tag>
+<status status="PASS" starttime="20261026 09:30:00.100" endtime="20261026 09:30:00.300"/>
+</test>
+<test id="s1-t2" name="Delete Entity" line="20">
+<tag>REQ_CRUD_002</tag>
+<tag>baseline</tag>
+<status status="FAIL" starttime="20261026 09:30:00.400" endtime="20261026 09:30:00.600">soft delete did not cascade</status>
+</test>
+<test id="s1-t4" name="Brand New Test" line="40">
+<tag>REQ_CRUD_009</tag>
+<status status="PASS" starttime="20261026 09:30:00.700" endtime="20261026 09:30:00.800"/>
+</test>
+<status status="FAIL" starttime="20261026 09:30:00.000" endtime="20261026 09:30:01.000"/>
+</suite>
+</robot>

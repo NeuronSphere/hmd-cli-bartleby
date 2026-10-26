@@ -1,5 +1,19 @@
 # Changelog
 
+## 2026-10-26
+
+- feat: `reqtrace -verify` / `bartleby reqs --verify`: the verification matrix
+  (NERD003). Joins the sphinx-needs `needs.json` from a bartleby build with Robot
+  `output.xml` and `go test -json` results labelled `LABEL[@VERSION]=PATH`, and
+  gives each requirement one verdict per implementation (pass, fail, skip,
+  missing, exempt), counting `baseline` tests apart from new ones. Writes
+  `docs/requirements/verification_matrix.rst`, prints JSON with `-json`, and exits
+  1 on a failing or missing requirement. `REQ_VERIFY_001`–`005`. Needs a bartleby
+  image that exports `needs.json` (`hmd-tf-bartleby` 1.0.79; `stable` is 1.0.73).
+- fix: `TestEnvPassesTheDeploymentAPIWhenSet` declared no requirement, which
+  failed `make check`; it verifies `REQ_EXEC_004`, whose list of optional
+  variables now names the deployment API's two.
+
 ## 2026-10-17
 
 - feat: `bartleby` passes `HMD_DEPLOYMENT_API_URL` and `HMD_DEPLOYMENT_API_TOKEN` into the transform, for the `ns-architecture` directive that draws a view the NeuronSphere deployment service renders (NERD036, hmd-cli-neuronsphere); like every optional value they are absent when unset

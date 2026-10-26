@@ -132,3 +132,39 @@ func TestReqsQuietPrintsNothingOnSuccess(t *testing.T) {
 		t.Errorf("--quiet printed:\n%s", output)
 	}
 }
+
+// Requirements: REQ_VERIFY_005
+func TestReqsVerifyIsTheSameToolAsReqtraceVerify(t *testing.T) {
+	root := writeReqsFixture(t, "")
+	fixture := func(name string) string {
+		path, err := filepath.Abs(filepath.Join("..", "..", "reqtrace", "testdata", "verify", name))
+		if err != nil {
+			t.Fatal(err)
+		}
+		return path
+	}
+
+	output, err := runReqs(t, reqsOptions{
+		repo:    root,
+		verify:  true,
+		needs:   fixture("needs.json"),
+		results: []string{"python=" + fixture("python-output.xml")},
+		out:     "-",
+	})
+	if err != nil {
+		t.Fatalf("bartleby reqs --verify: %v\n%s", err, output)
+	}
+	if !strings.Contains(output, "python: 3 pass, 1 exempt; baseline 2/2 passed, new 1/1 passed") {
+		t.Errorf("output:\n%s", output)
+	}
+
+	if _, err := runReqs(t, reqsOptions{
+		repo:    root,
+		verify:  true,
+		needs:   fixture("needs.json"),
+		results: []string{"go=" + fixture("go-output.xml")},
+		out:     "-",
+	}); err == nil {
+		t.Error("a failing requirement must fail bartleby reqs --verify")
+	}
+}

@@ -1,0 +1,7 @@
+{"Time":"2026-10-26T09:31:00Z","Action":"start","Package":"github.com/x/sample/engine"}
+{"Time":"2026-10-26T09:31:00.1Z","Action":"run","Package":"github.com/x/sample/engine","Test":"TestCreate"}
+{"Time":"2026-10-26T09:31:00.2Z","Action":"run","Package":"github.com/x/sample/engine","Test":"TestCreate/string"}
+{"Time":"2026-10-26T09:31:00.3Z","Action":"pass","Package":"github.com/x/sample/engine","Test":"TestCreate/string","Elapsed":0}
+{"Time":"2026-10-26T09:31:00.4Z","Action":"pass","Package":"github.com/x/sample/engine","Test":"TestCreate","Elapsed":0.3}
+{"Time":"2026-10-26T09:31:00.5Z","Action":"pass","Package":"github.com/x/sample/cmd/sample","Test":"TestDeleteCLI","Elapsed":0.1}
+{"Time":"2026-10-26T09:31:00.6Z","Action":"pass","Package":"github.com/x/sample/engine","Elapsed":0.6}

@@ -22,6 +22,9 @@ type RunOptions struct {
 	// rather than this silently failing an existing "-check" the first time a
 	// repository happens to have an uncovered NERD proposal.
 	IncludeProposals bool
+	// Verify, when set, joins a needs.json export with test results instead of
+	// generating or checking the traceability matrix. See verify.go.
+	Verify *VerifyOptions
 	// Out receives the summary, Err the problems. Nil means stdout and stderr.
 	Out, Err io.Writer
 }
@@ -50,6 +53,10 @@ func Run(o RunOptions) error {
 		if err != nil {
 			return err
 		}
+	}
+
+	if o.Verify != nil {
+		return runVerify(o, repo, out, errOut)
 	}
 
 	layout := DefaultLayout(repo)
