@@ -101,6 +101,23 @@ Proposed next
     verification under one dated directory named for the implementation, so a
     verdict can be reproduced from what was kept rather than re-run.
 
+    Every stored file name is unique and starts with an ISO 8601 UTC timestamp
+    of the run, followed by the module name. File creation and modification
+    times are unreliable after a copy, a checkout or an upload, so the name
+    alone says what the file is and when the run happened, and files from many
+    runs and modules sort chronologically when they are gathered in one place.
+    The timestamp has no colons (date in extended form, time in basic form), so
+    it is legal on every filesystem:
+
+    - ``2026-10-26T103109Z_hmd-cli-bender_needs.json``
+    - ``2026-10-26T103109Z_hmd-cli-bender_go-0.1_output.xml``. The
+      implementation label goes in the name, because one run can produce
+      results for several implementations.
+    - ``2026-10-26T103109Z_hmd-cli-bender_verification.json``, plus
+      ``…_verification.rst`` when the RST page is kept.
+
+    The timestamp is the run's start time, so every file from one run shares it.
+
 .. spec:: Engines as a second axis
     :id: HMD_CLI_BARTLEBY_NERD003_SPEC005
     :links: HMD_CLI_BARTLEBY_NERD003
