@@ -142,11 +142,13 @@ type RunResults struct {
 	Version        string // optional, e.g. "0.3.1"
 	Source         string // the result file
 	Generated      string // the run's own timestamp
+	RunID          string // Bender's run ID, for a run folder
+	Stamp          string // a run folder's <stamp>, which orders runs
 	Results        []TestResult
 }
 
 // ResultSpec is one -results argument: LABEL[@VERSION]=PATH. A bare PATH is
-// labelled "default".
+// labelled "default", except that a Bender run folder then names its own label.
 type ResultSpec struct {
 	Implementation string
 	Version        string
@@ -166,10 +168,18 @@ func ParseResultSpec(s string) (ResultSpec, error) {
 	return ResultSpec{Implementation: impl, Version: version, Path: file}, nil
 }
 
-// LoadResults reads one result file, choosing the parser by content: an XML
-// document is a Robot output.xml, anything else the JSON event stream of
-// "go test -json".
+// LoadResults reads one result file, or one Bender run folder
+// (bender/runs/<stamp>_<repo>_<run_id>/). A file's parser is chosen by
+// content: an XML document is a Robot output.xml, anything else the JSON event
+// stream of "go test -json".
 func LoadResults(spec ResultSpec) (RunResults, error) {
+	if isRunFolder(spec.Path) {
+		return loadRunFolder(spec)
+	}
+	return loadResultFile(spec)
+}
+
+func loadResultFile(spec ResultSpec) (RunResults, error) {
 	data, err := os.ReadFile(spec.Path)
 	if err != nil {
 		return RunResults{}, err
@@ -361,6 +371,7 @@ type TestOutcome struct {
 	Baseline bool    `json:"baseline"`
 	Source   string  `json:"source"`
 	RunAt    string  `json:"run_at"`
+	RunID    string  `json:"run_id,omitempty"`
 }
 
 // Cell is one requirement × implementation.
@@ -385,6 +396,7 @@ type ImplementationSummary struct {
 	Version        string          `json:"version,omitempty"`
 	Sources        []string        `json:"sources"`
 	RunAt          []string        `json:"run_at"`
+	RunIDs         []string        `json:"run_ids,omitempty"`
 	Verdicts       map[Verdict]int `json:"verdicts"`
 	BaselineTests  int             `json:"baseline_tests"`
 	BaselinePassed int             `json:"baseline_passed"`
@@ -460,6 +472,9 @@ func Verify(needs Needs, runs []RunResults) Verification {
 		}
 		ir.summary.Sources = append(ir.summary.Sources, run.Source)
 		ir.summary.RunAt = append(ir.summary.RunAt, run.Generated)
+		if run.RunID != "" {
+			ir.summary.RunIDs = append(ir.summary.RunIDs, run.RunID)
+		}
 		for _, res := range run.Results {
 			need, found := matchResult(res, testsByKey, goTestsByName)
 			if res.Baseline() {
@@ -479,7 +494,7 @@ func Verify(needs Needs, runs []RunResults) Verification {
 			}
 			ir.byNeed[need.ID] = append(ir.byNeed[need.ID], TestOutcome{
 				Test: need.Title, NeedID: need.ID, Outcome: res.Outcome,
-				Baseline: res.Baseline(), Source: run.Source, RunAt: run.Generated,
+				Baseline: res.Baseline(), Source: run.Source, RunAt: run.Generated, RunID: run.RunID,
 			})
 		}
 	}
@@ -609,6 +624,7 @@ func RenderVerification(v Verification) string {
 		"",
 		"   * - Implementation",
 		"     - Run at",
+		"     - Run ID",
 		"     - Results",
 		"     - Verdicts",
 		"     - Baseline tests passed",
@@ -622,6 +638,7 @@ func RenderVerification(v Verification) string {
 		writeLines(&b,
 			"   * - "+label,
 			"     - "+strings.Join(s.RunAt, ", "),
+			"     - "+literalList(s.RunIDs),
 			"     - "+literalList(s.Sources),
 			"     - "+verdictCounts(s.Verdicts),
 			fmt.Sprintf("     - %d / %d", s.BaselinePassed, s.BaselineTests),
@@ -707,8 +724,12 @@ type VerifyOptions struct {
 	// Needs is the needs.json path. Empty means the bartleby HTML build output,
 	// target/bartleby/html/needs.json, under the repository root.
 	Needs string
-	// Results are LABEL[@VERSION]=PATH result files.
+	// Results are LABEL[@VERSION]=PATH result files or Bender run folders.
 	Results []string
+	// Runs are directories of Bender run folders, such as bender/runs. Each
+	// label's latest run is used, or every run when AllRuns is set.
+	Runs    []string
+	AllRuns bool
 	// Out is the page to write. Empty means docs/requirements/verification_matrix.rst;
 	// "-" writes nothing.
 	Out string
@@ -723,8 +744,8 @@ func DefaultNeedsPath(repoRoot string) string {
 
 func runVerify(o RunOptions, repo string, out, errOut io.Writer) error {
 	vo := o.Verify
-	if len(vo.Results) == 0 {
-		return errors.New("verify: give at least one -results LABEL[@VERSION]=PATH (a Robot output.xml or go test -json output)")
+	if len(vo.Results) == 0 && len(vo.Runs) == 0 {
+		return errors.New("verify: give at least one -results LABEL[@VERSION]=PATH (a Robot output.xml, go test -json output or Bender run folder) or -runs DIR (such as bender/runs)")
 	}
 	needsPath := vo.Needs
 	if needsPath == "" {
@@ -748,6 +769,13 @@ func runVerify(o RunOptions, repo string, out, errOut io.Writer) error {
 			return err
 		}
 		runs = append(runs, run)
+	}
+	for _, dir := range vo.Runs {
+		found, err := LoadRunsDir(dir, vo.AllRuns)
+		if err != nil {
+			return err
+		}
+		runs = append(runs, found...)
 	}
 
 	v := Verify(needs, runs)

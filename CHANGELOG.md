@@ -2,6 +2,13 @@
 
 ## 2026-10-26
 
+- feat: `reqtrace -verify` reads Bender's archived runs (NERD003 SPEC004,
+  `REQ_VERIFY_006`–`009`). `-results` takes a run folder
+  (`bender/runs/<stamp>_<repo>_<run_id>/`) and takes the start time, run ID, label
+  and version from its `run.json`, falling back to the `hmd_run_label:` tag and
+  the file name's label. `-runs DIR` (`bartleby reqs --runs`) reads every run
+  folder under `DIR` and keeps each label's latest; `-all-runs` keeps every run.
+  Run IDs appear in the page and the JSON.
 - feat: `reqtrace -verify` / `bartleby reqs --verify`: the verification matrix
   (NERD003). Joins the sphinx-needs `needs.json` from a bartleby build with Robot
   `output.xml` and `go test -json` results labelled `LABEL[@VERSION]=PATH`, and

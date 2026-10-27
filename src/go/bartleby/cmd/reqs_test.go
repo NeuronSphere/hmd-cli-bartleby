@@ -168,3 +168,45 @@ func TestReqsVerifyIsTheSameToolAsReqtraceVerify(t *testing.T) {
 		t.Error("a failing requirement must fail bartleby reqs --verify")
 	}
 }
+
+// Requirements: REQ_VERIFY_008
+func TestReqsVerifyReadsBenderRunFolders(t *testing.T) {
+	root := writeReqsFixture(t, "")
+	fixture := func(name string) string {
+		path, err := filepath.Abs(filepath.Join("..", "..", "reqtrace", "testdata", "verify", name))
+		if err != nil {
+			t.Fatal(err)
+		}
+		return path
+	}
+
+	// Each label's latest run: python's later run passes everything, go-0.1 fails.
+	output, err := runReqs(t, reqsOptions{
+		repo:   root,
+		verify: true,
+		needs:  fixture("needs.json"),
+		runs:   []string{fixture("runs")},
+		out:    "-",
+	})
+	if err == nil {
+		t.Fatalf("go-0.1 fails a requirement, so --runs must fail:\n%s", output)
+	}
+	for _, want := range []string{"python: 3 pass, 1 exempt", "go-0.1: "} {
+		if !strings.Contains(output, want) {
+			t.Errorf("output lacks %q:\n%s", want, output)
+		}
+	}
+
+	// --all-runs: every run is its own column.
+	output, _ = runReqs(t, reqsOptions{
+		repo:    root,
+		verify:  true,
+		needs:   fixture("needs.json"),
+		runs:    []string{fixture("runs")},
+		allRuns: true,
+		out:     "-",
+	})
+	if !strings.Contains(output, "python 2026-10-26T090000Z: ") || !strings.Contains(output, "python 2026-10-26T100000Z: ") {
+		t.Errorf("--all-runs output:\n%s", output)
+	}
+}

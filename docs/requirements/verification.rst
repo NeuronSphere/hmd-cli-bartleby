@@ -56,3 +56,42 @@ implementation. NERD003 has the design.
     page named by ``-out``), print JSON with ``-json``, report results for tests
     ``needs.json`` does not declare, and exit non-zero when any requirement is
     failing or missing for any implementation.
+
+.. req:: Read a Bender run folder as one result
+    :id: HMD_CLI_BARTLEBY_REQ_VERIFY_006
+    :status: implemented
+
+    A ``-results`` path that is a directory shall be read as one Bender run
+    folder (``bender/runs/<stamp>_<repo>_<run_id>/``, NERD003 SPEC004): exactly
+    one ``*_output.xml`` in it is the result file, and its ``*_run.json`` supplies
+    the run's start time (``hmd_run_started``, used instead of the time Robot
+    wrote ``output.xml``), run ID (``hmd_run_id``), and, unless the argument
+    gives them, the label (``hmd_run_label``) and version
+    (``hmd_repo_version``).
+
+.. req:: Name a run's implementation when run.json does not
+    :id: HMD_CLI_BARTLEBY_REQ_VERIFY_007
+    :status: implemented
+
+    When a run folder's label is neither given nor in ``run.json``, it shall come
+    from the ``hmd_run_label:<label>`` tag Bender sets on every test, then from
+    the label segment of ``<stamp>_<repo>_<label>_output.xml``, and otherwise be
+    ``default``, as for a run of ``hmd-bender`` without ``--label``.
+
+.. req:: Read every run under a runs directory
+    :id: HMD_CLI_BARTLEBY_REQ_VERIFY_008
+    :status: implemented
+
+    ``-runs DIR`` (repeatable; ``bartleby reqs --runs``) shall read every run
+    folder directly under ``DIR``, such as ``bender/runs``, and keep each label's
+    latest run by the start stamp that begins its folder name. With
+    ``-all-runs`` every run shall be kept as its own implementation, named
+    ``<label> <stamp>``.
+
+.. req:: Record each run's ID
+    :id: HMD_CLI_BARTLEBY_REQ_VERIFY_009
+    :status: implemented
+
+    The run ID of each run folder shall appear in the verification page's runs
+    table and in the JSON, per implementation (``run_ids``) and on each test
+    outcome (``run_id``), so a verdict leads back to the archived run.

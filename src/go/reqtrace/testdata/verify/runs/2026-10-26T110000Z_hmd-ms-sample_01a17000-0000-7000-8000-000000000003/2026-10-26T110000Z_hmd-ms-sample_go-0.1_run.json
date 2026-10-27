@@ -1,0 +1,20 @@
+{
+  "hmd_run_id": "01a17000-0000-7000-8000-000000000003",
+  "hmd_run_started": "2026-10-26T11:00:00Z",
+  "hmd_repo_name": "hmd-ms-sample",
+  "hmd_repo_version": "0.4.0",
+  "hmd_instance_name": "ms-sample",
+  "hmd_did": "xxx",
+  "hmd_environment": "local",
+  "hmd_git_sha": "9169dbc92fb62861020320a251dd1667a533e082",
+  "hmd_git_branch": "main",
+  "hmd_git_dirty": "false",
+  "hmd_bender_impl": "go",
+  "hmd_bender_version": "0.1",
+  "hmd_tf_bender_image": "local/hmd-tf-bender:0.2.48-run-identity",
+  "hmd_tf_bender_version": "0.2.48",
+  "hmd_ci_run": "",
+  "hmd_run_label": "go-0.1",
+  "exit_code": 1,
+  "finished": "2026-10-26T11:00:05Z"
+}

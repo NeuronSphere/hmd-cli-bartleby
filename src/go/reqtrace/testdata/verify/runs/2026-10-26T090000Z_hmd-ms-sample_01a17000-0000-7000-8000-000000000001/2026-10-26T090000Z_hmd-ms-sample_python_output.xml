@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<robot generator="Robot 7.3.2 (Python 3.11.17 on linux)" generated="2026-10-26T09:00:04.000000" rpa="false" schemaversion="5">
+<suite id="s1" name="Suites" source="/hmd_transform/input/test">
+<suite id="s1-s1" name="Robot Test" source="/hmd_transform/input/test/robot_test.robot">
+<test id="s1-s1-t1" name="Create Entity" line="10">
+<kw name="Create">
+<tag>keyword-tag-not-a-test-tag</tag>
+<status status="FAIL" start="2026-10-26T09:00:00.100000" elapsed="0.1"/>
+</kw>
+<tag>REQ_CRUD_001</tag>
+<tag>baseline</tag>
+<tag>hmd_bender_impl:go</tag>
+<tag>hmd_bender_version:0.1</tag>
+<tag>hmd_did:xxx</tag>
+<tag>hmd_environment:local</tag>
+<tag>hmd_git_branch:main</tag>
+<tag>hmd_git_dirty:false</tag>
+<tag>hmd_git_sha:9169dbc92fb62861020320a251dd1667a533e082</tag>
+<tag>hmd_instance_name:ms-sample</tag>
+<tag>hmd_repo_name:hmd-ms-sample</tag>
+<tag>hmd_repo_version:0.4.0</tag>
+<tag>hmd_run_id:01a17000-0000-7000-8000-000000000001</tag>
+<tag>hmd_run_label:python</tag>
+<tag>hmd_tf_bender_image:local/hmd-tf-bender:0.2.48-run-identity</tag>
+<tag>hmd_tf_bender_version:0.2.48</tag>
+<status status="PASS" start="2026-10-26T09:00:00.100000" elapsed="0.2"/>
+</test>
+<test id="s1-s1-t2" name="Delete Entity" line="20">
+<tag>REQ_CRUD_002</tag>
+<tag>baseline</tag>
+<tag>hmd_bender_impl:go</tag>
+<tag>hmd_bender_version:0.1</tag>
+<tag>hmd_did:xxx</tag>
+<tag>hmd_environment:local</tag>
+<tag>hmd_git_branch:main</tag>
+<tag>hmd_git_dirty:false</tag>
+<tag>hmd_git_sha:9169dbc92fb62861020320a251dd1667a533e082</tag>
+<tag>hmd_instance_name:ms-sample</tag>
+<tag>hmd_repo_name:hmd-ms-sample</tag>
+<tag>hmd_repo_version:0.4.0</tag>
+<tag>hmd_run_id:01a17000-0000-7000-8000-000000000001</tag>
+<tag>hmd_run_label:python</tag>
+<tag>hmd_tf_bender_image:local/hmd-tf-bender:0.2.48-run-identity</tag>
+<tag>hmd_tf_bender_version:0.2.48</tag>
+<status status="FAIL" start="2026-10-26T09:00:00.400000" elapsed="0.2">soft delete did not cascade</status>
+</test>
+<test id="s1-s1-t3" name="Search On Dates" line="30">
+<tag>REQ_CRUD_003</tag>
+<tag>hmd_bender_impl:go</tag>
+<tag>hmd_bender_version:0.1</tag>
+<tag>hmd_did:xxx</tag>
+<tag>hmd_environment:local</tag>
+<tag>hmd_git_branch:main</tag>
+<tag>hmd_git_dirty:false</tag>
+<tag>hmd_git_sha:9169dbc92fb62861020320a251dd1667a533e082</tag>
+<tag>hmd_instance_name:ms-sample</tag>
+<tag>hmd_repo_name:hmd-ms-sample</tag>
+<tag>hmd_repo_version:0.4.0</tag>
+<tag>hmd_run_id:01a17000-0000-7000-8000-000000000001</tag>
+<tag>hmd_run_label:python</tag>
+<tag>hmd_tf_bender_image:local/hmd-tf-bender:0.2.48-run-identity</tag>
+<tag>hmd_tf_bender_version:0.2.48</tag>
+<status status="PASS" start="2026-10-26T09:00:00.700000" elapsed="0.2"/>
+</test>
+<status status="PASS" start="2026-10-26T09:00:00.000000" elapsed="1.0"/>
+</suite>
+<status status="PASS" start="2026-10-26T09:00:00.000000" elapsed="1.0"/>
+</suite>
+</robot>

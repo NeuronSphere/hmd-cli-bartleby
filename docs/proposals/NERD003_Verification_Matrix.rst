@@ -89,34 +89,55 @@ Usage
 Verified on ``hmd-cli-bender`` (2026-10-26): 27 requirements, all *pass* for
 ``go``, from 7 Robot and 43 Go results.
 
-Proposed next
--------------
-
 .. spec:: Keep each run's results as a dated artefact
     :id: HMD_CLI_BARTLEBY_NERD003_SPEC004
     :links: HMD_CLI_BARTLEBY_NERD003
-    :status: proposed
-
-    A conformance run stores ``needs.json``, each ``output.xml`` and the JSON
-    verification under one dated directory named for the implementation, so a
-    verdict can be reproduced from what was kept rather than re-run.
+    :status: implemented
 
     Every stored file name is unique and starts with an ISO 8601 UTC timestamp
     of the run, followed by the module name. File creation and modification
     times are unreliable after a copy, a checkout or an upload, so the name
     alone says what the file is and when the run happened, and files from many
     runs and modules sort chronologically when they are gathered in one place.
-    The timestamp has no colons (date in extended form, time in basic form), so
-    it is legal on every filesystem:
+    The timestamp is the run's start time in whole seconds, with no colons
+    (date in extended form, time in basic form), so it is legal on every
+    filesystem and every file from one run shares it.
 
-    - ``2026-10-26T103109Z_hmd-cli-bender_needs.json``
-    - ``2026-10-26T103109Z_hmd-cli-bender_go-0.1_output.xml``. The
-      implementation label goes in the name, because one run can produce
-      results for several implementations.
-    - ``2026-10-26T103109Z_hmd-cli-bender_verification.json``, plus
-      ``…_verification.rst`` when the RST page is kept.
+    **Bender writes this layout itself** (hmd-cli-bender ``3861a0f``,
+    hmd-tf-bender ``0748baf``, 2026-10-26). Each run is archived as
+    ``bender/runs/<stamp>_<repo>_<run_id>/``, the run ID being a UUIDv7, and
+    each file in it is named ``<stamp>_<repo>[_<label>]_<kind>``. The label is
+    the implementation under test, from ``hmd-bender --label``; without it the
+    segment is left out. For example::
 
-    The timestamp is the run's start time, so every file from one run shares it.
+        bender/runs/2026-10-27T000110Z_hmd-cli-manifest_01a17aa9-2e81-7092-aeb0-d2abadf40a1c/
+            2026-10-27T000110Z_hmd-cli-manifest_go-0.1_output.xml
+            2026-10-27T000110Z_hmd-cli-manifest_go-0.1_log.html
+            2026-10-27T000110Z_hmd-cli-manifest_go-0.1_report.html
+            2026-10-27T000110Z_hmd-cli-manifest_go-0.1_run.json
+
+    ``run.json`` records the run's identity (``hmd_run_id``,
+    ``hmd_run_started``, ``hmd_run_label``, ``hmd_repo_version``, git SHA,
+    branch and dirty flag, image, and exit code), and Bender also sets each
+    identity value as a ``key:value`` tag on every test. ``bender/output.xml`` is
+    unchanged.
+
+    **reqtrace reads it** (``REQ_VERIFY_006``–``009``). ``-results`` takes a run
+    folder: its one ``*_output.xml`` is the result, and ``run.json`` supplies the
+    start time, run ID and, unless the argument names them, the label and
+    version. ``-runs bender/runs`` reads every run folder and keeps each label's
+    latest; ``-all-runs`` keeps every run as its own column. Run IDs appear in
+    the page and the JSON, so each verdict leads back to its archived run.
+
+    Kept alongside the runs, the build's ``needs.json`` and the verification
+    follow the same naming:
+    ``2026-10-27T000110Z_hmd-cli-manifest_needs.json`` and
+    ``2026-10-27T000110Z_hmd-cli-manifest_verification.json`` (plus
+    ``…_verification.rst`` when the page is kept). Writing those two under that
+    name is still to do; today ``-out`` and ``-json`` name them.
+
+Proposed next
+-------------
 
 .. spec:: Engines as a second axis
     :id: HMD_CLI_BARTLEBY_NERD003_SPEC005

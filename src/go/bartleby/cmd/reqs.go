@@ -14,6 +14,8 @@ type reqsOptions struct {
 	verify           bool
 	needs            string
 	results          []string
+	runs             []string
+	allRuns          bool
 	out              string
 	json             bool
 }
@@ -51,7 +53,7 @@ repository that does not otherwise use bartleby.`,
 		}
 		if reqsOpts.verify {
 			opts.Verify = &reqtrace.VerifyOptions{
-				Needs: reqsOpts.needs, Results: reqsOpts.results, Out: reqsOpts.out, JSON: reqsOpts.json,
+				Needs: reqsOpts.needs, Results: reqsOpts.results, Runs: reqsOpts.runs, AllRuns: reqsOpts.allRuns, Out: reqsOpts.out, JSON: reqsOpts.json,
 			}
 		}
 		return reqtrace.Run(opts)
@@ -73,7 +75,11 @@ func init() {
 	flags.StringVar(&reqsOpts.needs, "needs", "",
 		"needs.json from a bartleby build, for --verify (default target/bartleby/html/needs.json)")
 	flags.StringArrayVar(&reqsOpts.results, "results", nil,
-		"for --verify: LABEL[@VERSION]=PATH of a Robot output.xml or go test -json output; repeatable")
+		"for --verify: LABEL[@VERSION]=PATH of a Robot output.xml, go test -json output or Bender run folder; repeatable")
+	flags.StringArrayVar(&reqsOpts.runs, "runs", nil,
+		"for --verify: a directory of Bender run folders, such as bender/runs; uses each label's latest run; repeatable")
+	flags.BoolVar(&reqsOpts.allRuns, "all-runs", false,
+		"for --verify with --runs: use every run, each as its own column, not each label's latest")
 	flags.StringVar(&reqsOpts.out, "out", "",
 		"for --verify: page to write (default docs/requirements/verification_matrix.rst; - for none)")
 	flags.BoolVar(&reqsOpts.json, "json", false,

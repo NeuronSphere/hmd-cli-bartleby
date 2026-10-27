@@ -16,7 +16,7 @@ generated from those declarations.
 Summary
 -------
 
-129 requirement items, verified by 201 Go tests and 35 Robot tests.
+133 requirement items, verified by 209 Go tests and 35 Robot tests.
 
 .. list-table::
    :header-rows: 1
@@ -167,8 +167,8 @@ Summary
      - 0
      - 1
    * - VERIFY
-     - 5
-     - 13
+     - 9
+     - 21
      - 0
 
 Coverage by requirement
@@ -568,6 +568,18 @@ Coverage by requirement
    * - :need:`HMD_CLI_BARTLEBY_REQ_VERIFY_005`
      - cmd.TestReqsVerifyIsTheSameToolAsReqtraceVerify, reqtrace.TestRenderVerification, reqtrace.TestRunVerifyWritesPageJSONAndFailsOnGaps, reqtrace.TestVerifyReportsResultsTheDocsDoNotDeclare
      - implemented
+   * - :need:`HMD_CLI_BARTLEBY_REQ_VERIFY_006`
+     - reqtrace.TestAGivenLabelAndVersionWinOverRunJSON, reqtrace.TestARunFolderNeedsExactlyOneOutputXML, reqtrace.TestLoadResultsReadsABenderRunFolder
+     - implemented
+   * - :need:`HMD_CLI_BARTLEBY_REQ_VERIFY_007`
+     - reqtrace.TestRunLabelFallsBackToTagThenFileName
+     - implemented
+   * - :need:`HMD_CLI_BARTLEBY_REQ_VERIFY_008`
+     - cmd.TestReqsVerifyReadsBenderRunFolders, reqtrace.TestLoadRunsDirAllRunsKeepsEveryRun, reqtrace.TestLoadRunsDirKeepsEachLabelsLatestRun
+     - implemented
+   * - :need:`HMD_CLI_BARTLEBY_REQ_VERIFY_009`
+     - reqtrace.TestRunIDsAppearInThePageAndJSON
+     - implemented
 
 Requirements and the tests that verify them
 -------------------------------------------
@@ -961,6 +973,13 @@ Run with ``make test``. No Docker required.
     :tags: go
 
     ``src/go/bartleby/cmd/reqs_test.go:137``
+
+.. test:: cmd.TestReqsVerifyReadsBenderRunFolders
+    :id: HMD_CLI_BARTLEBY_TEST_GO_3590E6F8
+    :links: HMD_CLI_BARTLEBY_REQ_VERIFY_008
+    :tags: go
+
+    ``src/go/bartleby/cmd/reqs_test.go:173``
 
 .. test:: cmd.TestResolveConfidential
     :id: HMD_CLI_BARTLEBY_TEST_GO_D13A9289
@@ -1389,6 +1408,20 @@ Run with ``make test``. No Docker required.
 
     ``src/go/bartleby/internal/pipconf/pipconf_test.go:122``
 
+.. test:: reqtrace.TestAGivenLabelAndVersionWinOverRunJSON
+    :id: HMD_CLI_BARTLEBY_TEST_GO_DFE4E1BE
+    :links: HMD_CLI_BARTLEBY_REQ_VERIFY_006
+    :tags: go
+
+    ``src/go/reqtrace/benderrun_test.go:46``
+
+.. test:: reqtrace.TestARunFolderNeedsExactlyOneOutputXML
+    :id: HMD_CLI_BARTLEBY_TEST_GO_28CCD4C1
+    :links: HMD_CLI_BARTLEBY_REQ_VERIFY_006
+    :tags: go
+
+    ``src/go/reqtrace/benderrun_test.go:95``
+
 .. test:: reqtrace.TestCheckFreshDetectsStaleness
     :id: HMD_CLI_BARTLEBY_TEST_GO_112E0DD2
     :links: HMD_CLI_BARTLEBY_REQ_TRACE_006
@@ -1430,6 +1463,27 @@ Run with ``make test``. No Docker required.
     :tags: go
 
     ``src/go/reqtrace/reqtrace_test.go:547``
+
+.. test:: reqtrace.TestLoadResultsReadsABenderRunFolder
+    :id: HMD_CLI_BARTLEBY_TEST_GO_79FF3767
+    :links: HMD_CLI_BARTLEBY_REQ_VERIFY_006
+    :tags: go
+
+    ``src/go/reqtrace/benderrun_test.go:23``
+
+.. test:: reqtrace.TestLoadRunsDirAllRunsKeepsEveryRun
+    :id: HMD_CLI_BARTLEBY_TEST_GO_738537EC
+    :links: HMD_CLI_BARTLEBY_REQ_VERIFY_008
+    :tags: go
+
+    ``src/go/reqtrace/benderrun_test.go:141``
+
+.. test:: reqtrace.TestLoadRunsDirKeepsEachLabelsLatestRun
+    :id: HMD_CLI_BARTLEBY_TEST_GO_FB4A6A0D
+    :links: HMD_CLI_BARTLEBY_REQ_VERIFY_008
+    :tags: go
+
+    ``src/go/reqtrace/benderrun_test.go:111``
 
 .. test:: reqtrace.TestLoadWithoutARequirementsDirectory
     :id: HMD_CLI_BARTLEBY_TEST_GO_6ACE04F6
@@ -1549,6 +1603,20 @@ Run with ``make test``. No Docker required.
     :tags: go
 
     ``src/go/reqtrace/verify_test.go:208``
+
+.. test:: reqtrace.TestRunIDsAppearInThePageAndJSON
+    :id: HMD_CLI_BARTLEBY_TEST_GO_4B2ABD14
+    :links: HMD_CLI_BARTLEBY_REQ_VERIFY_009
+    :tags: go
+
+    ``src/go/reqtrace/benderrun_test.go:160``
+
+.. test:: reqtrace.TestRunLabelFallsBackToTagThenFileName
+    :id: HMD_CLI_BARTLEBY_TEST_GO_0C68A9A7
+    :links: HMD_CLI_BARTLEBY_REQ_VERIFY_007
+    :tags: go
+
+    ``src/go/reqtrace/benderrun_test.go:57``
 
 .. test:: reqtrace.TestRunOnlyScansProposalsWhenIncluded
     :id: HMD_CLI_BARTLEBY_TEST_GO_C306D06E
