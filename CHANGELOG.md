@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-11-16
+
+- fix: raise dependency floors for the security fixes (add urllib3>=2.8.0,<3 (locked 2.3.0); add pyasn1>=0.6.5,<0.7 (locked 0.6.1)); the build keeps existing pins (`--no-upgrade`), so a floor is what moves the lock
+
 ## 2026-10-26
 
 - feat: `reqtrace -verify` reads Bender's archived runs (NERD003 SPEC004,
