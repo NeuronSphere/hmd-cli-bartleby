@@ -106,6 +106,12 @@ func Load(l Layout) (Model, error) {
 		scheme = derived
 	}
 
+	cfg, _, err := readRepoConfig(l.RepoRoot)
+	if err != nil {
+		return m, err
+	}
+	m.Config = cfg
+
 	for _, dir := range requirementsDirs {
 		requirements, err := ParseRequirements(dir, l.RepoRoot, scheme)
 		if err != nil {

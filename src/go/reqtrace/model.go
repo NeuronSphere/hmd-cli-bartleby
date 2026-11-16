@@ -171,6 +171,8 @@ func (t TestCase) Title() string {
 type Model struct {
 	Requirements []Requirement
 	Tests        []TestCase
+	// Config is what the manifest says about statuses and types.
+	Config repoConfig
 }
 
 // Sort puts the model in a stable order so the generated page and every report

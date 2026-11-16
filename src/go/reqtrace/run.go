@@ -25,6 +25,12 @@ type RunOptions struct {
 	// Verify, when set, joins a needs.json export with test results instead of
 	// generating or checking the traceability matrix. See verify.go.
 	Verify *VerifyOptions
+	// List, when set, prints the needs as JSON instead of generating the
+	// matrix. See listing.go.
+	List *ListOptions
+	// Diff, when it holds two listing files, prints the changes from the first
+	// to the second and reads nothing else.
+	Diff []string
 	// Out receives the summary, Err the problems. Nil means stdout and stderr.
 	Out, Err io.Writer
 }
@@ -41,6 +47,13 @@ func Run(o RunOptions) error {
 	}
 	if errOut == nil {
 		errOut = os.Stderr
+	}
+
+	if len(o.Diff) > 0 {
+		return runDiff(o.Diff, out)
+	}
+	if o.List != nil {
+		return runList(o, out, errOut)
 	}
 
 	repo := o.Repo

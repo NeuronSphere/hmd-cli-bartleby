@@ -115,6 +115,35 @@ Explain Without A Build Says To Build First
     Should Contain    ${result.stderr}    run a build first
     [Teardown]    Remove Directory    ${repo}    recursive=True
 
+Reqs Lists A Workspace As JSON
+    [Documentation]    Run over a directory of repositories with no manifest of
+    ...               its own, reqs --format json lists every repository, and
+    ...               --changes on a second run reports only the need edited.
+    [Tags]    REQ_LIST_001    REQ_LIST_004    REQ_LIST_008
+    ${ws}=    Set Variable    ${TEMPDIR}/bartleby-workspace
+    Set Environment Variable    REQTRACE_CACHE_DIR    ${TEMPDIR}/bartleby-workspace-cache
+    Create File    ${ws}/one/meta-data/manifest.json    {"name": "hmd-cli-one"}
+    Create File    ${ws}/one/docs/requirements/r.rst
+    ...    .. req:: One\n${SPACE*4}:id: HMD_CLI_ONE_REQ_X_001\n${SPACE*4}:status: draft\n
+    Create File    ${ws}/two/docs/proposals/NERD001.rst
+    ...    .. req:: Two\n${SPACE*4}:id: TWO_NERD001\n${SPACE*4}:status: proposed\n
+
+    ${result}=    Run Bartleby    reqs --format json --summary    ${ws}
+    ${listing}=    Evaluate    json.loads($result.stdout)    modules=json
+    Should Be Equal As Integers    ${listing}[summary][repos_with_needs]    2
+    Should Be Equal As Integers    ${listing}[summary][by_stage][draft]    1
+
+    ${result}=    Run Bartleby    reqs --format json --changes    ${ws}
+    Create File    ${ws}/one/docs/requirements/r.rst
+    ...    .. req:: One, retitled\n${SPACE*4}:id: HMD_CLI_ONE_REQ_X_001\n${SPACE*4}:status: proposed\n
+    ${result}=    Run Bartleby    reqs --format json --changes    ${ws}
+    ${listing}=    Evaluate    json.loads($result.stdout)    modules=json
+    Length Should Be    ${listing}[changes][changed]    1
+    Should Be Equal    ${listing}[changes][changed][0][id]    HMD_CLI_ONE_REQ_X_001
+    Length Should Be    ${listing}[changes][added]    0
+    [Teardown]    Run Keywords    Remove Directory    ${ws}    recursive=True
+    ...    AND    Remove Directory    ${TEMPDIR}/bartleby-workspace-cache    recursive=True
+
 *** Keywords ***
 Run Bartleby
     [Documentation]    Run the binary in a directory and assert its exit code.

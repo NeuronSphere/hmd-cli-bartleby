@@ -20,6 +20,28 @@ reqtrace -repo /path     # explicit repository root (default: walk up for meta-d
 reqtrace -quiet          # print nothing on success
 ```
 
+### Listing needs as JSON
+
+`-format json` prints every need instead of writing the matrix. Each entry has its
+status, a normalised stage (`draft`, `proposed`, `in_progress`, `implemented`, `deferred`,
+`closed`, `unknown`), its links, a digest of its text, and the tests that cover it. No
+Sphinx build is needed.
+
+```sh
+reqtrace -format json                      # this repository; or, run in a directory of
+                                           # repositories, every one of them
+reqtrace -format json -workspace DIR       # every repository up to two levels below DIR
+reqtrace -format json -open -summary       # open needs, counted per repository
+reqtrace -format json -repo NAME -stage draft -type spec
+reqtrace -format json -changes             # add what changed since the previous call
+reqtrace -diff OLD.json NEW.json           # what changed between two listings
+```
+
+A workspace listing is served from an index under `$REQTRACE_CACHE_DIR` (default: the user
+cache directory). Each call refreshes the index from directory and file modified times and
+the repositories' git `HEAD`, and re-reads only what moved. There is no file watcher.
+`-rebuild` ignores the index.
+
 Or as a library:
 
 ```go

@@ -31,6 +31,10 @@ const (
 	ProblemUntagged       = "test-without-requirement"
 	ProblemBadLink        = "broken-link"
 	ProblemNoRequirements = "no-requirements-found"
+	// ProblemUnknownStatus is reported only when the manifest sets
+	// needs_status_strict; otherwise an unknown status is the listing's
+	// business, not a traceability failure.
+	ProblemUnknownStatus = "unknown-status"
 )
 
 // Validate returns every traceability defect in the model, in a stable order.
@@ -100,6 +104,20 @@ func Validate(m Model) []Problem {
 				Where:   location(t.File, t.Line),
 				Message: untaggedHint(t),
 			})
+		}
+	}
+
+	// A status the stage table does not know, when the repository asks for that
+	// to fail the check.
+	if m.Config.Strict {
+		for _, r := range m.Requirements {
+			if _, recognised := m.Config.stageOf(r.Status); !recognised {
+				problems = append(problems, Problem{
+					Kind:    ProblemUnknownStatus,
+					Where:   location(r.File, r.Line),
+					Message: fmt.Sprintf("%s has status %q, which maps to no stage — use a known status or add it to needs_status_stages", r.ID, r.Status),
+				})
+			}
 		}
 	}
 
