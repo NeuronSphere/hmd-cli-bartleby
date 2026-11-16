@@ -1,5 +1,27 @@
 # Changelog
 
+## 2026-11-16
+
+- feat: `reqtrace -format json` / `bartleby reqs --format json` lists needs as JSON
+  without a Sphinx build (NERD004, `REQ_LIST_001`–`010`):
+  - **Each need** has its status, a normalised stage, its links, a text digest and
+    `covered_by` (its Go and Robot tests).
+  - **Stages:** `needs_status_stages` in a manifest extends the status-to-stage table,
+    and `needs_status_strict` makes an unknown status fail `-check`.
+  - **Workspace mode:** `-workspace DIR`, or the default when run from a directory of
+    repositories, lists every repository up to two levels down. Links resolve across
+    repositories, with `ambiguous-link`, `unknown-link`, `duplicate-id` and
+    `duplicate-repo` problems. Folders that share a manifest name are listed as
+    `name@folder`.
+  - **Filters:** `-repo` (repeatable), `-stage`, `-type`, `-open` and `-summary`.
+  - **Incremental index:** a workspace listing is served from an index under
+    `$REQTRACE_CACHE_DIR`, refreshed from directory and file modified times and git
+    `HEAD` with no watcher. It takes about 0.07 s warm over ~480 repositories.
+  - **Change tracking:** `-changes` reports added, changed and removed needs since the
+    previous call, and `-diff OLD NEW` compares two listings.
+  - **Parser:** a new `reqtrace/needs` package reads need directives with their bodies,
+    skipping literal and code blocks.
+
 ## 2026-10-26
 
 - feat: `reqtrace -verify` reads Bender's archived runs (NERD003 SPEC004,

@@ -16,7 +16,7 @@ generated from those declarations.
 Summary
 -------
 
-133 requirement items, verified by 209 Go tests and 35 Robot tests.
+143 requirement items, verified by 233 Go tests and 36 Robot tests.
 
 .. list-table::
    :header-rows: 1
@@ -101,6 +101,10 @@ Summary
    * - GATH
      - 4
      - 8
+     - 0
+   * - LIST
+     - 10
+     - 31
      - 0
    * - MAN
      - 5
@@ -399,6 +403,36 @@ Coverage by requirement
      - implemented
    * - :need:`HMD_CLI_BARTLEBY_REQ_GATH_004`
      - gather.TestReposEmptyListIsANoOp
+     - implemented
+   * - :need:`HMD_CLI_BARTLEBY_REQ_LIST_001`
+     - cmd.TestReqsListsNeedsAsJSON, cmd.TestReqsRejectsAnUnknownFormat, needs.TestTypesAreConfigurable, reqtrace.TestListRepoListsNeedsWithCoverage, reqtrace.TestListRepoReadsEveryDocsFolderButNotTheGeneratedPage, reqtrace.TestRunPrintsJSONAndDefaultsToTheWorkspace, cli: Reqs Lists A Workspace As JSON
+     - implemented
+   * - :need:`HMD_CLI_BARTLEBY_REQ_LIST_002`
+     - reqtrace.TestListRepoListsNeedsWithCoverage
+     - implemented
+   * - :need:`HMD_CLI_BARTLEBY_REQ_LIST_003`
+     - reqtrace.TestStageMatchingIgnoresCaseSpacesAndHyphens, reqtrace.TestStagesNormaliseStatuses, reqtrace.TestStrictStatusesFailTheTraceabilityCheck
+     - implemented
+   * - :need:`HMD_CLI_BARTLEBY_REQ_LIST_004`
+     - reqtrace.TestRunPrintsJSONAndDefaultsToTheWorkspace, reqtrace.TestWorkspaceDiscoversRepositories, reqtrace.TestWorkspaceSeparatesFoldersThatShareAManifestName, cli: Reqs Lists A Workspace As JSON
+     - implemented
+   * - :need:`HMD_CLI_BARTLEBY_REQ_LIST_005`
+     - reqtrace.TestWorkspaceResolvesLinksAcrossRepositories
+     - implemented
+   * - :need:`HMD_CLI_BARTLEBY_REQ_LIST_006`
+     - reqtrace.TestWorkspaceFiltersAndSummary
+     - implemented
+   * - :need:`HMD_CLI_BARTLEBY_REQ_LIST_007`
+     - reqtrace.TestIndexFindsNewAndRemovedRepositories, reqtrace.TestIndexFindsNewRemovedAndRenamedFiles, reqtrace.TestIndexRefreshesOnlyWhatChanged, reqtrace.TestIndexRewalksARepositoryWhoseHeadMoved, reqtrace.TestIndexSurvivesCorruptionAndRebuild
+     - implemented
+   * - :need:`HMD_CLI_BARTLEBY_REQ_LIST_008`
+     - reqtrace.TestIndexFindsNewRemovedAndRenamedFiles, reqtrace.TestIndexRefreshesOnlyWhatChanged, cli: Reqs Lists A Workspace As JSON
+     - implemented
+   * - :need:`HMD_CLI_BARTLEBY_REQ_LIST_009`
+     - reqtrace.TestDiffComparesTwoListings, reqtrace.TestRunDiffReadsTwoFiles
+     - implemented
+   * - :need:`HMD_CLI_BARTLEBY_REQ_LIST_010`
+     - needs.TestDigestIgnoresLineEndingsAndTrailingSpace, needs.TestParseIgnoresNeedsWithoutAnID, needs.TestParseReadsOptionsBodiesAndWrappedValues, needs.TestParseSkipsLiteralAndCodeBlocks
      - implemented
    * - :need:`HMD_CLI_BARTLEBY_REQ_MAN_001`
      - manifest.TestReadMissingManifest, manifest.TestReadStringBuilders, preconditions: Explicit Roots In Manifest Builds Configured Builder, preconditions: Missing Manifest Falls Back To Default Builders
@@ -951,35 +985,49 @@ Run with ``make test``. No Docker required.
     :links: HMD_CLI_BARTLEBY_REQ_TRACE_010
     :tags: go
 
-    ``src/go/bartleby/cmd/reqs_test.go:95``
+    ``src/go/bartleby/cmd/reqs_test.go:96``
 
 .. test:: cmd.TestReqsGeneratesTheMatrix
     :id: HMD_CLI_BARTLEBY_TEST_GO_4613D722
     :links: HMD_CLI_BARTLEBY_REQ_TRACE_010
     :tags: go
 
-    ``src/go/bartleby/cmd/reqs_test.go:68``
+    ``src/go/bartleby/cmd/reqs_test.go:69``
+
+.. test:: cmd.TestReqsListsNeedsAsJSON
+    :id: HMD_CLI_BARTLEBY_TEST_GO_3804475C
+    :links: HMD_CLI_BARTLEBY_REQ_LIST_001
+    :tags: go
+
+    ``src/go/bartleby/cmd/reqs_test.go:216``
 
 .. test:: cmd.TestReqsQuietPrintsNothingOnSuccess
     :id: HMD_CLI_BARTLEBY_TEST_GO_286EB09F
     :links: HMD_CLI_BARTLEBY_REQ_TRACE_010
     :tags: go
 
-    ``src/go/bartleby/cmd/reqs_test.go:120``
+    ``src/go/bartleby/cmd/reqs_test.go:121``
+
+.. test:: cmd.TestReqsRejectsAnUnknownFormat
+    :id: HMD_CLI_BARTLEBY_TEST_GO_E980A1B0
+    :links: HMD_CLI_BARTLEBY_REQ_LIST_001
+    :tags: go
+
+    ``src/go/bartleby/cmd/reqs_test.go:245``
 
 .. test:: cmd.TestReqsVerifyIsTheSameToolAsReqtraceVerify
     :id: HMD_CLI_BARTLEBY_TEST_GO_F939B01C
     :links: HMD_CLI_BARTLEBY_REQ_VERIFY_005
     :tags: go
 
-    ``src/go/bartleby/cmd/reqs_test.go:137``
+    ``src/go/bartleby/cmd/reqs_test.go:138``
 
 .. test:: cmd.TestReqsVerifyReadsBenderRunFolders
     :id: HMD_CLI_BARTLEBY_TEST_GO_3590E6F8
     :links: HMD_CLI_BARTLEBY_REQ_VERIFY_008
     :tags: go
 
-    ``src/go/bartleby/cmd/reqs_test.go:173``
+    ``src/go/bartleby/cmd/reqs_test.go:174``
 
 .. test:: cmd.TestResolveConfidential
     :id: HMD_CLI_BARTLEBY_TEST_GO_D13A9289
@@ -1366,6 +1414,41 @@ Run with ``make test``. No Docker required.
 
     ``src/go/bartleby/internal/manifest/manifest_test.go:138``
 
+.. test:: needs.TestDigestIgnoresLineEndingsAndTrailingSpace
+    :id: HMD_CLI_BARTLEBY_TEST_GO_245448B0
+    :links: HMD_CLI_BARTLEBY_REQ_LIST_010
+    :tags: go
+
+    ``src/go/reqtrace/needs/needs_test.go:105``
+
+.. test:: needs.TestParseIgnoresNeedsWithoutAnID
+    :id: HMD_CLI_BARTLEBY_TEST_GO_1A951E4D
+    :links: HMD_CLI_BARTLEBY_REQ_LIST_010
+    :tags: go
+
+    ``src/go/reqtrace/needs/needs_test.go:94``
+
+.. test:: needs.TestParseReadsOptionsBodiesAndWrappedValues
+    :id: HMD_CLI_BARTLEBY_TEST_GO_58524AF4
+    :links: HMD_CLI_BARTLEBY_REQ_LIST_010
+    :tags: go
+
+    ``src/go/reqtrace/needs/needs_test.go:35``
+
+.. test:: needs.TestParseSkipsLiteralAndCodeBlocks
+    :id: HMD_CLI_BARTLEBY_TEST_GO_1BD6EE4C
+    :links: HMD_CLI_BARTLEBY_REQ_LIST_010
+    :tags: go
+
+    ``src/go/reqtrace/needs/needs_test.go:70``
+
+.. test:: needs.TestTypesAreConfigurable
+    :id: HMD_CLI_BARTLEBY_TEST_GO_78EDEC5E
+    :links: HMD_CLI_BARTLEBY_REQ_LIST_001
+    :tags: go
+
+    ``src/go/reqtrace/needs/needs_test.go:131``
+
 .. test:: pipconf.TestResolveCleanupRemovesTheCredential
     :id: HMD_CLI_BARTLEBY_TEST_GO_F9FA2DF5
     :links: HMD_CLI_BARTLEBY_REQ_AUTO_002
@@ -1429,6 +1512,13 @@ Run with ``make test``. No Docker required.
 
     ``src/go/reqtrace/reqtrace_test.go:520``
 
+.. test:: reqtrace.TestDiffComparesTwoListings
+    :id: HMD_CLI_BARTLEBY_TEST_GO_215934DE
+    :links: HMD_CLI_BARTLEBY_REQ_LIST_009
+    :tags: go
+
+    ``src/go/reqtrace/listing_test.go:547``
+
 .. test:: reqtrace.TestExpandID
     :id: HMD_CLI_BARTLEBY_TEST_GO_74A0C9B5
     :links: HMD_CLI_BARTLEBY_REQ_TRACE_002
@@ -1442,6 +1532,55 @@ Run with ``make test``. No Docker required.
     :tags: go
 
     ``src/go/reqtrace/reqtrace_test.go:588``
+
+.. test:: reqtrace.TestIndexFindsNewAndRemovedRepositories
+    :id: HMD_CLI_BARTLEBY_TEST_GO_C3BEB2ED
+    :links: HMD_CLI_BARTLEBY_REQ_LIST_007
+    :tags: go
+
+    ``src/go/reqtrace/listing_test.go:474``
+
+.. test:: reqtrace.TestIndexFindsNewRemovedAndRenamedFiles
+    :id: HMD_CLI_BARTLEBY_TEST_GO_4E18C41A
+    :links: HMD_CLI_BARTLEBY_REQ_LIST_007, HMD_CLI_BARTLEBY_REQ_LIST_008
+    :tags: go
+
+    ``src/go/reqtrace/listing_test.go:427``
+
+.. test:: reqtrace.TestIndexRefreshesOnlyWhatChanged
+    :id: HMD_CLI_BARTLEBY_TEST_GO_B079D841
+    :links: HMD_CLI_BARTLEBY_REQ_LIST_007, HMD_CLI_BARTLEBY_REQ_LIST_008
+    :tags: go
+
+    ``src/go/reqtrace/listing_test.go:390``
+
+.. test:: reqtrace.TestIndexRewalksARepositoryWhoseHeadMoved
+    :id: HMD_CLI_BARTLEBY_TEST_GO_EAA90AE1
+    :links: HMD_CLI_BARTLEBY_REQ_LIST_007
+    :tags: go
+
+    ``src/go/reqtrace/listing_test.go:500``
+
+.. test:: reqtrace.TestIndexSurvivesCorruptionAndRebuild
+    :id: HMD_CLI_BARTLEBY_TEST_GO_4EE2DDC6
+    :links: HMD_CLI_BARTLEBY_REQ_LIST_007
+    :tags: go
+
+    ``src/go/reqtrace/listing_test.go:516``
+
+.. test:: reqtrace.TestListRepoListsNeedsWithCoverage
+    :id: HMD_CLI_BARTLEBY_TEST_GO_76E7AC14
+    :links: HMD_CLI_BARTLEBY_REQ_LIST_001, HMD_CLI_BARTLEBY_REQ_LIST_002
+    :tags: go
+
+    ``src/go/reqtrace/listing_test.go:81``
+
+.. test:: reqtrace.TestListRepoReadsEveryDocsFolderButNotTheGeneratedPage
+    :id: HMD_CLI_BARTLEBY_TEST_GO_B402A550
+    :links: HMD_CLI_BARTLEBY_REQ_LIST_001
+    :tags: go
+
+    ``src/go/reqtrace/listing_test.go:117``
 
 .. test:: reqtrace.TestLoadAlsoReadsDocsProposals
     :id: HMD_CLI_BARTLEBY_TEST_GO_20C3CB52
@@ -1604,6 +1743,13 @@ Run with ``make test``. No Docker required.
 
     ``src/go/reqtrace/verify_test.go:208``
 
+.. test:: reqtrace.TestRunDiffReadsTwoFiles
+    :id: HMD_CLI_BARTLEBY_TEST_GO_4E39AAA2
+    :links: HMD_CLI_BARTLEBY_REQ_LIST_009
+    :tags: go
+
+    ``src/go/reqtrace/listing_test.go:617``
+
 .. test:: reqtrace.TestRunIDsAppearInThePageAndJSON
     :id: HMD_CLI_BARTLEBY_TEST_GO_4B2ABD14
     :links: HMD_CLI_BARTLEBY_REQ_VERIFY_009
@@ -1625,12 +1771,40 @@ Run with ``make test``. No Docker required.
 
     ``src/go/reqtrace/reqtrace_test.go:738``
 
+.. test:: reqtrace.TestRunPrintsJSONAndDefaultsToTheWorkspace
+    :id: HMD_CLI_BARTLEBY_TEST_GO_297C9853
+    :links: HMD_CLI_BARTLEBY_REQ_LIST_001, HMD_CLI_BARTLEBY_REQ_LIST_004
+    :tags: go
+
+    ``src/go/reqtrace/listing_test.go:584``
+
 .. test:: reqtrace.TestRunVerifyWritesPageJSONAndFailsOnGaps
     :id: HMD_CLI_BARTLEBY_TEST_GO_7C71803B
     :links: HMD_CLI_BARTLEBY_REQ_VERIFY_005
     :tags: go
 
     ``src/go/reqtrace/verify_test.go:233``
+
+.. test:: reqtrace.TestStageMatchingIgnoresCaseSpacesAndHyphens
+    :id: HMD_CLI_BARTLEBY_TEST_GO_3C17C065
+    :links: HMD_CLI_BARTLEBY_REQ_LIST_003
+    :tags: go
+
+    ``src/go/reqtrace/listing_test.go:166``
+
+.. test:: reqtrace.TestStagesNormaliseStatuses
+    :id: HMD_CLI_BARTLEBY_TEST_GO_3A6CC4FD
+    :links: HMD_CLI_BARTLEBY_REQ_LIST_003
+    :tags: go
+
+    ``src/go/reqtrace/listing_test.go:136``
+
+.. test:: reqtrace.TestStrictStatusesFailTheTraceabilityCheck
+    :id: HMD_CLI_BARTLEBY_TEST_GO_6A9109E9
+    :links: HMD_CLI_BARTLEBY_REQ_LIST_003
+    :tags: go
+
+    ``src/go/reqtrace/listing_test.go:179``
 
 .. test:: reqtrace.TestValidateAcceptsExemptRequirements
     :id: HMD_CLI_BARTLEBY_TEST_GO_E8735AA4
@@ -1694,6 +1868,34 @@ Run with ``make test``. No Docker required.
     :tags: go
 
     ``src/go/reqtrace/verify_test.go:70``
+
+.. test:: reqtrace.TestWorkspaceDiscoversRepositories
+    :id: HMD_CLI_BARTLEBY_TEST_GO_67CC44A3
+    :links: HMD_CLI_BARTLEBY_REQ_LIST_004
+    :tags: go
+
+    ``src/go/reqtrace/listing_test.go:271``
+
+.. test:: reqtrace.TestWorkspaceFiltersAndSummary
+    :id: HMD_CLI_BARTLEBY_TEST_GO_144EDBF3
+    :links: HMD_CLI_BARTLEBY_REQ_LIST_006
+    :tags: go
+
+    ``src/go/reqtrace/listing_test.go:351``
+
+.. test:: reqtrace.TestWorkspaceResolvesLinksAcrossRepositories
+    :id: HMD_CLI_BARTLEBY_TEST_GO_78C04D08
+    :links: HMD_CLI_BARTLEBY_REQ_LIST_005
+    :tags: go
+
+    ``src/go/reqtrace/listing_test.go:297``
+
+.. test:: reqtrace.TestWorkspaceSeparatesFoldersThatShareAManifestName
+    :id: HMD_CLI_BARTLEBY_TEST_GO_71F261D7
+    :links: HMD_CLI_BARTLEBY_REQ_LIST_004
+    :tags: go
+
+    ``src/go/reqtrace/listing_test.go:323``
 
 .. test:: runner.TestContainerNameIsAlwaysValid
     :id: HMD_CLI_BARTLEBY_TEST_GO_782398E0
@@ -2217,6 +2419,13 @@ Robot Framework tests
     :tags: robot
 
     ``test/cli.robot:77``
+
+.. test:: cli: Reqs Lists A Workspace As JSON
+    :id: HMD_CLI_BARTLEBY_TEST_ROBOT_20AD63A3
+    :links: HMD_CLI_BARTLEBY_REQ_LIST_001, HMD_CLI_BARTLEBY_REQ_LIST_004, HMD_CLI_BARTLEBY_REQ_LIST_008
+    :tags: robot
+
+    ``test/cli.robot:118``
 
 .. test:: cli: Shell Flag Contradicting A Subcommand Is Rejected
     :id: HMD_CLI_BARTLEBY_TEST_ROBOT_DFD043D4

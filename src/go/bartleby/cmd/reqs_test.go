@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"encoding/json"
 	"os"
 	"path/filepath"
 	"strings"
@@ -208,5 +209,42 @@ func TestReqsVerifyReadsBenderRunFolders(t *testing.T) {
 	})
 	if !strings.Contains(output, "python 2026-10-26T090000Z: ") || !strings.Contains(output, "python 2026-10-26T100000Z: ") {
 		t.Errorf("--all-runs output:\n%s", output)
+	}
+}
+
+// Requirements: REQ_LIST_001
+func TestReqsListsNeedsAsJSON(t *testing.T) {
+	root := writeReqsFixture(t, "")
+
+	output, err := runReqs(t, reqsOptions{repo: root, format: "json"})
+	if err != nil {
+		t.Fatalf("bartleby reqs --format json: %v\n%s", err, output)
+	}
+	var listing struct {
+		Needs []struct {
+			ID        string `json:"id"`
+			Stage     string `json:"stage"`
+			CoveredBy []struct {
+				Test string `json:"test"`
+			} `json:"covered_by"`
+		} `json:"needs"`
+	}
+	if err := json.Unmarshal([]byte(output), &listing); err != nil {
+		t.Fatalf("output is not JSON: %v\n%s", err, output)
+	}
+	if len(listing.Needs) != 1 || listing.Needs[0].ID != "HMD_CLI_BARTLEBY_REQ_SEL_001" ||
+		listing.Needs[0].Stage != "implemented" || len(listing.Needs[0].CoveredBy) != 1 {
+		t.Errorf("listing = %+v", listing.Needs)
+	}
+	if _, err := os.Stat(filepath.Join(root, "docs", "requirements", "traceability.rst")); err == nil {
+		t.Error("--format json wrote the traceability page")
+	}
+}
+
+// Requirements: REQ_LIST_001
+func TestReqsRejectsAnUnknownFormat(t *testing.T) {
+	root := writeReqsFixture(t, "")
+	if _, err := runReqs(t, reqsOptions{repo: root, format: "yaml"}); err == nil {
+		t.Error("--format yaml was accepted")
 	}
 }

@@ -21,12 +21,20 @@ in it is implemented; the specifications are ``proposed`` and the first
 milestone is a change to ``reqtrace`` that is useful before any editor code
 exists.
 
+**Revision 1 (2026-11-16).** ``nsx`` is now an *optional* consumer, not a
+party to any milestone. Its shape is still open, so ``reqtrace`` owns
+``reqtrace/needs`` outright. It may be seeded from ``nsx``'s parser, but no
+acceptance criterion depends on ``nsx`` adopting it. The workspace-wide index,
+``-format json`` listing and status vocabulary that M0 needs are specified in
+:need:`HMD_CLI_BARTLEBY_NERD004`. That NERD's first consumers are the
+AI-memory dogfood and business proposals (``hmd-core-arch-docs`` NEP052).
+
 Motivation
 ----------
 
 Sphinx-Needs has become the substrate for requirements, specifications and
 decisions across NeuronSphere. As of September 2026, 32 of the ~430
-repositories under ``projects/`` carry needs — about 2,900 objects (1,857
+NeuronSphere repositories carry needs — about 2,900 objects (1,857
 ``spec``, 679 ``req``, 220 ``test``, 29 ``decision``, 16 ``feature``) —
 rendered by Bartleby and checked by ``reqtrace``. The ``nsx`` agent teams hand
 off to one another by writing needs.
@@ -164,10 +172,9 @@ by the server.
    }
    ws --> repos : read + file watch
 
-   [nsx] as nsx
-   [reqtrace CLI\nbartleby reqs] as cli
-   nsx --> needs : go.mod
-   nsx --> graph
+   [nsx\n(optional consumer)] as nsx
+   [reqtrace CLI\nbartleby reqs\n-format json] as cli
+   nsx ..> needs : go.mod, if adopted
    cli --> needs
    @enduml
 
@@ -189,8 +196,8 @@ consumer pinned to ``v0.1.0`` keeps working through every milestone.
     *Why here.* The module already ships as ``reqtrace_<version>_<os>_<arch>``
     archives and a Homebrew cask from this repository's GoReleaser
     configuration, so the server needs no new release plumbing, and one
-    binary serves the command line, ``nsx`` (through ``go.mod``) and the
-    editor. A ``bartleby lsp`` subcommand was rejected: Bartleby is
+    binary serves the command line, the editor and any Go consumer that
+    imports the module. A ``bartleby lsp`` subcommand was rejected: Bartleby is
     BSL-licensed — the GoReleaser file says so in as many words when it
     explains why ``reqtrace`` is installable on its own — and its binary
     carries the Docker client. A separate third module or repository was
@@ -203,28 +210,28 @@ consumer pinned to ``v0.1.0`` keeps working through every milestone.
     that would end the module's stdlib-only promise, and the surface needed
     here is small and stable.
 
-.. spec:: nsx's span-recording parser is lifted into reqtrace/needs
+.. spec:: reqtrace owns a span-recording needs parser in reqtrace/needs
     :id: HMD_CLI_BARTLEBY_NERD002_SPEC002
     :links: HMD_CLI_BARTLEBY_NERD002
     :status: proposed
 
-    ``reqtrace/needs`` shall be created by lifting ``nsx/internal/needs``
-    (``needs.go``, ``parse.go``, and in a second step ``write.go``) and
-    generalising it: the closed type vocabulary becomes a ``Parser.Types``
-    field, the ``exitcode`` wrapping is dropped in favour of plain errors,
-    and a ``Need.AsRequirement(scheme)`` conversion keeps ``Validate``
-    working unchanged. The parser shall record, per need, the span of the
+    ``reqtrace/needs`` shall be a parser owned by ``reqtrace``, with no
+    dependency on ``nsx``. It may be seeded by copying from
+    ``nsx/internal/needs`` (``needs.go``, ``parse.go``, and later
+    ``write.go``), after confirming the licence and recording the origin in
+    the package documentation. The copy is generalised: the closed type
+    vocabulary becomes a ``Parser.Types`` field, the ``exitcode`` wrapping is
+    dropped in favour of plain errors, and a ``Need.AsRequirement(scheme)``
+    conversion keeps ``Validate`` working unchanged. The parser shall record, per need, the span of the
     whole directive, of the ``:id:`` value and of the title, one ``Ref`` per
     ``:links:`` token, the enclosing section headings, and the body; and per
     document, every inline ``:need:`` role. A golden corpus of tricky files
     copied from real repositories shall pin its behaviour.
 
-    *Why now.* It is the only parser with byte spans, Markdown support,
-    wrapped-option handling and a test suite, and lifting it was already
-    ``nsx``'s stated intent. ``nsx``'s dependency test forbids the *old*
-    ``reqtrace`` functions by name, so a new package is not blocked; once the
-    lift lands that test flips to *require* ``reqtrace/needs`` and ``nsx``
-    deletes its copy. Three consumers on one parser is the point.
+    *Why now.* ``nsx``'s parser is the only one with byte spans, Markdown
+    support, wrapped-option handling and a test suite, so it is the cheapest
+    starting point. Whether ``nsx`` later imports ``reqtrace/needs`` and
+    deletes its copy is ``nsx``'s decision. No milestone here waits on it.
 
     When a repository's manifest declares ``needs_types``, that list replaces
     the default vocabulary, as it does in Sphinx, and a directive outside it
@@ -248,9 +255,9 @@ consumer pinned to ``v0.1.0`` keeps working through every milestone.
     ``ambiguous-link`` diagnostic naming the candidates. Edges resolved to a
     sibling are marked as cross-repository so the webview can style them.
 
-    The package shall offer the queries the vault task already names —
+    The package shall offer the queries
     ``Neighbourhood(key, hops, direction, filter)``, ``Closure``, ``ByType``,
-    ``Backlinks``, ``Sections`` — plus ``Whole(filter)`` with a node cap and
+    ``Backlinks`` and ``Sections``, plus ``Whole(filter)`` with a node cap and
     a ``truncated`` flag, and a JSON-tagged ``Subgraph{nodes, edges}`` that is
     the exact payload the webview receives. Generated ``test`` nodes are
     synthesised from the existing Go and Robot test parsers through
@@ -422,8 +429,8 @@ consumer pinned to ``v0.1.0`` keeps working through every milestone.
     :status: proposed
 
     ``reqtrace/needsjson`` shall load the sphinx-needs export
-    (``versions[""].needs``) in the first milestone, because ``nsx`` needs it
-    for its run graph. The editor shall *not* depend on it: the live parse
+    (``versions[""].needs``) in the first milestone. The M0 check diffs the
+    live parse against it, and ``-verify`` already reads it. The editor shall *not* depend on it: the live parse
     already yields links, backlinks, sections and bodies, and the data only
     Sphinx has — nested ``parent_need``, ``parts``, toctree-resolved
     docnames — is rare. Its value to the editor is fidelity: a later
@@ -495,17 +502,17 @@ exists.
      - Delivers
      - Demonstrated by
    * - M0 — reqtrace v0.2.0
-     - hmd-cli-bartleby, neuronsphere
+     - hmd-cli-bartleby
      - ``needs/``, ``needsjson/``, ``graph/``; ``Problem`` gains
-       ``File``/``Line``/``Span``; ``reqtrace -format json``; golden corpus;
-       ``nsx`` switches to ``reqtrace/needs``.
-     - ``reqtrace -format json`` over this repository, ``neuronsphere`` and
-       ``hmd-ms-deployment``, identifiers diffed against the one existing
-       ``needs.json``; ``nsx`` tests green.
+       ``File``/``Line``/``Span``; golden corpus; the workspace index and
+       ``reqtrace -format json`` of :need:`HMD_CLI_BARTLEBY_NERD004`.
+     - ``reqtrace -format json`` over this repository, ``hmd-ms-deployment``
+       and ``hmd-ms-transform``, identifiers and statuses diffed against a
+       fresh ``needs.json``; a run over a full multi-repository workspace.
    * - M0.5 — v0.2.1
-     - both
-     - ``needs/write.go`` lifted; ``nsx`` deletes its copy.
-     - ``nsx`` tests green on the upstream writer.
+     - hmd-cli-bartleby
+     - ``needs/write.go`` (span-preserving write-back).
+     - Round-trip tests: parse, write unchanged, byte-identical file.
    * - M1 — v0.3.0
      - hmd-cli-bartleby
      - ``workspace/``, ``lsp/``, ``reqtrace lsp --stdio``.
@@ -563,9 +570,9 @@ Risks
        offline machines, no Windows build.
      - The four-step acquisition order; verify the quarantine behaviour;
        Windows deferred until someone in the organisation runs it.
-   * - Three consumers — the CLI, ``nsx``, the server — on one parser.
-     - Contract tests in ``reqtrace``; ``nsx``'s dependency test inverted to
-       *require* the shared package; semantic versioning on the nested
+   * - Several consumers (the CLI, the server, memory tooling, and possibly
+       ``nsx``) on one parser.
+     - Contract tests in ``reqtrace``; semantic versioning on the nested
        module; ``bartleby reqs`` keeps calling ``reqtrace.Run``.
    * - Breaking ``v0.1.0`` users.
      - ``Load``, ``Validate`` and ``Run`` untouched through v0.3;
@@ -581,10 +588,9 @@ Open questions
 
 Each carries the recommended answer; none blocks M0.
 
-1. **Discovery.** Ship ``needs.discovery: "recursive"`` — a depth-limited
-   scan for ``meta-data/manifest.json`` so opening ``projects/`` alone works
-   — in M1 rather than M5? *Recommended: yes; it is a few dozen lines and the
-   organisation's layout invites it.*
+1. **Discovery.** *Resolved 2026-11-16:* recursive discovery ships in M0 as
+   the workspace index of :need:`HMD_CLI_BARTLEBY_NERD004`. The server's
+   ``workspace/`` package reuses that index.
 2. **Type fallback.** Lenient union by default with strict as an opt-in, or
    strict by default so that a ``.. decision::`` in a repository that never
    declared it is flagged (a real bug finder, since the shared ``conf.py``
