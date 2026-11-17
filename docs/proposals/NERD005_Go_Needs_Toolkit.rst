@@ -1,10 +1,10 @@
-.. NERD004 Go Needs Toolkit
+.. NERD005 Go Needs Toolkit
 
-NERD004 Go Needs Toolkit
+NERD005 Go Needs Toolkit
 ========================
 
 .. req:: Bartleby shall own the sphinx-needs format in Go: reading, writing, graph, digest and checks
-    :id: HMD_CLI_BARTLEBY_NERD004
+    :id: HMD_CLI_BARTLEBY_NERD005
     :status: proposed
 
     Bartleby shall provide one Go module that reads and writes sphinx-needs in
@@ -13,7 +13,10 @@ NERD004 Go Needs Toolkit
     shall use it rather than parsing needs themselves. All of this shall run
     with no Sphinx, no container, no credentials and no network.
 
-Created 2026-11-06, alongside nsx's ``HMD_CLI_NSX_NERD005``, which makes nsx a
+Created 2026-11-06 as NERD004 and renumbered 2026-11-17, because NERD004 is
+the workspace needs index. Amended 2026-11-17: approval is a merged pull
+request, with no signatures (SPEC006, SPEC007). Written alongside nsx's
+``HMD_CLI_NSX_NERD005``, which makes nsx a
 consumer of this module and moves its needs code here.
 
 Motivation
@@ -36,16 +39,17 @@ repository's requirements is Bartleby's concern. Bartleby builds the documents,
 generates ``traceability.rst`` and judges verification. Its Go tooling should
 be the one place that knows the format.
 
-nsx is also becoming the approval ledger (``HMD_CLI_NSX_NERD005``). An approval
-is fields in a need plus a digest of its text, and the check that the digest
-still matches belongs with the traceability check in CI, not in nsx.
+nsx is becoming a queue over approved needs (``HMD_CLI_NSX_NERD005``). An
+approval is a reviewed pull request that sets a need's status and the digest of
+its text. The check that the digest still matches belongs with the
+traceability check in CI, not in nsx.
 
 Design
 ------
 
 .. spec:: A ``needs`` module beside reqtrace
-    :id: HMD_CLI_BARTLEBY_NERD004_SPEC001
-    :links: HMD_CLI_BARTLEBY_NERD004
+    :id: HMD_CLI_BARTLEBY_NERD005_SPEC001
+    :links: HMD_CLI_BARTLEBY_NERD005
     :status: proposed
 
     ``src/go/needs`` is a new Go module,
@@ -67,8 +71,8 @@ Design
     The module knows the format, not the workflow.
 
 .. spec:: reqtrace parses through the needs module
-    :id: HMD_CLI_BARTLEBY_NERD004_SPEC002
-    :links: HMD_CLI_BARTLEBY_NERD004, HMD_CLI_BARTLEBY_NERD004_SPEC001
+    :id: HMD_CLI_BARTLEBY_NERD005_SPEC002
+    :links: HMD_CLI_BARTLEBY_NERD005, HMD_CLI_BARTLEBY_NERD005_SPEC001
     :status: proposed
 
     ``reqtrace``'s ``ParseRequirements`` is reimplemented over the ``needs``
@@ -79,8 +83,8 @@ Design
     to the sibling directories, as it does for reqtrace today.
 
 .. spec:: The approval digest
-    :id: HMD_CLI_BARTLEBY_NERD004_SPEC003
-    :links: HMD_CLI_BARTLEBY_NERD004, HMD_CLI_BARTLEBY_NERD004_SPEC001
+    :id: HMD_CLI_BARTLEBY_NERD005_SPEC003
+    :links: HMD_CLI_BARTLEBY_NERD005, HMD_CLI_BARTLEBY_NERD005_SPEC001
     :status: proposed
 
     ``needs.Digest(need)`` returns ``sha256:<hex>``, computed over a canonical
@@ -97,8 +101,8 @@ Design
     changes it.
 
 .. spec:: ``reqs --check`` reports lapsed approvals
-    :id: HMD_CLI_BARTLEBY_NERD004_SPEC004
-    :links: HMD_CLI_BARTLEBY_NERD004, HMD_CLI_BARTLEBY_NERD004_SPEC003
+    :id: HMD_CLI_BARTLEBY_NERD005_SPEC004
+    :links: HMD_CLI_BARTLEBY_NERD005, HMD_CLI_BARTLEBY_NERD005_SPEC003, HMD_CLI_BARTLEBY_NERD005_SPEC007
     :status: proposed
 
     For every need with ``:status: approved``, ``reqtrace -check`` (and
@@ -106,16 +110,15 @@ Design
     file and line:
 
     - ``approval-lapsed`` when it differs from ``:approval-digest:``;
-    - ``approval-incomplete`` when ``:approved-by:``, ``:approved-at:`` or
-      ``:approval-digest:`` is missing.
+    - ``approval-incomplete`` when ``:approval-digest:`` is missing.
 
     ``superseded`` becomes a status that needs no test, like ``trace-exempt``.
     These are new problem kinds. Repositories that never write ``approved``
     see no change.
 
 .. spec:: ``bartleby needs`` exposes the module on the command line
-    :id: HMD_CLI_BARTLEBY_NERD004_SPEC005
-    :links: HMD_CLI_BARTLEBY_NERD004, HMD_CLI_BARTLEBY_NERD004_SPEC001
+    :id: HMD_CLI_BARTLEBY_NERD005_SPEC005
+    :links: HMD_CLI_BARTLEBY_NERD005, HMD_CLI_BARTLEBY_NERD005_SPEC001
     :status: proposed
 
     ``bartleby needs`` works from the source tree, with no Sphinx build:
@@ -123,28 +126,54 @@ Design
     - ``list [--type t] [--status s] [--json]``
     - ``show <id> [--json]``: options, body, location, links in and out, and
       the digest.
-    - ``set <id> --status s [--option key=value ...]``: amends in place. It
-      refuses the approval and acceptance fields, which only nsx writes.
+    - ``set <id> --status s [--option key=value ...]``: amends in place.
+      ``--status approved`` also writes ``:approval-digest:`` from the text as
+      it stands, so a team using Bartleby alone can propose an approval in a
+      pull request with no other tool (SPEC007). It refuses a hand-written
+      ``approval-digest``.
     - ``graph <id> [--json]``: what the need links to and what traces to it.
 
     This gives agents and scripts a structured way to read and change needs
     without parsing RST, and nsx uses the same module in-process.
 
-.. spec:: Signature verification is designed in nsx NERD006, not built here yet
-    :id: HMD_CLI_BARTLEBY_NERD004_SPEC006
-    :links: HMD_CLI_BARTLEBY_NERD004
+.. spec:: Approval and acceptance are a merged pull request; signatures are not built
+    :id: HMD_CLI_BARTLEBY_NERD005_SPEC006
+    :links: HMD_CLI_BARTLEBY_NERD005
     :status: proposed
 
-    ``HMD_CLI_NSX_NERD006``, which is under review, proposes signed approvals:
+    ``HMD_CLI_NSX_NERD006`` (a per-repository ``allowed_signers`` roster and
+    an ``:approval-sig:`` field) was rejected on 2026-11-17. Nothing in this
+    module verifies signatures. Who approved is the review on the pull
+    request that made the change, which the repository's branch protection
+    requires (SPEC007). The need does not repeat it.
 
-    - a ``docs/requirements/approvers`` roster in OpenSSH ``allowed_signers``
-      format;
-    - an ``:approval-sig:`` field;
-    - verification in pure Go in ``reqs --check``, with verdicts ``approved``,
-      ``lapsed``, ``unverified`` and ``revoked``.
+    A tool may later export an append-only, hash-chained log of approvals,
+    claims and merges to a git location (nsx ``HMD_CLI_NSX_NERD007``). If it
+    does, its verifier is a separate package in this module, and nothing here
+    depends on it.
 
-    If it is accepted, the verifier lands in this module as ``needs/approval``.
-    Nothing in this NERD depends on it.
+.. spec:: A need's approval is the pull request that sets it to approved
+    :id: HMD_CLI_BARTLEBY_NERD005_SPEC007
+    :links: HMD_CLI_BARTLEBY_NERD005, HMD_CLI_BARTLEBY_NERD005_SPEC003
+    :status: proposed
+
+    The rule, which every tool built on this module follows:
+
+    - **Approval.** A need is approved when ``:status: approved`` and a
+      matching ``:approval-digest:`` are on the default branch. The change
+      that set them was merged through a reviewed pull request, and that
+      review is the approval. There is no separate approval command or record.
+    - **Acceptance.** A need is accepted when ``:status: implemented`` reaches
+      the default branch the same way, in the pull request that carries the
+      work. Approving and merging that pull request is the acceptance.
+    - **Lapse.** Editing an approved need's obligation makes its digest stale,
+      and ``reqs --check`` fails until a reviewed pull request approves it
+      again.
+
+    Bartleby alone is enough to follow this rule: ``bartleby needs set``
+    writes the fields, the pull request carries them, and ``reqs --check`` in
+    CI checks them. Queues, claims and review packets built on top of it are
+    optional.
 
 Migration
 ---------
@@ -152,7 +181,8 @@ Migration
 1. Move ``internal/needs`` from nsx with its tests, under a new package path.
    No behaviour changes.
 2. Point reqtrace's parser at it, and keep reqtrace's tests green.
-3. Add the digest, the new ``--check`` problems and ``bartleby needs``.
+3. Add the digest, the new ``--check`` problems and ``bartleby needs``,
+   including the approval rule of SPEC007.
 4. Tag the modules. nsx drops ``internal/needs`` and imports ``needs``. During
    development it uses an uncommitted ``go.work``.
 
