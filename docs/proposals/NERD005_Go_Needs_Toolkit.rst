@@ -130,11 +130,16 @@ Design
       ``--status approved`` also writes ``:approval-digest:`` from the text as
       it stands, so a team using Bartleby alone can propose an approval in a
       pull request with no other tool (SPEC007). It refuses a hand-written
-      ``approval-digest``.
+      ``approval-digest``. Other fields are plain options, for example
+      ``set <id> --status implemented --option pr=<url> --option
+      packet-digest=sha256:…``. Bartleby renders them and does not interpret
+      them.
     - ``graph <id> [--json]``: what the need links to and what traces to it.
 
     This gives agents and scripts a structured way to read and change needs
-    without parsing RST, and nsx uses the same module in-process.
+    without parsing RST. ``set`` is the one writer: other tools record a
+    change of status by calling it. nsx reads through the same module
+    in-process and does not write.
 
 .. spec:: Approval and acceptance are a merged pull request; signatures are not built
     :id: HMD_CLI_BARTLEBY_NERD005_SPEC006
