@@ -765,6 +765,32 @@ instruction, or a ``.bartleby/explain-prompt.md`` committed in the documentation
 repository — useful when a project has house conventions worth telling the model
 about. The CLI reports which prompt it used.
 
+Reviewing several repositories: ``bartleby serve``
+---------------------------------------------------
+
+``bartleby html`` builds one repository's documentation into
+``target/bartleby/html/``. To review NERDs and NEPs across several repositories
+without opening each ``index.html``, serve what is already built:
+
+.. code-block:: bash
+
+    bartleby serve --open          # http://127.0.0.1:8099/
+    bartleby serve suggest         # repositories you committed to recently, not yet listed
+
+The repositories to show are named in a plain-text file, one directory name per
+line, ``#`` for comments. It is ``$HMD_HOME/.config/bartleby-serve.repos`` by
+default, or ``--repos-file``. The directory that holds them is ``$HMD_REPO_HOME``
+by default, or ``--workspace``.
+
+The landing page lists each repository with a link to its HTML and its newest PDF,
+when it was built, and whether its ``.rst`` sources are newer than the HTML
+(stale). Under each repository are its NERDs and NEPs, with their status, linked
+to the rendered page. A **Rebuild** button runs ``bartleby html`` in that
+repository, one build at a time. Opening the page never builds anything.
+
+The server listens on the loopback interface only; ``--addr`` refuses any other
+address. See ``docs/proposals/NERD005_Serve_Review_Hub.rst``.
+
 Requirements and Traceability
 ------------------------------
 

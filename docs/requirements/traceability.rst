@@ -16,7 +16,7 @@ generated from those declarations.
 Summary
 -------
 
-143 requirement items, verified by 233 Go tests and 36 Robot tests.
+150 requirement items, verified by 250 Go tests and 36 Robot tests.
 
 .. list-table::
    :header-rows: 1
@@ -133,6 +133,10 @@ Summary
    * - SEL_002
      - 1
      - 1
+     - 0
+   * - SERVE
+     - 7
+     - 17
      - 0
    * - SKILL
      - 9
@@ -487,6 +491,27 @@ Coverage by requirement
      - implemented
    * - :need:`HMD_CLI_BARTLEBY_REQ_SEL_007`
      - buildplan.TestBuildsAreDeterministic
+     - implemented
+   * - :need:`HMD_CLI_BARTLEBY_REQ_SERVE_001`
+     - serve.TestLoadReposMissingFileIsEmpty, serve.TestParseReposIgnoresCommentsAndBlanks, serve.TestParseReposRejectsPathsAndDuplicates
+     - implemented
+   * - :need:`HMD_CLI_BARTLEBY_REQ_SERVE_002`
+     - serve.TestRefusesUnlistedMissingAndEscapes, serve.TestServesBuiltHTML
+     - implemented
+   * - :need:`HMD_CLI_BARTLEBY_REQ_SERVE_003`
+     - serve.TestBuildStateNewestPDF, serve.TestLandingPage, serve.TestLandingPageSurvivesListerError
+     - implemented
+   * - :need:`HMD_CLI_BARTLEBY_REQ_SERVE_004`
+     - serve.TestBuildStateFreshAndStale, serve.TestBuildStateNotBuilt
+     - implemented
+   * - :need:`HMD_CLI_BARTLEBY_REQ_SERVE_005`
+     - serve.TestRebuildFailureIsReported, serve.TestRebuildOneAtATime, serve.TestRebuildRefusals, serve.TestRebuildRunsInRepoDirectory
+     - implemented
+   * - :need:`HMD_CLI_BARTLEBY_REQ_SERVE_006`
+     - serve.TestCheckLoopback
+     - implemented
+   * - :need:`HMD_CLI_BARTLEBY_REQ_SERVE_007`
+     - serve.TestSuggest, serve.TestSuggestNeedsAnEmail
      - implemented
    * - :need:`HMD_CLI_BARTLEBY_REQ_SKILL_001`
      - skills.TestSkillsComeFromTheBinary, skills.TestTheRequirementsSkillsAreBundled
@@ -2106,6 +2131,125 @@ Run with ``make test``. No Docker required.
     :tags: go
 
     ``src/go/bartleby/internal/sanitize/sanitize_test.go:6``
+
+.. test:: serve.TestBuildStateFreshAndStale
+    :id: HMD_CLI_BARTLEBY_TEST_GO_804810A9
+    :links: HMD_CLI_BARTLEBY_REQ_SERVE_004
+    :tags: go
+
+    ``src/go/bartleby/internal/serve/state_test.go:34``
+
+.. test:: serve.TestBuildStateNewestPDF
+    :id: HMD_CLI_BARTLEBY_TEST_GO_24712FAF
+    :links: HMD_CLI_BARTLEBY_REQ_SERVE_003
+    :tags: go
+
+    ``src/go/bartleby/internal/serve/state_test.go:53``
+
+.. test:: serve.TestBuildStateNotBuilt
+    :id: HMD_CLI_BARTLEBY_TEST_GO_DC6F1956
+    :links: HMD_CLI_BARTLEBY_REQ_SERVE_004
+    :tags: go
+
+    ``src/go/bartleby/internal/serve/state_test.go:24``
+
+.. test:: serve.TestCheckLoopback
+    :id: HMD_CLI_BARTLEBY_TEST_GO_0B765991
+    :links: HMD_CLI_BARTLEBY_REQ_SERVE_006
+    :tags: go
+
+    ``src/go/bartleby/internal/serve/config_test.go:47``
+
+.. test:: serve.TestLandingPage
+    :id: HMD_CLI_BARTLEBY_TEST_GO_1B84C614
+    :links: HMD_CLI_BARTLEBY_REQ_SERVE_003
+    :tags: go
+
+    ``src/go/bartleby/internal/serve/handler_test.go:96``
+
+.. test:: serve.TestLandingPageSurvivesListerError
+    :id: HMD_CLI_BARTLEBY_TEST_GO_6A2CAAAA
+    :links: HMD_CLI_BARTLEBY_REQ_SERVE_003
+    :tags: go
+
+    ``src/go/bartleby/internal/serve/handler_test.go:125``
+
+.. test:: serve.TestLoadReposMissingFileIsEmpty
+    :id: HMD_CLI_BARTLEBY_TEST_GO_C46CB5F2
+    :links: HMD_CLI_BARTLEBY_REQ_SERVE_001
+    :tags: go
+
+    ``src/go/bartleby/internal/serve/config_test.go:39``
+
+.. test:: serve.TestParseReposIgnoresCommentsAndBlanks
+    :id: HMD_CLI_BARTLEBY_TEST_GO_A59F34AD
+    :links: HMD_CLI_BARTLEBY_REQ_SERVE_001
+    :tags: go
+
+    ``src/go/bartleby/internal/serve/config_test.go:10``
+
+.. test:: serve.TestParseReposRejectsPathsAndDuplicates
+    :id: HMD_CLI_BARTLEBY_TEST_GO_80255D3F
+    :links: HMD_CLI_BARTLEBY_REQ_SERVE_001
+    :tags: go
+
+    ``src/go/bartleby/internal/serve/config_test.go:23``
+
+.. test:: serve.TestRebuildFailureIsReported
+    :id: HMD_CLI_BARTLEBY_TEST_GO_81A275B0
+    :links: HMD_CLI_BARTLEBY_REQ_SERVE_005
+    :tags: go
+
+    ``src/go/bartleby/internal/serve/handler_test.go:214``
+
+.. test:: serve.TestRebuildOneAtATime
+    :id: HMD_CLI_BARTLEBY_TEST_GO_EBF54A36
+    :links: HMD_CLI_BARTLEBY_REQ_SERVE_005
+    :tags: go
+
+    ``src/go/bartleby/internal/serve/handler_test.go:192``
+
+.. test:: serve.TestRebuildRefusals
+    :id: HMD_CLI_BARTLEBY_TEST_GO_70FE8DA2
+    :links: HMD_CLI_BARTLEBY_REQ_SERVE_005
+    :tags: go
+
+    ``src/go/bartleby/internal/serve/handler_test.go:169``
+
+.. test:: serve.TestRebuildRunsInRepoDirectory
+    :id: HMD_CLI_BARTLEBY_TEST_GO_487140D1
+    :links: HMD_CLI_BARTLEBY_REQ_SERVE_005
+    :tags: go
+
+    ``src/go/bartleby/internal/serve/handler_test.go:151``
+
+.. test:: serve.TestRefusesUnlistedMissingAndEscapes
+    :id: HMD_CLI_BARTLEBY_TEST_GO_9FAEAF22
+    :links: HMD_CLI_BARTLEBY_REQ_SERVE_002
+    :tags: go
+
+    ``src/go/bartleby/internal/serve/handler_test.go:67``
+
+.. test:: serve.TestServesBuiltHTML
+    :id: HMD_CLI_BARTLEBY_TEST_GO_0833BE41
+    :links: HMD_CLI_BARTLEBY_REQ_SERVE_002
+    :tags: go
+
+    ``src/go/bartleby/internal/serve/handler_test.go:55``
+
+.. test:: serve.TestSuggest
+    :id: HMD_CLI_BARTLEBY_TEST_GO_F792637E
+    :links: HMD_CLI_BARTLEBY_REQ_SERVE_007
+    :tags: go
+
+    ``src/go/bartleby/internal/serve/suggest_test.go:34``
+
+.. test:: serve.TestSuggestNeedsAnEmail
+    :id: HMD_CLI_BARTLEBY_TEST_GO_18E2D4AC
+    :links: HMD_CLI_BARTLEBY_REQ_SERVE_007
+    :tags: go
+
+    ``src/go/bartleby/internal/serve/suggest_test.go:55``
 
 .. test:: skills.TestALocallyEditedSkillIsLeftAlone
     :id: HMD_CLI_BARTLEBY_TEST_GO_AF214A16
