@@ -62,6 +62,8 @@ area segment keeps the ID readable where it matters most — on a test:
      - The agent skills the CLI bundles and installs.
    * - ``AGENT``
      - The agent definitions the CLI bundles and installs.
+   * - ``SERVE``
+     - ``bartleby serve``: the local review hub for built documentation.
 
 **Tests declare their own coverage**, in the test source rather than in a
 separate list that would drift. A Go test declares it in the doc comment on the
@@ -115,4 +117,5 @@ it *is* verified. There are two, both about pulling a multi-gigabyte image.
    process
    verification
    listing
+   serve
    traceability

@@ -1,5 +1,18 @@
 # Changelog
 
+## 2026-11-22
+
+- feat: `bartleby serve` serves built HTML for a list of repositories from one local page (NERD005):
+  - **Landing page:** each listed repository's NERDs and NEPs with status, links to the
+    rendered pages and newest PDF, build time, and a stale badge when `.rst` sources are
+    newer than the HTML. Opening it never builds anything.
+  - **Repo list:** a plain-text file, `$HMD_HOME/.config/bartleby-serve.repos` or
+    `--repos-file`; `bartleby serve suggest` prints repositories you committed to recently.
+  - **Rebuild:** `POST /rebuild/<repo>` runs `bartleby html` in that repository, one at a
+    time, and refuses a foreign `Host` or `Origin`.
+  - **Safety:** loopback-only (`--addr` refuses anything else); files are read through
+    `os.Root`, so `..` and symlinks cannot leave the HTML tree.
+
 ## 2026-11-16
 
 - feat: `reqtrace -format json` / `bartleby reqs --format json` lists needs as JSON

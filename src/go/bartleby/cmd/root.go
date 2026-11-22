@@ -129,6 +129,7 @@ func init() {
 		configureCmd,
 		explainCmd,
 		reqsCmd,
+		serveCmd,
 		skillCmds.root,
 		agentCmds.root,
 		versionCmd,
