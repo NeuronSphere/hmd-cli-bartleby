@@ -25,5 +25,9 @@
         }
       }
     }
+  },
+  "system": {
+    "name": "cli-go",
+    "role": "cli"
   }
 }
